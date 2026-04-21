@@ -1,4 +1,5 @@
 import Image from "next/image";
+import SignInWithGoogle from "@/components/SignInWithGoogle";
 
 const COMING_SOON_IMAGE =
   "https://idgobxvhbhdymfsfmhae.supabase.co/storage/v1/object/public/assets/homepage/comingsoon.PNG";
@@ -28,6 +29,13 @@ export default function HomePage() {
           <p className="text-sm sm:text-base text-brand-cream/80 max-w-xl mx-auto">
             Turn your Schiphol layover into a legend. Premium city tours between flights —
             launching soon.
+          </p>
+        </div>
+
+        <div className="flex flex-col items-center gap-3 pt-2">
+          <SignInWithGoogle />
+          <p className="text-xs text-brand-cream/60 max-w-sm">
+            Join the early-access list. We&apos;ll only email you once — when tours open.
           </p>
         </div>
 

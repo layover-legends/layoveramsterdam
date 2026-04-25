@@ -1,3 +1,5 @@
+"use server";
+
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -10,8 +12,6 @@ import { validateProfileUpdate } from "@/lib/validation/profile";
  * Success: row updated via RLS-enforced UPDATE, redirected to /account?saved=1
  */
 export async function updateProfile(formData: FormData) {
-  "use server";
-
   const supabase = createClient();
 
   const {

@@ -18,7 +18,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Deploy
 
-This repo is configured for zero-config deploy on Vercel. Connect the GitHub repo in Vercel and it builds automatically on every push to `main`.
+This repo is configured for zero-config deploy on Vercel. Connect the GitHub repo in Vercel and it builds automatically on every push to `main`. 
 
 ## Stack
 

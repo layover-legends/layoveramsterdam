@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import "mapbox-gl/dist/mapbox-gl.css";
+
 html,
 body {
   height: 100%;
@@ -12,4 +14,64 @@ body {
   color: #FFF7ED;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Mapbox marker — pulsing orange dot used by AmsterdamMap. */
+.lal-marker {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+.lal-marker__dot {
+  position: absolute;
+  inset: 4px;
+  border-radius: 9999px;
+  background-color: #f97316;
+  border: 2px solid #fff7ed;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  z-index: 2;
+}
+.lal-marker__pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background-color: rgba(249, 115, 22, 0.6);
+  animation: lal-pulse 1.8s ease-out infinite;
+  z-index: 1;
+}
+@keyframes lal-pulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+/* Tone the Mapbox attribution to fit the dark theme */
+.mapboxgl-ctrl-attrib,
+.mapboxgl-ctrl-bottom-right .mapboxgl-ctrl {
+  background-color: rgba(15, 23, 42, 0.6) !important;
+  color: rgba(255, 247, 237, 0.7) !important;
+}
+.mapboxgl-ctrl-attrib a {
+  color: rgba(255, 247, 237, 0.85) !important;
+}
+
+/* Style the popup to match the dark brand */
+.mapboxgl-popup-content {
+  background-color: #0f172a !important;
+  color: #fff7ed !important;
+  border: 1px solid rgba(255, 247, 237, 0.15) !important;
+  border-radius: 12px !important;
+  font-family: inherit !important;
+  font-size: 13px !important;
+  padding: 8px 12px !important;
+}
+.mapboxgl-popup-tip {
+  border-top-color: #0f172a !important;
+  border-bottom-color: #0f172a !important;
 }

@@ -97,11 +97,17 @@ export default function AccountForm({ profile }: Props) {
             id="nationality"
             name="nationality"
             defaultValue={profile.nationality ?? ""}
-            className="w-full px-4 py-3 rounded-xl bg-brand-cream/5 border border-brand-cream/15 text-brand-cream focus:outline-none focus:ring-2 focus:ring-brand-orange/60 focus:border-brand-orange/60"
+            className="w-full px-4 py-3 rounded-xl bg-brand-cream/5 border border-brand-cream/15 text-brand-cream focus:outline-none focus:ring-2 focus:ring-brand-orange/60 focus:border-brand-orange/60 [&>option]:bg-brand-navy [&>option]:text-brand-cream"
           >
-            <option value="">Select…</option>
+            <option value="" style={{ backgroundColor: "#0F172A", color: "#FFF7ED" }}>
+              Select…
+            </option>
             {COUNTRIES.map((c) => (
-              <option key={c.code} value={c.code}>
+              <option
+                key={c.code}
+                value={c.code}
+                style={{ backgroundColor: "#0F172A", color: "#FFF7ED" }}
+              >
                 {c.flag} {c.name}
               </option>
             ))}
@@ -120,10 +126,14 @@ export default function AccountForm({ profile }: Props) {
           id="preferred_language"
           name="preferred_language"
           defaultValue={profile.preferred_language ?? "en"}
-          className="w-full px-4 py-3 rounded-xl bg-brand-cream/5 border border-brand-cream/15 text-brand-cream focus:outline-none focus:ring-2 focus:ring-brand-orange/60 focus:border-brand-orange/60"
+          className="w-full px-4 py-3 rounded-xl bg-brand-cream/5 border border-brand-cream/15 text-brand-cream focus:outline-none focus:ring-2 focus:ring-brand-orange/60 focus:border-brand-orange/60 [&>option]:bg-brand-navy [&>option]:text-brand-cream"
         >
           {SUPPORTED_LANGUAGES.map((l) => (
-            <option key={l.code} value={l.code}>
+            <option
+              key={l.code}
+              value={l.code}
+              style={{ backgroundColor: "#0F172A", color: "#FFF7ED" }}
+            >
               {l.flag} {l.nativeName} ({l.name})
             </option>
           ))}

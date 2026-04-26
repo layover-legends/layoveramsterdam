@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import SignInWithGoogle from "@/components/SignInWithGoogle";
+import StopsTeaser from "@/components/StopsTeaser";
 import { createClient } from "@/lib/supabase/server";
+import { getStopsTeaser } from "@/lib/public/stops";
 
 export const dynamic = "force-dynamic";
 
@@ -18,17 +20,18 @@ type HomePageProps = {
 
 export default async function HomePage({ searchParams }: HomePageProps) {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const [{ data: { user } }, stopsTeaser] = await Promise.all([
+    supabase.auth.getUser(),
+    getStopsTeaser(),
+  ]);
 
   const authError = searchParams?.auth_error === "1";
   const authRequired = searchParams?.auth_required === "1";
   const adminOnly = searchParams?.admin_only === "1";
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12 bg-brand-navy text-brand-cream">
-      <section className="w-full max-w-3xl flex flex-col items-center text-center gap-8">
+    <main className="min-h-screen flex flex-col items-center px-6 py-12 bg-brand-navy text-brand-cream">
+      <section className="w-full max-w-3xl flex flex-col items-center text-center gap-8 pt-8 sm:pt-16">
         <div className="relative w-full aspect-square max-w-xl">
           <Image
             src={COMING_SOON_IMAGE}
@@ -86,10 +89,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           )}
         </div>
 
-        <div className="text-xs text-brand-cream/50 pt-6">
-          © {new Date().getFullYear()} Layover Amsterdam. All rights reserved.
-        </div>
       </section>
+
+      <StopsTeaser data={stopsTeaser} />
+
+      <div className="text-xs text-brand-cream/50 pt-12 pb-2 text-center">
+        © {new Date().getFullYear()} Layover Amsterdam. All rights reserved.
+      </div>
     </main>
   );
 }

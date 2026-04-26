@@ -7,7 +7,7 @@ import {
   ALL_CATEGORIES,
   CATEGORY_META,
   type FreeStopCategory,
-} from "@/lib/admin/stops";
+} from "@/lib/admin/stops-types";
 
 type Props = {
   initialSearch: string;

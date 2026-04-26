@@ -13,6 +13,7 @@ type Props = {
 const NAV: Array<{ key: string; label: string; href: string; icon: string; matchPrefix: string }> = [
   { key: "overview", label: "Overview", href: "/admin", icon: "▦", matchPrefix: "/admin" },
   { key: "users", label: "Users", href: "/admin/users", icon: "◇", matchPrefix: "/admin/users" },
+  { key: "stops", label: "Free stops", href: "/admin/stops", icon: "✦", matchPrefix: "/admin/stops" },
 ];
 
 export default function AdminSidebar({ email, fullName, avatarUrl }: Props) {

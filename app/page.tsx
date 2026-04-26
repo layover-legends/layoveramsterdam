@@ -1,22 +1,19 @@
+import Image from "next/image";
 import Link from "next/link";
-import dynamicImport from "next/dynamic";
 import SignInWithGoogle from "@/components/SignInWithGoogle";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-// Mapbox-GL touches `window` so it can only render in the browser.
-// Lazy-load the map with no SSR so it doesn't pull ~250KB into the
-// server bundle and doesn't hydrate-mismatch on first paint.
-const AmsterdamMap = dynamicImport(() => import("@/components/AmsterdamMap"), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full aspect-square max-w-xl rounded-2xl border border-brand-cream/10 bg-brand-cream/5 animate-pulse" />
-  ),
-});
+const COMING_SOON_IMAGE =
+  "https://idgobxvhbhdymfsfmhae.supabase.co/storage/v1/object/public/assets/homepage/comingsoon.PNG";
 
 type HomePageProps = {
-  searchParams?: { auth_error?: string; auth_required?: string };
+  searchParams?: {
+    auth_error?: string;
+    auth_required?: string;
+    admin_only?: string;
+  };
 };
 
 export default async function HomePage({ searchParams }: HomePageProps) {
@@ -27,11 +24,21 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   const authError = searchParams?.auth_error === "1";
   const authRequired = searchParams?.auth_required === "1";
+  const adminOnly = searchParams?.admin_only === "1";
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12 bg-brand-navy text-brand-cream">
       <section className="w-full max-w-3xl flex flex-col items-center text-center gap-8">
-        <AmsterdamMap />
+        <div className="relative w-full aspect-square max-w-xl">
+          <Image
+            src={COMING_SOON_IMAGE}
+            alt="Layover Amsterdam — Coming Soon"
+            fill
+            priority
+            sizes="(max-width: 768px) 90vw, 600px"
+            className="object-contain drop-shadow-2xl"
+          />
+        </div>
 
         <div className="space-y-3">
           <h1 className="text-3xl sm:text-5xl font-bold tracking-tight">
@@ -60,7 +67,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           <p className="text-xs text-brand-cream/60 max-w-sm">
             {user
               ? `Signed in as ${user.email}.`
-              : "Join the early-access list. We\u2019ll only email you once — when tours open."}
+              : "Join the early-access list. We’ll only email you once — when tours open."}
           </p>
           {authError && (
             <p className="text-xs text-red-300" role="alert">
@@ -70,6 +77,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           {authRequired && !user && (
             <p className="text-xs text-brand-orange" role="status">
               Please sign in to view your account.
+            </p>
+          )}
+          {adminOnly && (
+            <p className="text-xs text-brand-orange/80" role="status">
+              That area is for admins only.
             </p>
           )}
         </div>

@@ -1,51 +1,67 @@
-// Client-safe types and category metadata for free stops.
-// This file MUST NOT import any server-only modules — it is reachable
-// from "use client" components.
+// Client-safe types for destinations (formerly free_stops).
+// MUST NOT import server-only modules — used by "use client" components.
 
-export type FreeStopCategory =
-  | "monuments"
-  | "canals"
-  | "neighborhoods"
-  | "food"
-  | "bars"
-  | "architecture"
-  | "experiences"
-  | "hidden_gems"
-  | "shopping"
-  | "nature"
-  | "religion";
-
-export type FreeStop = {
+export type Category = {
   id: string;
   name: string;
-  neighborhood: string | null;
+  slug: string;
+};
+
+export type Photo = {
+  id: string;
+  destination_id: string;
+  url: string;
+  alt_text: string | null;
+  is_primary: boolean | null;
+};
+
+export type OpeningHour = {
+  id: string;
+  destination_id: string;
+  day_of_week: number; // 0=Sun .. 6=Sat
+  open_time: string | null;
+  close_time: string | null;
+};
+
+export type Stop = {
+  id: string;
+  category_id: string | null;
+  category_slug: string | null;
+  category_name: string | null;
+  name: string;
+  slug: string;
+  area: string | null;
   description: string | null;
-  category: FreeStopCategory;
-  lat: number | null;
-  lng: number | null;
-  display_order: number;
+  latitude: number | null;
+  longitude: number | null;
   is_active: boolean;
+  is_adult_only: boolean | null;
+  is_seasonal: boolean | null;
+  requires_booking: boolean | null;
+  wheelchair_accessible: boolean | null;
+  primary_photo_url: string | null;
   created_at: string | null;
   updated_at: string | null;
 };
 
-export const CATEGORY_META: Record<
-  FreeStopCategory,
-  { label: string; emoji: string }
-> = {
-  monuments: { label: "Monuments & Landmarks", emoji: "🏛️" },
-  canals: { label: "Canaux & Scènes de rue", emoji: "🚤" },
-  neighborhoods: { label: "Quartiers à explorer", emoji: "🏘️" },
-  food: { label: "Food & Marchés", emoji: "🥯" },
-  bars: { label: "Bars & Cafés", emoji: "🍻" },
-  architecture: { label: "Architecture & Design", emoji: "📐" },
-  experiences: { label: "Expériences & Transport", emoji: "⛴️" },
-  hidden_gems: { label: "Pépites cachées", emoji: "💎" },
-  shopping: { label: "Shopping local", emoji: "🛍️" },
-  nature: { label: "Nature & Parcs", emoji: "🌳" },
-  religion: { label: "Spiritualité & Religion", emoji: "⛪" },
-};
+// Day-of-week labels for opening-hours editor (Monday-first to match EU convention).
+export const DAY_LABELS: Array<{ value: number; label: string }> = [
+  { value: 1, label: "Mon" },
+  { value: 2, label: "Tue" },
+  { value: 3, label: "Wed" },
+  { value: 4, label: "Thu" },
+  { value: 5, label: "Fri" },
+  { value: 6, label: "Sat" },
+  { value: 0, label: "Sun" },
+];
 
-export const ALL_CATEGORIES: FreeStopCategory[] = Object.keys(
-  CATEGORY_META,
-) as FreeStopCategory[];
+// Visible filter chips on the admin list.
+export const STOP_FILTERS = [
+  { key: "all", label: "All" },
+  { key: "free", label: "Free" },
+  { key: "paid", label: "Bookable" },
+  { key: "inactive", label: "Inactive" },
+  { key: "seasonal", label: "Seasonal" },
+  { key: "adult", label: "Adult only" },
+] as const;
+export type StopFilter = (typeof STOP_FILTERS)[number]["key"];

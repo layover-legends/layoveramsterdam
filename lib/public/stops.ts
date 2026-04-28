@@ -1,27 +1,28 @@
 import { createClient } from "@/lib/supabase/server";
-import {
-  ALL_CATEGORIES,
-  CATEGORY_META,
-  type FreeStop,
-  type FreeStopCategory,
-} from "@/lib/admin/stops-types";
 
 export type CategorySummary = {
-  category: FreeStopCategory;
-  label: string;
-  emoji: string;
+  category_id: string;
+  name: string;
+  slug: string;
   count: number;
-  examples: string[]; // up to 3 example stop names for this category
+  examples: string[];
+};
+
+export type FeaturedStop = {
+  id: string;
+  name: string;
+  area: string | null;
+  description: string | null;
+  category_name: string | null;
+  primary_photo_url: string | null;
 };
 
 export type StopsTeaser = {
   totalCount: number;
   byCategory: CategorySummary[];
-  featured: FreeStop[]; // a small curated sample for the hero grid
+  featured: FeaturedStop[];
 };
 
-// Names we feature on the homepage. Picked from across categories so the
-// preview tells the story: monuments, food, hidden gem, neighborhood, canal.
 const FEATURED_NAMES = [
   "Dam Square",
   "Vondelpark",
@@ -34,65 +35,95 @@ const FEATURED_NAMES = [
 ];
 
 /**
- * Returns the data the public homepage shows about the free-stops catalog.
- * Read-only and goes through the existing "Public reads active stops" RLS
- * policy, so anyone (signed-in or not) can see this.
+ * Public-facing teaser: free destinations only (requires_booking = false)
+ * with category breakdown + a curated featured set with images.
  *
- * Failure mode: if the table doesn't exist yet (e.g. migration not run on
- * a new environment), we return an empty teaser so the page still renders.
+ * Defensive: returns an empty teaser if the migration hasn't run yet,
+ * so the homepage doesn't crash on a fresh environment.
  */
 export async function getStopsTeaser(): Promise<StopsTeaser> {
   const supabase = createClient();
 
-  const [allRowsRes, featuredRes] = await Promise.all([
+  const baseSelect = `
+    id, name, area, description,
+    destination_categories ( id, name, slug ),
+    stop_photos ( url, is_primary )
+  `;
+
+  const [allRes, featuredRes] = await Promise.all([
     supabase
-      .from("free_stops")
-      .select("name, category")
-      .eq("is_active", true),
-    supabase
-      .from("free_stops")
-      .select(
-        "id, name, neighborhood, description, category, lat, lng, display_order, is_active, created_at, updated_at",
-      )
+      .from("destinations")
+      .select(baseSelect)
       .eq("is_active", true)
+      .eq("requires_booking", false),
+    supabase
+      .from("destinations")
+      .select(baseSelect)
+      .eq("is_active", true)
+      .eq("requires_booking", false)
       .in("name", FEATURED_NAMES),
   ]);
 
-  if (allRowsRes.error || !allRowsRes.data) {
+  if (allRes.error || !allRes.data) {
     return { totalCount: 0, byCategory: [], featured: [] };
   }
 
-  const allRows = allRowsRes.data as Array<{ name: string; category: FreeStopCategory }>;
+  type Row = {
+    id: string;
+    name: string;
+    area: string | null;
+    description: string | null;
+    destination_categories: { id: string; name: string; slug: string } | null;
+    stop_photos: Array<{ url: string; is_primary: boolean | null }> | null;
+  };
+
+  const allRows = allRes.data as unknown as Row[];
   const totalCount = allRows.length;
 
-  // Tally per category and grab up to 3 example names per category.
-  const tallies = new Map<FreeStopCategory, { count: number; examples: string[] }>();
-  for (const cat of ALL_CATEGORIES) {
-    tallies.set(cat, { count: 0, examples: [] });
-  }
+  const tally = new Map<
+    string,
+    { name: string; slug: string; count: number; examples: string[] }
+  >();
   for (const row of allRows) {
-    const t = tallies.get(row.category);
-    if (!t) continue;
+    const c = row.destination_categories;
+    if (!c) continue;
+    const t = tally.get(c.id) ?? {
+      name: c.name,
+      slug: c.slug,
+      count: 0,
+      examples: [],
+    };
     t.count += 1;
     if (t.examples.length < 3) t.examples.push(row.name);
+    tally.set(c.id, t);
   }
 
-  const byCategory: CategorySummary[] = ALL_CATEGORIES
-    .map((cat) => {
-      const t = tallies.get(cat);
-      const meta = CATEGORY_META[cat];
-      return {
-        category: cat,
-        label: meta.label,
-        emoji: meta.emoji,
-        count: t?.count ?? 0,
-        examples: t?.examples ?? [],
-      };
-    })
+  const byCategory: CategorySummary[] = [...tally.entries()]
+    .map(([category_id, t]) => ({
+      category_id,
+      name: t.name,
+      slug: t.slug,
+      count: t.count,
+      examples: t.examples,
+    }))
     .filter((c) => c.count > 0)
     .sort((a, b) => b.count - a.count);
 
-  const featured = (featuredRes.data ?? []) as FreeStop[];
+  const featured: FeaturedStop[] = ((featuredRes.data ?? []) as unknown as Row[]).map(
+    (r) => {
+      const photos = r.stop_photos ?? [];
+      const url =
+        photos.find((p) => p.is_primary)?.url ?? photos[0]?.url ?? null;
+      return {
+        id: r.id,
+        name: r.name,
+        area: r.area,
+        description: r.description,
+        category_name: r.destination_categories?.name ?? null,
+        primary_photo_url: url,
+      };
+    },
+  );
 
   return { totalCount, byCategory, featured };
 }

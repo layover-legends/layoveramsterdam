@@ -1,5 +1,5 @@
+import Image from "next/image";
 import type { StopsTeaser as StopsTeaserData } from "@/lib/public/stops";
-import { CATEGORY_META } from "@/lib/admin/stops-types";
 
 type Props = {
   data: StopsTeaserData;
@@ -31,17 +31,29 @@ export default function StopsTeaser({ data }: Props) {
 
       {data.featured.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {data.featured.slice(0, 6).map((stop) => {
-            const meta = CATEGORY_META[stop.category];
-            return (
-              <div
-                key={stop.id}
-                className="rounded-2xl border border-brand-cream/10 bg-brand-cream/5 hover:bg-brand-cream/[0.07] transition-colors p-5 text-left flex flex-col gap-2"
-              >
-                <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-brand-cream/55">
-                  <span aria-hidden>{meta.emoji}</span>
-                  <span>{meta.label}</span>
+          {data.featured.slice(0, 6).map((stop) => (
+            <div
+              key={stop.id}
+              className="rounded-2xl border border-brand-cream/10 bg-brand-cream/5 hover:bg-brand-cream/[0.07] transition-colors text-left flex flex-col overflow-hidden"
+            >
+              {stop.primary_photo_url && (
+                <div className="relative w-full h-40">
+                  <Image
+                    src={stop.primary_photo_url}
+                    alt={stop.name}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover"
+                    unoptimized
+                  />
                 </div>
+              )}
+              <div className="p-5 flex flex-col gap-2 flex-1">
+                {stop.category_name && (
+                  <div className="text-xs uppercase tracking-wide text-brand-cream/55">
+                    {stop.category_name}
+                  </div>
+                )}
                 <h3 className="text-base font-semibold text-brand-cream">
                   {stop.name}
                 </h3>
@@ -50,14 +62,14 @@ export default function StopsTeaser({ data }: Props) {
                     {stop.description}
                   </p>
                 )}
-                {stop.neighborhood && (
+                {stop.area && (
                   <p className="text-xs text-brand-orange/80 mt-auto pt-2">
-                    {stop.neighborhood}
+                    {stop.area}
                   </p>
                 )}
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       )}
 
@@ -68,13 +80,10 @@ export default function StopsTeaser({ data }: Props) {
         <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-3">
           {data.byCategory.map((c) => (
             <li
-              key={c.category}
+              key={c.category_id}
               className="flex items-center justify-between text-sm text-brand-cream/85"
             >
-              <span className="flex items-center gap-2 truncate">
-                <span aria-hidden>{c.emoji}</span>
-                <span className="truncate">{c.label}</span>
-              </span>
+              <span className="truncate">{c.name}</span>
               <span className="text-brand-orange font-semibold tabular-nums">
                 {c.count}
               </span>

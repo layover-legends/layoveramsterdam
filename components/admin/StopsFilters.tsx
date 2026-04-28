@@ -4,21 +4,28 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
-  ALL_CATEGORIES,
-  CATEGORY_META,
-  type FreeStopCategory,
+  STOP_FILTERS,
+  type Category,
+  type StopFilter,
 } from "@/lib/admin/stops-types";
 
 type Props = {
   initialSearch: string;
-  activeCategory: FreeStopCategory | null;
-  countsByCategory: Record<FreeStopCategory | "_all", number>;
+  activeFilter: StopFilter;
+  activeCategorySlug: string | null;
+  filterCounts: Record<StopFilter, number>;
+  categoriesByCount: Array<{ category: Category; count: number }>;
 };
+
+const chipBase =
+  "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border transition-colors whitespace-nowrap";
 
 export default function StopsFilters({
   initialSearch,
-  activeCategory,
-  countsByCategory,
+  activeFilter,
+  activeCategorySlug,
+  filterCounts,
+  categoriesByCount,
 }: Props) {
   const router = useRouter();
   const params = useSearchParams();
@@ -41,17 +48,25 @@ export default function StopsFilters({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
-  const buildHref = (cat: FreeStopCategory | null) => {
+  const buildFilterHref = (filter: StopFilter) => {
     const next = new URLSearchParams();
     const q = value.trim();
     if (q) next.set("q", q);
-    if (cat) next.set("category", cat);
+    if (filter !== "all") next.set("filter", filter);
+    if (activeCategorySlug) next.set("category", activeCategorySlug);
     const qs = next.toString();
     return qs ? `/admin/stops?${qs}` : "/admin/stops";
   };
 
-  const chipBase =
-    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border transition-colors whitespace-nowrap";
+  const buildCategoryHref = (slug: string | null) => {
+    const next = new URLSearchParams();
+    const q = value.trim();
+    if (q) next.set("q", q);
+    if (activeFilter !== "all") next.set("filter", activeFilter);
+    if (slug) next.set("category", slug);
+    const qs = next.toString();
+    return qs ? `/admin/stops?${qs}` : "/admin/stops";
+  };
 
   return (
     <div className="space-y-3">
@@ -59,32 +74,17 @@ export default function StopsFilters({
         type="search"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="Search name, neighborhood, description…"
+        placeholder="Search name, area or description…"
         className="w-full sm:max-w-md px-4 py-2.5 rounded-xl bg-brand-cream/5 border border-brand-cream/15 text-brand-cream placeholder:text-brand-cream/30 focus:outline-none focus:ring-2 focus:ring-brand-orange/60 focus:border-brand-orange/60"
       />
+
       <div className="flex flex-wrap gap-2">
-        <Link
-          href={buildHref(null)}
-          className={
-            chipBase +
-            " " +
-            (activeCategory === null
-              ? "bg-brand-orange/15 border-brand-orange/40 text-brand-orange"
-              : "border-brand-cream/15 text-brand-cream/70 hover:bg-brand-cream/5")
-          }
-        >
-          All
-          <span className="text-brand-cream/50 tabular-nums">
-            {countsByCategory._all}
-          </span>
-        </Link>
-        {ALL_CATEGORIES.map((cat) => {
-          const meta = CATEGORY_META[cat];
-          const isActive = activeCategory === cat;
+        {STOP_FILTERS.map((f) => {
+          const isActive = activeFilter === f.key;
           return (
             <Link
-              key={cat}
-              href={buildHref(cat)}
+              key={f.key}
+              href={buildFilterHref(f.key)}
               className={
                 chipBase +
                 " " +
@@ -93,11 +93,44 @@ export default function StopsFilters({
                   : "border-brand-cream/15 text-brand-cream/70 hover:bg-brand-cream/5")
               }
             >
-              <span aria-hidden>{meta.emoji}</span>
-              {meta.label}
+              {f.label}
               <span className="text-brand-cream/50 tabular-nums">
-                {countsByCategory[cat]}
+                {filterCounts[f.key]}
               </span>
+            </Link>
+          );
+        })}
+      </div>
+
+      <div className="flex flex-wrap gap-2 pt-1">
+        <Link
+          href={buildCategoryHref(null)}
+          className={
+            chipBase +
+            " " +
+            (activeCategorySlug === null
+              ? "bg-brand-cream/10 border-brand-cream/30 text-brand-cream"
+              : "border-brand-cream/10 text-brand-cream/55 hover:bg-brand-cream/5")
+          }
+        >
+          All categories
+        </Link>
+        {categoriesByCount.map(({ category, count }) => {
+          const isActive = activeCategorySlug === category.slug;
+          return (
+            <Link
+              key={category.id}
+              href={buildCategoryHref(category.slug)}
+              className={
+                chipBase +
+                " " +
+                (isActive
+                  ? "bg-brand-cream/10 border-brand-cream/30 text-brand-cream"
+                  : "border-brand-cream/10 text-brand-cream/55 hover:bg-brand-cream/5")
+              }
+            >
+              {category.name}
+              <span className="text-brand-cream/40 tabular-nums">{count}</span>
             </Link>
           );
         })}

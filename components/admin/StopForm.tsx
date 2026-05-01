@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import type { Category, Stop } from "@/lib/admin/stops-types";
 
@@ -76,6 +77,78 @@ function CheckboxField({
         {hint && <span className="block text-xs text-brand-cream/55 mt-0.5">{hint}</span>}
       </span>
     </label>
+  );
+}
+
+function SeoFields({
+  initialTitle,
+  initialDescription,
+  previewSlug,
+  previewName,
+}: {
+  initialTitle: string | null;
+  initialDescription: string | null;
+  previewSlug: string;
+  previewName: string;
+}) {
+  const [title, setTitle] = useState(initialTitle ?? "");
+  const [desc, setDesc] = useState(initialDescription ?? "");
+  const displayTitle = title || `${previewName} · LayoverAmsterdam`;
+  const displayDesc = desc || "Leave blank to use the description automatically.";
+  return (
+    <fieldset className="space-y-4">
+      <legend className={labelClass + " mb-2"}>Search engine snippet</legend>
+      <p className="text-xs text-brand-cream/45 -mt-2">
+        Leave blank to use the name and description automatically.
+      </p>
+
+      {/* Google preview */}
+      <div className="rounded-xl border border-brand-cream/10 bg-brand-cream/[0.03] px-4 py-3 space-y-0.5">
+        <p className="text-[13px] text-[#1a0dab] truncate">{displayTitle}</p>
+        <p className="text-[11px] text-brand-cream/40">
+          layover-legends.com/stops/{previewSlug || "…"}
+        </p>
+        <p className="text-[12px] text-brand-cream/65 line-clamp-2">{displayDesc}</p>
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between mb-1">
+          <label htmlFor="meta_title" className={labelClass}>Meta title</label>
+          <span className={`text-xs tabular-nums ${title.length > 60 ? "text-brand-orange" : "text-brand-cream/40"}`}>
+            {title.length}/70
+          </span>
+        </div>
+        <input
+          id="meta_title"
+          name="meta_title"
+          type="text"
+          maxLength={70}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className={inputClass}
+          placeholder={`${previewName} · LayoverAmsterdam`}
+        />
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between mb-1">
+          <label htmlFor="meta_description" className={labelClass}>Meta description</label>
+          <span className={`text-xs tabular-nums ${desc.length > 140 ? "text-brand-orange" : "text-brand-cream/40"}`}>
+            {desc.length}/160
+          </span>
+        </div>
+        <textarea
+          id="meta_description"
+          name="meta_description"
+          rows={3}
+          maxLength={160}
+          value={desc}
+          onChange={(e) => setDesc(e.target.value)}
+          className={inputClass + " resize-none"}
+          placeholder="What makes this stop worth a layover detour? (auto-generated when blank)"
+        />
+      </div>
+    </fieldset>
   );
 }
 
@@ -166,6 +239,13 @@ export default function StopForm({ stop, categories, action, mode, deleteAction 
           hint="Confirmed accessible entrance / interior."
           defaultChecked={!!stop?.wheelchair_accessible} />
       </fieldset>
+
+      <SeoFields
+        initialTitle={stop?.meta_title ?? null}
+        initialDescription={stop?.meta_description ?? null}
+        previewSlug={stop?.slug ?? ""}
+        previewName={stop?.name ?? ""}
+      />
 
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
         <SaveButton mode={mode} />

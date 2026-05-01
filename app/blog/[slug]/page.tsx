@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { getArticleBySlug } from "@/lib/public/articles";
 import { renderMarkdown } from "@/lib/markdown";
 import { SITE, canonicalFor, ogImageFor } from "@/lib/seo/site";
+import { StructuredData } from "@/components/seo/StructuredData";
+import { articleLd, breadcrumbLd } from "@/lib/seo/jsonld";
 
 export const dynamic = "force-dynamic";
 
@@ -59,6 +61,15 @@ export default async function BlogArticlePage({ params }: PageProps) {
   const date = fmt(article.published_at);
 
   return (
+    <>
+    <StructuredData data={[
+      articleLd(article),
+      breadcrumbLd([
+        { name: "Home", url: SITE.url },
+        { name: "Blog", url: `${SITE.url}/blog` },
+        { name: article.title, url: canonicalFor(`/blog/${article.slug}`) },
+      ]),
+    ]} />
     <main className="min-h-screen bg-brand-navy text-brand-cream">
       {article.cover_url && (
         // eslint-disable-next-line @next/next/no-img-element
@@ -98,5 +109,6 @@ export default async function BlogArticlePage({ params }: PageProps) {
         </footer>
       </div>
     </main>
+    </>
   );
 }

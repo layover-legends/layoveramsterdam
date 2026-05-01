@@ -6,6 +6,8 @@ import StopsTeaser from "@/components/StopsTeaser";
 import { createClient } from "@/lib/supabase/server";
 import { getStopsTeaser } from "@/lib/public/stops";
 import { SITE, canonicalFor, ogImageFor } from "@/lib/seo/site";
+import { StructuredData } from "@/components/seo/StructuredData";
+import { organizationLd, websiteLd } from "@/lib/seo/jsonld";
 
 export const dynamic = "force-dynamic";
 
@@ -57,6 +59,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const adminOnly = searchParams?.admin_only === "1";
 
   return (
+    <>
+    <StructuredData data={[organizationLd(), websiteLd()]} />
     <main className="min-h-screen flex flex-col items-center px-6 py-12 bg-brand-navy text-brand-cream">
       <section className="w-full max-w-3xl flex flex-col items-center text-center gap-8 pt-8 sm:pt-16">
         <div className="relative w-full aspect-square max-w-xl">
@@ -124,5 +128,6 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         © {new Date().getFullYear()} Layover Amsterdam. All rights reserved.
       </div>
     </main>
+    </>
   );
 }

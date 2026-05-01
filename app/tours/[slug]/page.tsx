@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getTourBySlug } from "@/lib/public/tour-detail";
 import { SITE, canonicalFor, ogImageFor } from "@/lib/seo/site";
+import { StructuredData } from "@/components/seo/StructuredData";
+import { tourLd, breadcrumbLd } from "@/lib/seo/jsonld";
 
 export const dynamic = "force-dynamic";
 
@@ -56,6 +58,15 @@ export default async function TourPage({ params }: PageProps) {
       : null;
 
   return (
+    <>
+    <StructuredData data={[
+      tourLd(tour),
+      breadcrumbLd([
+        { name: "Home", url: SITE.url },
+        { name: "Tours", url: `${SITE.url}/tours` },
+        { name: tour.name, url: canonicalFor(`/tours/${tour.slug}`) },
+      ]),
+    ]} />
     <main className="min-h-screen bg-brand-navy text-brand-cream px-5 py-12 max-w-3xl mx-auto space-y-6">
       <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{tour.name}</h1>
       {tour.tagline && (
@@ -69,5 +80,6 @@ export default async function TourPage({ params }: PageProps) {
         <p className="text-brand-cream/80 leading-relaxed">{tour.description}</p>
       )}
     </main>
+    </>
   );
 }

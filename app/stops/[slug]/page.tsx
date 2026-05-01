@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getStopBySlug } from "@/lib/public/stop-detail";
 import { SITE, canonicalFor, ogImageFor } from "@/lib/seo/site";
+import { StructuredData } from "@/components/seo/StructuredData";
+import { touristAttractionLd, breadcrumbLd } from "@/lib/seo/jsonld";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +50,14 @@ export default async function StopPage({ params }: PageProps) {
   if (!stop) notFound();
 
   return (
+    <>
+    <StructuredData data={[
+      touristAttractionLd(stop),
+      breadcrumbLd([
+        { name: "Home", url: SITE.url },
+        { name: stop.name, url: canonicalFor(`/stops/${stop.slug}`) },
+      ]),
+    ]} />
     <main className="min-h-screen bg-brand-navy text-brand-cream px-5 py-12 max-w-3xl mx-auto space-y-6">
       {stop.category_name && (
         <p className="text-xs uppercase tracking-wide text-brand-orange/80">
@@ -70,5 +80,6 @@ export default async function StopPage({ params }: PageProps) {
         <p className="text-brand-cream/80 leading-relaxed">{stop.description}</p>
       )}
     </main>
+    </>
   );
 }

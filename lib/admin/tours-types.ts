@@ -16,6 +16,8 @@ export type Tour = {
   is_adult_only: boolean;
   is_seasonal: boolean;
   stop_count: number;
+  meta_title: string | null;
+  meta_description: string | null;
   created_at: string | null;
   updated_at: string | null;
 };

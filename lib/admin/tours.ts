@@ -9,7 +9,7 @@ const PAGE_SIZE = 25;
 const TOUR_SELECT = `
   id, name, slug, tagline, description, duration_hours, price_cents, currency,
   max_group_size, is_active, requires_booking, is_adult_only, is_seasonal,
-  created_at, updated_at,
+  meta_title, meta_description, created_at, updated_at,
   tour_stops ( id )
 `;
 
@@ -27,6 +27,8 @@ type Row = {
   requires_booking: boolean;
   is_adult_only: boolean;
   is_seasonal: boolean;
+  meta_title: string | null;
+  meta_description: string | null;
   created_at: string | null;
   updated_at: string | null;
   tour_stops: Array<{ id: string }> | null;
@@ -48,6 +50,8 @@ function rowToTour(r: Row): Tour {
     is_adult_only: r.is_adult_only,
     is_seasonal: r.is_seasonal,
     stop_count: (r.tour_stops ?? []).length,
+    meta_title: r.meta_title,
+    meta_description: r.meta_description,
     created_at: r.created_at,
     updated_at: r.updated_at,
   };

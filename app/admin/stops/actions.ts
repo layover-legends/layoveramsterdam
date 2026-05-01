@@ -14,6 +14,8 @@ const ALLOWED_IMAGE_TYPES = new Set([
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5 MB
 const MAX_AREA = 200;
 const MAX_DESCRIPTION = 2000;
+const MAX_META_TITLE = 70;
+const MAX_META_DESCRIPTION = 160;
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -30,6 +32,8 @@ type Parsed = {
   is_seasonal: boolean;
   requires_booking: boolean;
   wheelchair_accessible: boolean;
+  meta_title: string | null;
+  meta_description: string | null;
 };
 
 function slugify(s: string): string {
@@ -91,6 +95,16 @@ function parseStop(formData: FormData):
     return { ok: false, error: "Provide both latitude and longitude, or leave both blank." };
   }
 
+  const meta_title = (formData.get("meta_title") || "").toString().trim() || null;
+  if (meta_title && meta_title.length > MAX_META_TITLE) {
+    return { ok: false, error: `Meta title must be ${MAX_META_TITLE} chars or fewer.` };
+  }
+
+  const meta_description = (formData.get("meta_description") || "").toString().trim() || null;
+  if (meta_description && meta_description.length > MAX_META_DESCRIPTION) {
+    return { ok: false, error: `Meta description must be ${MAX_META_DESCRIPTION} chars or fewer.` };
+  }
+
   return {
     ok: true,
     data: {
@@ -106,6 +120,8 @@ function parseStop(formData: FormData):
       is_seasonal: formData.get("is_seasonal") === "on",
       requires_booking: formData.get("requires_booking") === "on",
       wheelchair_accessible: formData.get("wheelchair_accessible") === "on",
+      meta_title,
+      meta_description,
     },
   };
 }

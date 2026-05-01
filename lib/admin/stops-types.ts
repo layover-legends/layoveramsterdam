@@ -40,6 +40,8 @@ export type Stop = {
   requires_booking: boolean | null;
   wheelchair_accessible: boolean | null;
   primary_photo_url: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
   created_at: string | null;
   updated_at: string | null;
 };

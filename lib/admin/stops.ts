@@ -21,7 +21,7 @@ const PAGE_SIZE = 50;
 const STOP_SELECT = `
   id, category_id, name, slug, area, description, latitude, longitude,
   is_active, is_adult_only, is_seasonal, requires_booking, wheelchair_accessible,
-  created_at, updated_at,
+  meta_title, meta_description, created_at, updated_at,
   destination_categories ( name, slug ),
   stop_photos ( url, is_primary )
 `;
@@ -40,6 +40,8 @@ type Row = {
   is_seasonal: boolean | null;
   requires_booking: boolean | null;
   wheelchair_accessible: boolean | null;
+  meta_title: string | null;
+  meta_description: string | null;
   created_at: string | null;
   updated_at: string | null;
   destination_categories: { name: string; slug: string } | null;
@@ -47,7 +49,6 @@ type Row = {
 };
 
 function rowToStop(r: Row): Stop {
-  // Choose the primary photo, fall back to the first one.
   const photos = r.stop_photos ?? [];
   const primary = photos.find((p) => p.is_primary)?.url ?? photos[0]?.url ?? null;
   return {
@@ -67,6 +68,8 @@ function rowToStop(r: Row): Stop {
     requires_booking: r.requires_booking,
     wheelchair_accessible: r.wheelchair_accessible,
     primary_photo_url: primary,
+    meta_title: r.meta_title,
+    meta_description: r.meta_description,
     created_at: r.created_at,
     updated_at: r.updated_at,
   };

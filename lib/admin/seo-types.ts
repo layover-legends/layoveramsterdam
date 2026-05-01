@@ -9,7 +9,9 @@ export type SeoIssueKind =
   | "missing_coords"
   | "missing_alt_text"
   | "missing_tagline"
-  | "duplicate_slug";
+  | "duplicate_slug"
+  | "missing_meta_title"
+  | "missing_meta_description";
 
 export type SeoIssue = {
   kind: SeoIssueKind;
@@ -66,4 +68,6 @@ export const ISSUE_LABELS: Record<SeoIssueKind, string> = {
   missing_alt_text: "Photo missing alt text",
   missing_tagline: "No tagline",
   duplicate_slug: "Slug duplicated elsewhere",
+  missing_meta_title: "No custom meta title",
+  missing_meta_description: "No custom meta description",
 };

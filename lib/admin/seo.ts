@@ -27,6 +27,8 @@ type DestRow = {
   is_active: boolean;
   requires_booking: boolean | null;
   is_adult_only: boolean | null;
+  meta_title: string | null;
+  meta_description: string | null;
   stop_photos: Array<{ id: string; alt_text: string | null; is_primary: boolean | null }> | null;
 };
 
@@ -37,6 +39,8 @@ type TourRow = {
   tagline: string | null;
   description: string | null;
   is_active: boolean;
+  meta_title: string | null;
+  meta_description: string | null;
 };
 
 function makeIssue(kind: SeoIssueKind): SeoIssue {
@@ -53,16 +57,11 @@ function emptyCounts(): Record<SeoIssueKind, number> {
     missing_alt_text: 0,
     missing_tagline: 0,
     duplicate_slug: 0,
+    missing_meta_title: 0,
+    missing_meta_description: 0,
   };
 }
 
-/**
- * Compute a complete SEO-health snapshot of the catalog.
- *
- * Reads every destination + photo manifest + every tour. Doable in two queries
- * because the catalog is bounded (a few hundred rows). Computes issues in JS
- * so we can present a per-row punch list, not just aggregate counts.
- */
 export async function getSeoHealth(): Promise<SeoHealth> {
   const supabase = createClient();
 
@@ -70,20 +69,18 @@ export async function getSeoHealth(): Promise<SeoHealth> {
     supabase
       .from("destinations")
       .select(
-        "id, name, slug, description, latitude, longitude, is_active, requires_booking, is_adult_only, stop_photos ( id, alt_text, is_primary )",
+        "id, name, slug, description, latitude, longitude, is_active, requires_booking, is_adult_only, meta_title, meta_description, stop_photos ( id, alt_text, is_primary )",
       )
       .order("name", { ascending: true }),
     supabase
       .from("tours")
-      .select("id, name, slug, tagline, description, is_active")
+      .select("id, name, slug, tagline, description, is_active, meta_title, meta_description")
       .order("name", { ascending: true }),
   ]);
 
   const dests = (dRows ?? []) as unknown as DestRow[];
   const tours = (tRows ?? []) as unknown as TourRow[];
 
-  // Slug duplicate detection — across destinations only (tours have their own
-  // namespace so a tour and a destination can share a slug without conflict).
   const slugSeen = new Map<string, number>();
   for (const d of dests) {
     slugSeen.set(d.slug, (slugSeen.get(d.slug) ?? 0) + 1);
@@ -114,6 +111,9 @@ export async function getSeoHealth(): Promise<SeoHealth> {
       issues.push(makeIssue("duplicate_slug"));
     }
 
+    if (!d.meta_title) issues.push(makeIssue("missing_meta_title"));
+    if (!d.meta_description) issues.push(makeIssue("missing_meta_description"));
+
     for (const i of issues) dCounts[i.kind] += 1;
 
     if (issues.length > 0) {
@@ -142,6 +142,9 @@ export async function getSeoHealth(): Promise<SeoHealth> {
       if (t.description.length < DESC_MIN) issues.push(makeIssue("description_too_short"));
       if (t.description.length > DESC_MAX) issues.push(makeIssue("description_too_long"));
     }
+
+    if (!t.meta_title) issues.push(makeIssue("missing_meta_title"));
+    if (!t.meta_description) issues.push(makeIssue("missing_meta_description"));
 
     for (const i of issues) tCounts[i.kind] += 1;
 

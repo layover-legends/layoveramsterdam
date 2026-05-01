@@ -40,6 +40,7 @@ const NAV: NavItem[] = [
     filterKey: "filter", filterValue: "adult",
   },
   { key: "tours",      label: "Tours",       href: "/admin/tours",              icon: "◆",  matchPrefix: "/admin/tours" },
+  { key: "seo",        label: "SEO",         href: "/admin/seo",                icon: "↗",  matchPrefix: "/admin/seo" },
 ];
 
 export default function AdminSidebar({ email, fullName, avatarUrl }: Props) {
@@ -85,43 +86,4 @@ export default function AdminSidebar({ email, fullName, avatarUrl }: Props) {
         )}
         <div className="min-w-0">
           <p className="text-xs uppercase tracking-wider text-brand-orange font-semibold">
-            Admin
-          </p>
-          <p className="text-sm text-brand-cream truncate">{fullName || email}</p>
-        </div>
-      </div>
-
-      <nav className="px-3 py-4 flex lg:flex-col gap-1">
-        {NAV.map((item) => {
-          const active = isActive(item);
-          return (
-            <Link
-              key={item.key}
-              href={item.href}
-              className={
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors " +
-                (active
-                  ? "bg-brand-orange/15 text-brand-orange font-medium"
-                  : "text-brand-cream/75 hover:bg-brand-cream/5")
-              }
-            >
-              <span className="text-base leading-none">{item.icon}</span>
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
-
-      <div className="mt-auto hidden lg:flex flex-col gap-2 px-5 py-5 text-xs text-brand-cream/40 border-t border-brand-cream/10">
-        <Link href="/" className="hover:text-brand-cream/70 transition-colors">
-          ← Back to site
-        </Link>
-        <form action="/auth/signout" method="post">
-          <button type="submit" className="hover:text-brand-cream/70 transition-colors">
-            Sign out
-          </button>
-        </form>
-      </div>
-    </aside>
-  );
-}
+            Adm

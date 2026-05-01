@@ -73,7 +73,6 @@ export default async function AdminStopsPage({ searchParams }: PageProps) {
               : "total"}
             {q ? ` matching "${q}"` : ""}
             {categorySlug ? ` in this category` : ""}
-            {" — use filters below to browse free, paid & after-dark"}
           </p>
         </div>
         <Link

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 type Props = {
   email: string;
@@ -10,21 +10,61 @@ type Props = {
   avatarUrl: string | null;
 };
 
-const NAV: Array<{ key: string; label: string; href: string; icon: string; matchPrefix: string }> = [
-  { key: "overview", label: "Overview", href: "/admin", icon: "▦", matchPrefix: "/admin" },
-  { key: "users", label: "Users", href: "/admin/users", icon: "◇", matchPrefix: "/admin/users" },
-  { key: "stops", label: "Stops", href: "/admin/stops", icon: "✦", matchPrefix: "/admin/stops" },
-  { key: "tours", label: "Tours", href: "/admin/tours", icon: "◆", matchPrefix: "/admin/tours" },
+type NavItem = {
+  key: string;
+  label: string;
+  href: string;
+  icon: string;
+  matchPrefix: string;
+  // When set, this item is only active when the URL also has ?filterKey=filterValue.
+  filterKey?: string;
+  filterValue?: string;
+  // When set, this item is inactive when the URL has ?filterKey=filterValue.
+  excludeFilterKey?: string;
+  excludeFilterValues?: string[];
+};
+
+const NAV: NavItem[] = [
+  { key: "overview",   label: "Overview",    href: "/admin",                    icon: "▦",  matchPrefix: "/admin" },
+  { key: "users",      label: "Users",       href: "/admin/users",              icon: "◇",  matchPrefix: "/admin/users" },
+  {
+    key: "stops",      label: "Free stops",  href: "/admin/stops?filter=free",  icon: "✦",  matchPrefix: "/admin/stops",
+    filterKey: "filter", filterValue: "free",
+  },
+  {
+    key: "paid",       label: "Paid stops",  href: "/admin/stops?filter=paid",  icon: "€",  matchPrefix: "/admin/stops",
+    filterKey: "filter", filterValue: "paid",
+  },
+  {
+    key: "adult",      label: "After Dark",  href: "/admin/stops?filter=adult", icon: "🌙", matchPrefix: "/admin/stops",
+    filterKey: "filter", filterValue: "adult",
+  },
+  { key: "tours",      label: "Tours",       href: "/admin/tours",              icon: "◆",  matchPrefix: "/admin/tours" },
 ];
 
 export default function AdminSidebar({ email, fullName, avatarUrl }: Props) {
   const pathname = usePathname() || "";
+  const searchParams = useSearchParams();
   const initial = (fullName || email).charAt(0).toUpperCase();
 
-  // The most specific (longest) matching prefix wins so /admin/users beats /admin.
-  const activeKey = [...NAV]
-    .sort((a, b) => b.matchPrefix.length - a.matchPrefix.length)
-    .find((n) => pathname === n.matchPrefix || pathname.startsWith(n.matchPrefix + "/"))?.key;
+  function isActive(item: NavItem): boolean {
+    const pathMatch =
+      pathname === item.matchPrefix || pathname.startsWith(item.matchPrefix + "/");
+    if (!pathMatch) return false;
+
+    // Items with a required filter param.
+    if (item.filterKey && item.filterValue) {
+      return searchParams.get(item.filterKey) === item.filterValue;
+    }
+
+    // "Overview" — exact match only (so /admin/stops doesn't activate it).
+    if (item.matchPrefix === "/admin") {
+      return pathname === "/admin";
+    }
+
+    // Items with no filter constraint — active unless another sibling's filter matches.
+    return true;
+  }
 
   return (
     <aside className="w-full lg:w-64 lg:min-h-screen lg:sticky lg:top-0 border-b lg:border-b-0 lg:border-r border-brand-cream/10 bg-brand-navy flex flex-col">
@@ -53,14 +93,14 @@ export default function AdminSidebar({ email, fullName, avatarUrl }: Props) {
 
       <nav className="px-3 py-4 flex lg:flex-col gap-1">
         {NAV.map((item) => {
-          const isActive = item.key === activeKey;
+          const active = isActive(item);
           return (
             <Link
               key={item.key}
               href={item.href}
               className={
                 "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors " +
-                (isActive
+                (active
                   ? "bg-brand-orange/15 text-brand-orange font-medium"
                   : "text-brand-cream/75 hover:bg-brand-cream/5")
               }

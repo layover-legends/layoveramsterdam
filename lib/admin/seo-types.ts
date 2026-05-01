@@ -11,7 +11,10 @@ export type SeoIssueKind =
   | "missing_tagline"
   | "duplicate_slug"
   | "missing_meta_title"
-  | "missing_meta_description";
+  | "missing_meta_description"
+  | "missing_excerpt"
+  | "missing_cover"
+  | "body_too_short";
 
 export type SeoIssue = {
   kind: SeoIssueKind;
@@ -36,13 +39,21 @@ export type TourHealth = {
   issues: SeoIssue[];
 };
 
+export type ArticleHealth = {
+  id: string;
+  title: string;
+  slug: string;
+  is_published: boolean;
+  issues: SeoIssue[];
+};
+
 export type SeoHealth = {
   destinations: {
     total: number;
     healthy: number;
     needsWork: number;
     counts: Record<SeoIssueKind, number>;
-    items: DestinationHealth[]; // only those with at least one issue
+    items: DestinationHealth[];
   };
   tours: {
     total: number;
@@ -50,6 +61,14 @@ export type SeoHealth = {
     needsWork: number;
     counts: Record<SeoIssueKind, number>;
     items: TourHealth[];
+  };
+  articles: {
+    total: number;
+    published: number;
+    drafts: number;
+    needsWork: number;
+    counts: Record<SeoIssueKind, number>;
+    items: ArticleHealth[];
   };
 };
 
@@ -70,4 +89,7 @@ export const ISSUE_LABELS: Record<SeoIssueKind, string> = {
   duplicate_slug: "Slug duplicated elsewhere",
   missing_meta_title: "No custom meta title",
   missing_meta_description: "No custom meta description",
+  missing_excerpt: "No excerpt",
+  missing_cover: "No cover image",
+  body_too_short: "Body under 300 chars",
 };

@@ -77,13 +77,23 @@ function emptyCounts(): Record<SeoIssueKind, number> {
     missing_cover: 0,
     body_too_short: 0,
     missing_og_image: 0,
+    missing_translation_fr: 0,
+    missing_translation_nl: 0,
+    missing_translation_de: 0,
+    missing_translation_es: 0,
+    missing_translation_it: 0,
+    missing_translation_pt: 0,
+    missing_translation_zh: 0,
   };
 }
+
+const NON_DEFAULT_LOCALES = ["fr", "nl", "de", "es", "it", "pt", "zh"] as const;
+type NonDefaultLocale = (typeof NON_DEFAULT_LOCALES)[number];
 
 export async function getSeoHealth(): Promise<SeoHealth> {
   const supabase = createClient();
 
-  const [{ data: dRows }, { data: tRows }, { data: aRows }] = await Promise.all([
+  const [{ data: dRows }, { data: tRows }, { data: aRows }, { data: trRows }] = await Promise.all([
     supabase
       .from("destinations")
       .select(
@@ -98,11 +108,23 @@ export async function getSeoHealth(): Promise<SeoHealth> {
       .from("articles")
       .select("id, title, slug, is_published, excerpt, cover_url, body_md, meta_title, meta_description")
       .order("title", { ascending: true }),
+    // Fetch which (entity_id, language) combos have at least one 'name' translation.
+    supabase
+      .from("translations")
+      .select("entity_type, entity_id, language")
+      .eq("field", "name")
+      .in("language", NON_DEFAULT_LOCALES as unknown as string[]),
   ]);
 
   const dests = (dRows ?? []) as unknown as DestRow[];
   const tours = (tRows ?? []) as unknown as TourRow[];
   const articles = (aRows ?? []) as unknown as ArticleRow[];
+
+  // Build set: `${entity_type}:${entity_id}:${language}` for quick lookup.
+  const translatedSet = new Set<string>();
+  for (const r of (trRows ?? []) as Array<{ entity_type: string; entity_id: string; language: string }>) {
+    translatedSet.add(`${r.entity_type}:${r.entity_id}:${r.language}`);
+  }
 
   // ── destinations ────────────────────────────────────────────────────────
 
@@ -133,6 +155,12 @@ export async function getSeoHealth(): Promise<SeoHealth> {
     if (!d.meta_title) issues.push(makeIssue("missing_meta_title"));
     if (!d.meta_description) issues.push(makeIssue("missing_meta_description"));
 
+    for (const lang of NON_DEFAULT_LOCALES) {
+      if (!translatedSet.has(`destination:${d.id}:${lang}`)) {
+        issues.push(makeIssue(`missing_translation_${lang}` as SeoIssueKind));
+      }
+    }
+
     for (const i of issues) dCounts[i.kind] += 1;
     if (issues.length > 0) {
       dItems.push({ id: d.id, name: d.name, slug: d.slug, is_active: d.is_active, requires_booking: d.requires_booking, is_adult_only: d.is_adult_only, issues });
@@ -154,7 +182,12 @@ export async function getSeoHealth(): Promise<SeoHealth> {
     }
     if (!t.meta_title) issues.push(makeIssue("missing_meta_title"));
     if (!t.meta_description) issues.push(makeIssue("missing_meta_description"));
-    // Tours use the dynamic /og route so missing_og_image is not flagged here.
+
+    for (const lang of NON_DEFAULT_LOCALES) {
+      if (!translatedSet.has(`tour:${t.id}:${lang}`)) {
+        issues.push(makeIssue(`missing_translation_${lang}` as SeoIssueKind));
+      }
+    }
 
     for (const i of issues) tCounts[i.kind] += 1;
     if (issues.length > 0) {

@@ -15,7 +15,14 @@ export type SeoIssueKind =
   | "missing_excerpt"
   | "missing_cover"
   | "body_too_short"
-  | "missing_og_image";
+  | "missing_og_image"
+  | "missing_translation_fr"
+  | "missing_translation_nl"
+  | "missing_translation_de"
+  | "missing_translation_es"
+  | "missing_translation_it"
+  | "missing_translation_pt"
+  | "missing_translation_zh";
 
 export type SeoIssue = {
   kind: SeoIssueKind;
@@ -94,4 +101,11 @@ export const ISSUE_LABELS: Record<SeoIssueKind, string> = {
   missing_cover: "No cover image",
   body_too_short: "Body under 300 chars",
   missing_og_image: "No OG image (sharing preview will use default)",
+  missing_translation_fr: "No French translation",
+  missing_translation_nl: "No Dutch translation",
+  missing_translation_de: "No German translation",
+  missing_translation_es: "No Spanish translation",
+  missing_translation_it: "No Italian translation",
+  missing_translation_pt: "No Portuguese translation",
+  missing_translation_zh: "No Chinese translation",
 };

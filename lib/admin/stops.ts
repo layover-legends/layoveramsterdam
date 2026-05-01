@@ -103,8 +103,13 @@ export async function listStops({
     .range(from, to);
 
   // Filter by primary flag.
-  if (filter === "free") q = q.eq("requires_booking", false);
-  if (filter === "paid") q = q.eq("requires_booking", true);
+  // "free" and "paid" are the family-friendly buckets — they explicitly
+  // exclude adult-only rows so the sidebar's three entries (Free / Paid /
+  // After Dark) partition the catalog cleanly without overlap.
+  if (filter === "free")
+    q = q.eq("requires_booking", false).eq("is_adult_only", false);
+  if (filter === "paid")
+    q = q.eq("requires_booking", true).eq("is_adult_only", false);
   if (filter === "inactive") q = q.eq("is_active", false);
   if (filter === "seasonal") q = q.eq("is_seasonal", true);
   if (filter === "adult") q = q.eq("is_adult_only", true);
@@ -125,8 +130,16 @@ export async function listStops({
   const [allCount, freeCount, paidCount, inactiveCount, seasonalCount, adultCount, catData] =
     await Promise.all([
       supabase.from("destinations").select("id", { count: "exact", head: true }),
-      supabase.from("destinations").select("id", { count: "exact", head: true }).eq("requires_booking", false),
-      supabase.from("destinations").select("id", { count: "exact", head: true }).eq("requires_booking", true),
+      supabase
+        .from("destinations")
+        .select("id", { count: "exact", head: true })
+        .eq("requires_booking", false)
+        .eq("is_adult_only", false),
+      supabase
+        .from("destinations")
+        .select("id", { count: "exact", head: true })
+        .eq("requires_booking", true)
+        .eq("is_adult_only", false),
       supabase.from("destinations").select("id", { count: "exact", head: true }).eq("is_active", false),
       supabase.from("destinations").select("id", { count: "exact", head: true }).eq("is_seasonal", true),
       supabase.from("destinations").select("id", { count: "exact", head: true }).eq("is_adult_only", true),

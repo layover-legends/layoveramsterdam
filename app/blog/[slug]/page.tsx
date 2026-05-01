@@ -2,9 +2,11 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getArticleBySlug } from "@/lib/public/articles";
 import { renderMarkdown } from "@/lib/markdown";
-import { SITE, canonicalFor, ogImageFor } from "@/lib/seo/site";
+import { SITE, canonicalFor, ogImageFor, langAlternates } from "@/lib/seo/site";
 import { StructuredData } from "@/components/seo/StructuredData";
 import { articleLd, breadcrumbLd } from "@/lib/seo/jsonld";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { OG_LOCALE } from "@/lib/i18n/locales";
 
 export const dynamic = "force-dynamic";
 
@@ -14,22 +16,24 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const article = await getArticleBySlug(params.slug);
   if (!article) return { title: "Not found" };
 
+  const locale = resolveLocale();
   const title = article.meta_title || `${article.title} · ${SITE.name}`;
   const description = article.meta_description || article.excerpt || undefined;
   const ogImage = article.cover_url ?? ogImageFor({ title: article.title });
-  const canonical = canonicalFor(`/blog/${params.slug}`);
+  const path = `/blog/${params.slug}`;
+  const canonical = canonicalFor(path);
 
   return {
     title,
     description,
-    alternates: { canonical },
+    alternates: { canonical, languages: langAlternates(path) },
     openGraph: {
       title: article.meta_title || article.title,
       description,
       url: canonical,
       siteName: SITE.name,
       type: "article",
-      locale: SITE.locale,
+      locale: OG_LOCALE[locale],
       publishedTime: article.published_at ?? undefined,
       images: [{ url: ogImage, width: 1200, height: 630, alt: article.title }],
     },

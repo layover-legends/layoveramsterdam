@@ -21,3 +21,10 @@ export function ogImageFor(opts: { title?: string; subtitle?: string } = {}): st
   const qs = p.toString();
   return `${SITE.url}/og${qs ? `?${qs}` : ""}`;
 }
+
+/** Build hreflang alternates for a given path (used in generateMetadata). */
+export function langAlternates(path: string): Record<string, string> {
+  // Inline the codes to keep this file dependency-free.
+  const codes = ["en", "fr", "nl", "de", "es", "it", "pt", "zh"] as const;
+  return Object.fromEntries(codes.map((c) => [c, `${SITE.url}${path}?lang=${c}`]));
+}

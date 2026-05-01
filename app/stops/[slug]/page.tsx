@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getStopBySlug } from "@/lib/public/stop-detail";
-import { SITE, canonicalFor, ogImageFor } from "@/lib/seo/site";
+import { SITE, canonicalFor, ogImageFor, langAlternates } from "@/lib/seo/site";
 import { StructuredData } from "@/components/seo/StructuredData";
 import { touristAttractionLd, breadcrumbLd } from "@/lib/seo/jsonld";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { OG_LOCALE } from "@/lib/i18n/locales";
 
 export const dynamic = "force-dynamic";
 
@@ -13,25 +15,27 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const stop = await getStopBySlug(params.slug);
   if (!stop) return { title: "Not found" };
 
+  const locale = resolveLocale();
   const title = stop.meta_title || `${stop.name} · ${SITE.name}`;
   const description =
     stop.meta_description ||
     stop.description ||
     `${stop.name} in ${stop.area || "Amsterdam"} — discover it on your Schiphol layover.`;
   const ogImage = stop.primary_photo_url ?? ogImageFor({ title: stop.name, subtitle: stop.area ?? "Amsterdam" });
-  const canonical = canonicalFor(`/stops/${params.slug}`);
+  const path = `/stops/${params.slug}`;
+  const canonical = canonicalFor(path);
 
   return {
     title,
     description,
-    alternates: { canonical },
+    alternates: { canonical, languages: langAlternates(path) },
     openGraph: {
       title: stop.meta_title || stop.name,
       description,
       url: canonical,
       siteName: SITE.name,
       type: "website",
-      locale: SITE.locale,
+      locale: OG_LOCALE[locale],
       images: [{ url: ogImage, width: 1200, height: 630, alt: stop.name }],
     },
     twitter: {

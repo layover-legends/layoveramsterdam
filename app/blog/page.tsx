@@ -1,36 +1,41 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { listPublishedArticles } from "@/lib/public/articles";
-import { SITE, canonicalFor, ogImageFor } from "@/lib/seo/site";
+import { SITE, canonicalFor, ogImageFor, langAlternates } from "@/lib/seo/site";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { OG_LOCALE } from "@/lib/i18n/locales";
 
 export const dynamic = "force-dynamic";
 
-const title = "Layover Guides · LayoverAmsterdam";
-const description =
-  "Amsterdam layover tips, canal walk guides, and everything you need to turn a Schiphol stopover into an unforgettable experience.";
-
-export const metadata: Metadata = {
-  title,
-  description,
-  alternates: { canonical: canonicalFor("/blog") },
-  openGraph: {
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = resolveLocale();
+  const title = "Layover Guides · LayoverAmsterdam";
+  const description =
+    "Amsterdam layover tips, canal walk guides, and everything you need to turn a Schiphol stopover into an unforgettable experience.";
+  const ogImage = ogImageFor({ title: "Layover Guides", subtitle: "Amsterdam tips & itineraries" });
+  return {
     title,
     description,
-    url: canonicalFor("/blog"),
-    siteName: SITE.name,
-    type: "website",
-    locale: SITE.locale,
-    images: [{ url: ogImageFor({ title: "Layover Guides", subtitle: "Amsterdam tips & itineraries" }), width: 1200, height: 630, alt: title }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    site: SITE.twitter,
-    creator: SITE.twitter,
-    title,
-    description,
-    images: [ogImageFor({ title: "Layover Guides", subtitle: "Amsterdam tips & itineraries" })],
-  },
-};
+    alternates: { canonical: canonicalFor("/blog"), languages: langAlternates("/blog") },
+    openGraph: {
+      title,
+      description,
+      url: canonicalFor("/blog"),
+      siteName: SITE.name,
+      type: "website",
+      locale: OG_LOCALE[locale],
+      images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      site: SITE.twitter,
+      creator: SITE.twitter,
+      title,
+      description,
+      images: [ogImageFor({ title: "Layover Guides", subtitle: "Amsterdam tips & itineraries" })],
+    },
+  };
+}
 
 function fmt(dateStr: string | null) {
   if (!dateStr) return "";

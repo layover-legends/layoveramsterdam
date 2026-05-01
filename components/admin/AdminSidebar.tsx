@@ -13,7 +13,7 @@ type Props = {
 const NAV: Array<{ key: string; label: string; href: string; icon: string; matchPrefix: string }> = [
   { key: "overview", label: "Overview", href: "/admin", icon: "▦", matchPrefix: "/admin" },
   { key: "users", label: "Users", href: "/admin/users", icon: "◇", matchPrefix: "/admin/users" },
-  { key: "stops", label: "Free stops", href: "/admin/stops", icon: "✦", matchPrefix: "/admin/stops" },
+  { key: "stops", label: "Stops", href: "/admin/stops", icon: "✦", matchPrefix: "/admin/stops" },
   { key: "tours", label: "Tours", href: "/admin/tours", icon: "◆", matchPrefix: "/admin/tours" },
 ];
 

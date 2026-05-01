@@ -59,9 +59,21 @@ export default async function AdminStopsPage({ searchParams }: PageProps) {
         <div className="space-y-1">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Stops</h1>
           <p className="text-sm text-brand-cream/60">
-            {totalMatching} {filter === "free" ? "free" : filter === "paid" ? "bookable" : "total"}
+            {totalMatching}{" "}
+            {filter === "free"
+              ? "free"
+              : filter === "paid"
+              ? "bookable"
+              : filter === "adult"
+              ? "adult-only"
+              : filter === "inactive"
+              ? "inactive"
+              : filter === "seasonal"
+              ? "seasonal"
+              : "total"}
             {q ? ` matching "${q}"` : ""}
             {categorySlug ? ` in this category` : ""}
+            {" — use filters below to browse free, paid & after-dark"}
           </p>
         </div>
         <Link

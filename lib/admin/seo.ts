@@ -76,6 +76,7 @@ function emptyCounts(): Record<SeoIssueKind, number> {
     missing_excerpt: 0,
     missing_cover: 0,
     body_too_short: 0,
+    missing_og_image: 0,
   };
 }
 
@@ -121,7 +122,11 @@ export async function getSeoHealth(): Promise<SeoHealth> {
     }
 
     const photos = d.stop_photos ?? [];
-    if (!photos.some((p) => p.is_primary)) issues.push(makeIssue("missing_primary_photo"));
+    const hasPrimary = photos.some((p) => p.is_primary);
+    if (!hasPrimary) {
+      issues.push(makeIssue("missing_primary_photo"));
+      issues.push(makeIssue("missing_og_image"));
+    }
     if (photos.some((p) => !p.alt_text)) issues.push(makeIssue("missing_alt_text"));
     if (d.latitude === null || d.longitude === null) issues.push(makeIssue("missing_coords"));
     if ((slugSeen.get(d.slug) ?? 0) > 1) issues.push(makeIssue("duplicate_slug"));
@@ -149,6 +154,7 @@ export async function getSeoHealth(): Promise<SeoHealth> {
     }
     if (!t.meta_title) issues.push(makeIssue("missing_meta_title"));
     if (!t.meta_description) issues.push(makeIssue("missing_meta_description"));
+    // Tours use the dynamic /og route so missing_og_image is not flagged here.
 
     for (const i of issues) tCounts[i.kind] += 1;
     if (issues.length > 0) {
@@ -165,7 +171,10 @@ export async function getSeoHealth(): Promise<SeoHealth> {
   for (const a of articles) {
     const issues: SeoIssue[] = [];
     if (!a.excerpt) issues.push(makeIssue("missing_excerpt"));
-    if (!a.cover_url) issues.push(makeIssue("missing_cover"));
+    if (!a.cover_url) {
+      issues.push(makeIssue("missing_cover"));
+      issues.push(makeIssue("missing_og_image"));
+    }
     if (a.body_md.trim().length < 300) issues.push(makeIssue("body_too_short"));
     if (!a.meta_title) issues.push(makeIssue("missing_meta_title"));
     if (!a.meta_description) issues.push(makeIssue("missing_meta_description"));

@@ -14,7 +14,8 @@ export type SeoIssueKind =
   | "missing_meta_description"
   | "missing_excerpt"
   | "missing_cover"
-  | "body_too_short";
+  | "body_too_short"
+  | "missing_og_image";
 
 export type SeoIssue = {
   kind: SeoIssueKind;
@@ -92,4 +93,5 @@ export const ISSUE_LABELS: Record<SeoIssueKind, string> = {
   missing_excerpt: "No excerpt",
   missing_cover: "No cover image",
   body_too_short: "Body under 300 chars",
+  missing_og_image: "No OG image (sharing preview will use default)",
 };

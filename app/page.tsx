@@ -1,11 +1,38 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import SignInWithGoogle from "@/components/SignInWithGoogle";
 import StopsTeaser from "@/components/StopsTeaser";
 import { createClient } from "@/lib/supabase/server";
 import { getStopsTeaser } from "@/lib/public/stops";
+import { SITE, canonicalFor, ogImageFor } from "@/lib/seo/site";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: `${SITE.name} — Curated Amsterdam Layover Tours`,
+  description:
+    "Turn your Schiphol stopover into a legend. Curated Amsterdam tours for 4–12 hour layovers — canals, markets, museums, after dark.",
+  alternates: { canonical: canonicalFor("/") },
+  openGraph: {
+    title: `${SITE.name} — Curated Amsterdam Layover Tours`,
+    description:
+      "Turn your Schiphol stopover into a legend. Curated Amsterdam tours for 4–12 hour layovers.",
+    url: canonicalFor("/"),
+    siteName: SITE.name,
+    type: "website",
+    locale: SITE.locale,
+    images: [{ url: ogImageFor({ title: SITE.name, subtitle: "Curated Amsterdam layovers" }), width: 1200, height: 630, alt: SITE.name }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: SITE.twitter,
+    creator: SITE.twitter,
+    title: `${SITE.name} — Curated Amsterdam Layover Tours`,
+    description: "Turn your Schiphol stopover into a legend.",
+    images: [ogImageFor({ title: SITE.name, subtitle: "Curated Amsterdam layovers" })],
+  },
+};
 
 const COMING_SOON_IMAGE =
   "https://idgobxvhbhdymfsfmhae.supabase.co/storage/v1/object/public/assets/homepage/comingsoon.PNG";

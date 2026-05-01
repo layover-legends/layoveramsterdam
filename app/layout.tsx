@@ -1,22 +1,15 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { SITE } from "@/lib/seo/site";
 
 export const metadata: Metadata = {
-  title: "Layover Amsterdam — Coming Soon",
-  description:
-    "Premium layover tours at Amsterdam Schiphol. Turn your layover into a legend.",
-  openGraph: {
-    title: "Layover Amsterdam — Coming Soon",
-    description:
-      "Premium layover tours at Amsterdam Schiphol. Turn your layover into a legend.",
-    images: [
-      "https://idgobxvhbhdymfsfmhae.supabase.co/storage/v1/object/public/assets/homepage/comingsoon.PNG",
-    ],
-    type: "website",
+  metadataBase: new URL(SITE.url),
+  title: {
+    default: `${SITE.name} — Curated Amsterdam Layover Tours`,
+    template: `%s · ${SITE.name}`,
   },
-  icons: {
-    icon: "/favicon.ico",
-  },
+  description: "Premium layover tours at Amsterdam Schiphol. Turn your layover into a legend.",
+  icons: { icon: "/favicon.ico" },
 };
 
 export default function RootLayout({

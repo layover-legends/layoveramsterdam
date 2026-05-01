@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getStopBySlug } from "@/lib/public/stop-detail";
+import { SITE, canonicalFor, ogImageFor } from "@/lib/seo/site";
 
 export const dynamic = "force-dynamic";
 
@@ -10,19 +11,34 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const stop = await getStopBySlug(params.slug);
   if (!stop) return { title: "Not found" };
 
-  const title = stop.meta_title || `${stop.name} · LayoverAmsterdam`;
+  const title = stop.meta_title || `${stop.name} · ${SITE.name}`;
   const description =
     stop.meta_description ||
     stop.description ||
     `${stop.name} in ${stop.area || "Amsterdam"} — discover it on your Schiphol layover.`;
+  const ogImage = stop.primary_photo_url ?? ogImageFor({ title: stop.name, subtitle: stop.area ?? "Amsterdam" });
+  const canonical = canonicalFor(`/stops/${params.slug}`);
 
   return {
     title,
     description,
+    alternates: { canonical },
     openGraph: {
       title: stop.meta_title || stop.name,
-      description: stop.meta_description || stop.description || undefined,
-      images: stop.primary_photo_url ? [stop.primary_photo_url] : undefined,
+      description,
+      url: canonical,
+      siteName: SITE.name,
+      type: "website",
+      locale: SITE.locale,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: stop.name }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      site: SITE.twitter,
+      creator: SITE.twitter,
+      title,
+      description,
+      images: [ogImage],
     },
   };
 }

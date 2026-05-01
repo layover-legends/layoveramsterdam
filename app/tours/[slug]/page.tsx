@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getTourBySlug } from "@/lib/public/tour-detail";
+import { SITE, canonicalFor, ogImageFor } from "@/lib/seo/site";
 
 export const dynamic = "force-dynamic";
 
@@ -10,19 +11,35 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const tour = await getTourBySlug(params.slug);
   if (!tour) return { title: "Not found" };
 
-  const title = tour.meta_title || `${tour.name} · LayoverAmsterdam`;
+  const title = tour.meta_title || `${tour.name} · ${SITE.name}`;
   const description =
     tour.meta_description ||
     tour.description ||
     tour.tagline ||
     `${tour.name} — a curated Amsterdam layover experience.`;
+  const ogImage = ogImageFor({ title: tour.name, subtitle: tour.tagline ?? "Amsterdam layover tour" });
+  const canonical = canonicalFor(`/tours/${params.slug}`);
 
   return {
     title,
     description,
+    alternates: { canonical },
     openGraph: {
       title: tour.meta_title || tour.name,
-      description: tour.meta_description || tour.description || tour.tagline || undefined,
+      description,
+      url: canonical,
+      siteName: SITE.name,
+      type: "website",
+      locale: SITE.locale,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: tour.name }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      site: SITE.twitter,
+      creator: SITE.twitter,
+      title,
+      description,
+      images: [ogImage],
     },
   };
 }

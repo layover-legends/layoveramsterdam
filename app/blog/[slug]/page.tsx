@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getArticleBySlug } from "@/lib/public/articles";
 import { renderMarkdown } from "@/lib/markdown";
+import { SITE, canonicalFor, ogImageFor } from "@/lib/seo/site";
 
 export const dynamic = "force-dynamic";
 
@@ -11,18 +12,32 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const article = await getArticleBySlug(params.slug);
   if (!article) return { title: "Not found" };
 
-  const title = article.meta_title || `${article.title} · LayoverAmsterdam`;
+  const title = article.meta_title || `${article.title} · ${SITE.name}`;
   const description = article.meta_description || article.excerpt || undefined;
+  const ogImage = article.cover_url ?? ogImageFor({ title: article.title });
+  const canonical = canonicalFor(`/blog/${params.slug}`);
 
   return {
     title,
     description,
+    alternates: { canonical },
     openGraph: {
       title: article.meta_title || article.title,
-      description: article.meta_description || article.excerpt || undefined,
-      images: article.cover_url ? [article.cover_url] : undefined,
+      description,
+      url: canonical,
+      siteName: SITE.name,
       type: "article",
+      locale: SITE.locale,
       publishedTime: article.published_at ?? undefined,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: article.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      site: SITE.twitter,
+      creator: SITE.twitter,
+      title,
+      description,
+      images: [ogImage],
     },
   };
 }

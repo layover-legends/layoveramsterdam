@@ -27,6 +27,7 @@ const NAV: NavItem[] = [
   { key: "paid",     label: "Paid stops", href: "/admin/stops?filter=paid",  icon: "€", matchPrefix: "/admin/stops", filterKey: "filter", filterValue: "paid" },
   { key: "adult",    label: "After Dark", href: "/admin/stops?filter=adult", icon: "🌙", matchPrefix: "/admin/stops", filterKey: "filter", filterValue: "adult" },
   { key: "tours",    label: "Tours",      href: "/admin/tours",              icon: "◆", matchPrefix: "/admin/tours" },
+  { key: "articles", label: "Articles",   href: "/admin/articles",           icon: "✍", matchPrefix: "/admin/articles" },
   { key: "seo",      label: "SEO",        href: "/admin/seo",                icon: "↗", matchPrefix: "/admin/seo" },
 ];
 

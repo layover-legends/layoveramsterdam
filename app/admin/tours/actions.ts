@@ -5,6 +5,12 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/require-admin";
 
+const ALLOWED_CURRENCIES = new Set(["EUR", "USD", "GBP"]);
+const MAX_TAGLINE = 200;
+const MAX_DESCRIPTION = 2000;
+const MAX_PRICE_CENTS = 1_000_000; // €10,000 cap to catch typos
+const MAX_GROUP_SIZE = 100;
+
 type Parsed = {
   name: string;
   slug: string;
@@ -44,7 +50,14 @@ function parseTour(
   }
 
   const tagline = (formData.get("tagline") || "").toString().trim() || null;
+  if (tagline && tagline.length > MAX_TAGLINE) {
+    return { ok: false, error: `Tagline must be ${MAX_TAGLINE} characters or fewer.` };
+  }
+
   const description = (formData.get("description") || "").toString().trim() || null;
+  if (description && description.length > MAX_DESCRIPTION) {
+    return { ok: false, error: `Description must be ${MAX_DESCRIPTION} characters or fewer.` };
+  }
 
   const durRaw = (formData.get("duration_hours") || "").toString().trim();
   let duration_hours: number | null = null;
@@ -60,20 +73,23 @@ function parseTour(
   let price_cents: number | null = null;
   if (priceRaw) {
     const n = Math.round(Number(priceRaw));
-    if (Number.isNaN(n) || n < 0) {
-      return { ok: false, error: "Price must be a positive number." };
+    if (Number.isNaN(n) || n < 0 || n > MAX_PRICE_CENTS) {
+      return { ok: false, error: `Price must be between 0 and ${MAX_PRICE_CENTS} cents.` };
     }
     price_cents = n;
   }
 
-  const currency = (formData.get("currency") || "EUR").toString().trim() || "EUR";
+  const currency = (formData.get("currency") || "EUR").toString().trim().toUpperCase() || "EUR";
+  if (!ALLOWED_CURRENCIES.has(currency)) {
+    return { ok: false, error: `Currency must be one of: ${[...ALLOWED_CURRENCIES].join(", ")}.` };
+  }
 
   const groupRaw = (formData.get("max_group_size") || "").toString().trim();
   let max_group_size: number | null = null;
   if (groupRaw) {
     const n = Math.round(Number(groupRaw));
-    if (Number.isNaN(n) || n < 1) {
-      return { ok: false, error: "Max group size must be at least 1." };
+    if (Number.isNaN(n) || n < 1 || n > MAX_GROUP_SIZE) {
+      return { ok: false, error: `Max group size must be between 1 and ${MAX_GROUP_SIZE}.` };
     }
     max_group_size = n;
   }

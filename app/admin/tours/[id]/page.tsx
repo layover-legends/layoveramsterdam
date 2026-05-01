@@ -1,9 +1,12 @@
 import { notFound } from "next/navigation";
 import TourForm from "@/components/admin/TourForm";
 import TourStopsEditor from "@/components/admin/TourStopsEditor";
+import TranslationsEditor from "@/components/admin/TranslationsEditor";
 import { getTourById } from "@/lib/admin/tours";
 import { getTourStops } from "@/lib/admin/tour-stops";
 import { updateTour, deleteTour } from "@/app/admin/tours/actions";
+import { createClient } from "@/lib/supabase/server";
+import { LOCALES, DEFAULT_LOCALE } from "@/lib/i18n/locales";
 
 export const dynamic = "force-dynamic";
 
@@ -12,10 +15,34 @@ type PageProps = {
   searchParams?: { saved?: string; error?: string };
 };
 
+const TOUR_FIELDS = [
+  { key: "name",        label: "Name" },
+  { key: "tagline",     label: "Tagline" },
+  { key: "description", label: "Description", multiline: true },
+];
+
+async function loadExistingTranslations(entityId: string) {
+  const supabase = createClient();
+  const langs = LOCALES.filter((l) => l.code !== DEFAULT_LOCALE).map((l) => l.code);
+  const { data } = await supabase
+    .from("translations")
+    .select("language, field, value")
+    .eq("entity_type", "tour")
+    .eq("entity_id", entityId)
+    .in("language", langs);
+  const result: Record<string, Record<string, string>> = {};
+  for (const row of (data ?? []) as Array<{ language: string; field: string; value: string }>) {
+    if (!result[row.language]) result[row.language] = {};
+    result[row.language][row.field] = row.value;
+  }
+  return result;
+}
+
 export default async function EditTourPage({ params, searchParams }: PageProps) {
-  const [tour, stops] = await Promise.all([
+  const [tour, stops, existingTranslations] = await Promise.all([
     getTourById(params.id),
     getTourStops(params.id),
+    loadExistingTranslations(params.id),
   ]);
   if (!tour) notFound();
 
@@ -55,11 +82,19 @@ export default async function EditTourPage({ params, searchParams }: PageProps) 
 
       <section className="space-y-3">
         <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">Details</h2>
-        <TourForm
-          tour={tour}
-          action={updateAction}
-          deleteAction={deleteAction}
-          mode="edit"
+        <TourForm tour={tour} action={updateAction} deleteAction={deleteAction} mode="edit" />
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">Translations</h2>
+        <p className="text-xs text-brand-cream/45">
+          Edit name, tagline, and description in each non-English language.
+        </p>
+        <TranslationsEditor
+          entityType="tour"
+          entityId={tour.id}
+          fields={TOUR_FIELDS}
+          existing={existingTranslations}
         />
       </section>
     </div>

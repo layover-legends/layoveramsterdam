@@ -92,12 +92,14 @@ table when an existing one fits. When in doubt, query
 - `stop_opening_hours` — 1-to-many (destination has hours per day_of_week)
 - `after_dark_stops`, `seasonal_stops`, `weather_backup_stops`, `pickup_points` — type-specific add-ons keyed by `destination_id`
 
-### Tours (Phase 2 ready)
+### Tours (Phase 2 — migration written, admin UI live)
 
-- `tours` — packaged tours
-- `tour_stops` — junction (tour ↔ destination + stop_order)
-- `tour_addons` — paid extras
-- `route_stops`, `booking_stops` — booking mechanics
+- `tours` — packaged tours; key fields: `name`, `slug`, `tagline`, `description`, `duration_hours`, `price_cents`, `currency`, `max_group_size`, `is_active`, `requires_booking`, `is_adult_only`, `is_seasonal`
+- `tour_stops` — junction (tour ↔ destination + `stop_order`); CASCADE-deletes when tour is removed
+- Admin pages: `/admin/tours` list, `/admin/tours/new`, `/admin/tours/[id]` edit
+- Data layer: `lib/admin/tours.ts` + `lib/admin/tours-types.ts`; actions in `app/admin/tours/actions.ts`
+- Migration: `supabase/migrations/tours-setup.sql` — **run in Supabase SQL Editor before using the UI**
+- `tour_addons`, `route_stops`, `booking_stops` — planned for Phase 2 booking flow (not yet created)
 
 ### Other notable tables
 

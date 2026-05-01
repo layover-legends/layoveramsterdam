@@ -14,6 +14,7 @@ const NAV: Array<{ key: string; label: string; href: string; icon: string; match
   { key: "overview", label: "Overview", href: "/admin", icon: "▦", matchPrefix: "/admin" },
   { key: "users", label: "Users", href: "/admin/users", icon: "◇", matchPrefix: "/admin/users" },
   { key: "stops", label: "Free stops", href: "/admin/stops", icon: "✦", matchPrefix: "/admin/stops" },
+  { key: "tours", label: "Tours", href: "/admin/tours", icon: "◆", matchPrefix: "/admin/tours" },
 ];
 
 export default function AdminSidebar({ email, fullName, avatarUrl }: Props) {

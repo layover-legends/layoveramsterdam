@@ -37,6 +37,18 @@ export function t(strings: Record<string, string>, key: string, fallback?: strin
   return strings[key] ?? fallback ?? key;
 }
 
+/**
+ * Template interpolation — replace {placeholder} tokens in a translated string.
+ * Example: tpl(t(s, "stops_teaser.free_count"), { count: 137 })
+ *          → "137 free stops, hand-picked."
+ */
+export function tpl(
+  str: string,
+  vars: Record<string, string | number>,
+): string {
+  return str.replace(/\{(\w+)\}/g, (_, key) => String(vars[key] ?? `{${key}}`));
+}
+
 /** Keys used across public pages. Always fetch these. */
 export const UI_KEYS = {
   NAV_HOME:        "nav.home",

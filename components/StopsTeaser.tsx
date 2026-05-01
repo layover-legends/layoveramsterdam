@@ -1,11 +1,13 @@
 import Image from "next/image";
 import type { StopsTeaser as StopsTeaserData } from "@/lib/public/stops";
+import { t, tpl } from "@/lib/i18n/ui";
 
 type Props = {
   data: StopsTeaserData;
+  strings: Record<string, string>;
 };
 
-export default function StopsTeaser({ data }: Props) {
+export default function StopsTeaser({ data, strings }: Props) {
   if (data.totalCount === 0) return null;
 
   return (
@@ -15,17 +17,23 @@ export default function StopsTeaser({ data }: Props) {
     >
       <header className="text-center space-y-3">
         <p className="text-xs uppercase tracking-[0.25em] text-brand-orange/90 font-semibold">
-          What you&apos;ll discover
+          {t(strings, "stops_teaser.discover", "What you'll discover")}
         </p>
         <h2
           id="stops-teaser-heading"
           className="text-3xl sm:text-4xl font-bold tracking-tight"
         >
-          {data.totalCount} free stops, hand-picked.
+          {tpl(
+            t(strings, "stops_teaser.free_count", "{count} free stops, hand-picked."),
+            { count: data.totalCount },
+          )}
         </h2>
         <p className="text-sm sm:text-base text-brand-cream/75 max-w-2xl mx-auto">
-          Every layover, packed with the things Amsterdam does best — and
-          every one of them is free. No tickets, no queues. Just the city.
+          {t(
+            strings,
+            "stops_teaser.description",
+            "Every layover, packed with the things Amsterdam does best — and every one of them is free. No tickets, no queues. Just the city.",
+          )}
         </p>
       </header>
 
@@ -75,7 +83,10 @@ export default function StopsTeaser({ data }: Props) {
 
       <div className="rounded-2xl border border-brand-cream/10 bg-brand-cream/[0.03] p-5 sm:p-6">
         <p className="text-xs uppercase tracking-wide text-brand-cream/55 mb-4">
-          Across {data.byCategory.length} categories
+          {tpl(
+            t(strings, "stops_teaser.categories", "Across {count} categories"),
+            { count: data.byCategory.length },
+          )}
         </p>
         <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-3">
           {data.byCategory.map((c) => (
@@ -93,7 +104,11 @@ export default function StopsTeaser({ data }: Props) {
       </div>
 
       <p className="text-center text-xs text-brand-cream/50">
-        Sign up above to be the first to plan your tour when bookings open.
+        {t(
+          strings,
+          "stops_teaser.signup_cta",
+          "Sign up above to be the first to plan your tour when bookings open.",
+        )}
       </p>
     </section>
   );

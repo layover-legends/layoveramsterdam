@@ -10,22 +10,27 @@ import { StructuredData } from "@/components/seo/StructuredData";
 import { organizationLd, websiteLd } from "@/lib/seo/jsonld";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { OG_LOCALE } from "@/lib/i18n/locales";
+import { loadUiStrings, t, tpl } from "@/lib/i18n/ui";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = resolveLocale();
-  const title = `${SITE.name} — Curated Amsterdam Layover Tours`;
-  const description =
-    "Turn your Schiphol stopover into a legend. Curated Amsterdam tours for 4–12 hour layovers — canals, markets, museums, after dark.";
-  const ogImage = ogImageFor({ title: SITE.name, subtitle: "Curated Amsterdam layovers" });
+  const strings = await loadUiStrings(locale);
+  const title = `${SITE.name} — ${t(strings, "site.tagline", "Curated Amsterdam Layover Tours")}`;
+  const description = t(
+    strings,
+    "homepage.tagline",
+    "Turn your Schiphol layover into a legend. Premium city tours between flights — launching soon.",
+  );
+  const ogImage = ogImageFor({ title: SITE.name, subtitle: t(strings, "site.tagline", "Curated Amsterdam layovers") });
   return {
     title,
     description,
     alternates: { canonical: canonicalFor("/"), languages: langAlternates("/") },
     openGraph: {
       title,
-      description: "Turn your Schiphol stopover into a legend. Curated Amsterdam tours for 4–12 hour layovers.",
+      description,
       url: canonicalFor("/"),
       siteName: SITE.name,
       type: "website",
@@ -37,7 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
       site: SITE.twitter,
       creator: SITE.twitter,
       title,
-      description: "Turn your Schiphol stopover into a legend.",
+      description,
       images: [ogImage],
     },
   };
@@ -56,14 +61,18 @@ type HomePageProps = {
 
 export default async function HomePage({ searchParams }: HomePageProps) {
   const supabase = createClient();
-  const [{ data: { user } }, stopsTeaser] = await Promise.all([
+  const locale = resolveLocale();
+
+  const [{ data: { user } }, stopsTeaser, strings] = await Promise.all([
     supabase.auth.getUser(),
     getStopsTeaser(),
+    loadUiStrings(locale),
   ]);
 
   const authError = searchParams?.auth_error === "1";
   const authRequired = searchParams?.auth_required === "1";
   const adminOnly = searchParams?.admin_only === "1";
+  const year = String(new Date().getFullYear());
 
   return (
     <>
@@ -73,7 +82,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         <div className="relative w-full aspect-square max-w-xl">
           <Image
             src={COMING_SOON_IMAGE}
-            alt="Layover Amsterdam — Coming Soon"
+            alt={t(strings, "homepage.coming_soon", "Layover Amsterdam — Coming Soon")}
             fill
             priority
             sizes="(max-width: 768px) 90vw, 600px"
@@ -86,11 +95,14 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             Layover Amsterdam
           </h1>
           <p className="text-lg sm:text-xl text-brand-orange font-semibold">
-            Coming Soon
+            {t(strings, "homepage.coming_soon", "Coming Soon")}
           </p>
           <p className="text-sm sm:text-base text-brand-cream/80 max-w-xl mx-auto">
-            Turn your Schiphol layover into a legend. Premium city tours between flights —
-            launching soon.
+            {t(
+              strings,
+              "homepage.tagline",
+              "Turn your Schiphol layover into a legend. Premium city tours between flights — launching soon.",
+            )}
           </p>
         </div>
 
@@ -100,39 +112,46 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               href="/account"
               className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-brand-orange text-brand-navy font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
             >
-              Go to your account
+              {t(strings, "homepage.go_to_account", "Go to your account")}
             </Link>
           ) : (
             <SignInWithGoogle />
           )}
           <p className="text-xs text-brand-cream/60 max-w-sm">
             {user
-              ? `Signed in as ${user.email}.`
-              : "Join the early-access list. We’ll only email you once — when tours open."}
+              ? tpl(t(strings, "homepage.signed_in_as", "Signed in as {email}."), { email: user.email ?? "" })
+              : t(
+                  strings,
+                  "homepage.early_access",
+                  "Join the early-access list. We'll only email you once — when tours open.",
+                )}
           </p>
           {authError && (
             <p className="text-xs text-red-300" role="alert">
-              Sign-in didn&apos;t complete. Please try again.
+              {t(strings, "homepage.auth_error", "Sign-in didn't complete. Please try again.")}
             </p>
           )}
           {authRequired && !user && (
             <p className="text-xs text-brand-orange" role="status">
-              Please sign in to view your account.
+              {t(strings, "homepage.auth_required", "Please sign in to view your account.")}
             </p>
           )}
           {adminOnly && (
             <p className="text-xs text-brand-orange/80" role="status">
-              That area is for admins only.
+              {t(strings, "homepage.admin_only", "That area is for admins only.")}
             </p>
           )}
         </div>
 
       </section>
 
-      <StopsTeaser data={stopsTeaser} />
+      <StopsTeaser data={stopsTeaser} strings={strings} />
 
       <div className="text-xs text-brand-cream/50 pt-12 pb-2 text-center">
-        © {new Date().getFullYear()} Layover Amsterdam. All rights reserved.
+        {tpl(
+          t(strings, "footer.copyright", "© {year} Layover Amsterdam. All rights reserved."),
+          { year },
+        )}
       </div>
     </main>
     </>

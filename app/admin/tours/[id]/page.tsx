@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import TourForm from "@/components/admin/TourForm";
+import TourStopsEditor from "@/components/admin/TourStopsEditor";
 import { getTourById } from "@/lib/admin/tours";
+import { getTourStops } from "@/lib/admin/tour-stops";
 import { updateTour, deleteTour } from "@/app/admin/tours/actions";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +13,10 @@ type PageProps = {
 };
 
 export default async function EditTourPage({ params, searchParams }: PageProps) {
-  const tour = await getTourById(params.id);
+  const [tour, stops] = await Promise.all([
+    getTourById(params.id),
+    getTourStops(params.id),
+  ]);
   if (!tour) notFound();
 
   const saved = searchParams?.saved === "1";
@@ -42,6 +47,13 @@ export default async function EditTourPage({ params, searchParams }: PageProps) 
       )}
 
       <section className="space-y-3">
+        <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">
+          Stops ({stops.length})
+        </h2>
+        <TourStopsEditor tourId={tour.id} initialStops={stops} />
+      </section>
+
+      <section className="space-y-3">
         <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">Details</h2>
         <TourForm
           tour={tour}
@@ -49,23 +61,6 @@ export default async function EditTourPage({ params, searchParams }: PageProps) 
           deleteAction={deleteAction}
           mode="edit"
         />
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">Stops ({tour.stop_count})</h2>
-        <p className="text-sm text-brand-cream/55">
-          Stop-order editing via drag-and-drop is coming soon. For now, add or remove stops directly
-          in the{" "}
-          <a
-            href="https://supabase.com/dashboard"
-            target="_blank"
-            rel="noreferrer"
-            className="underline hover:text-brand-orange transition-colors"
-          >
-            Supabase table editor
-          </a>
-          .
-        </p>
       </section>
     </div>
   );

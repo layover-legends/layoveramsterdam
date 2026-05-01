@@ -29,9 +29,9 @@ export default function AmsterdamMap() {
   const rotationFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
-    const token =
-      process.env.NEXT_PUBLIC_MAPBOX_TOKEN ||
-      process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+    // Next.js inlines NEXT_PUBLIC_* env vars at build time when referenced
+    // as a direct literal (no fallback chain), so this exact form is required.
+    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
     if (!token || !containerRef.current) {
       return;

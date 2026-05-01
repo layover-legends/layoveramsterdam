@@ -12,6 +12,10 @@ const ALLOWED_IMAGE_TYPES = new Set([
   "image/gif",
 ]);
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5 MB
+const MAX_AREA = 200;
+const MAX_DESCRIPTION = 2000;
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 type Parsed = {
   category_id: string | null;
@@ -53,9 +57,19 @@ function parseStop(formData: FormData):
 
   const category_id =
     (formData.get("category_id") || "").toString().trim() || null;
+  if (category_id && !UUID_RE.test(category_id)) {
+    return { ok: false, error: "Invalid category." };
+  }
 
   const area = (formData.get("area") || "").toString().trim() || null;
+  if (area && area.length > MAX_AREA) {
+    return { ok: false, error: `Area must be ${MAX_AREA} characters or fewer.` };
+  }
+
   const description = (formData.get("description") || "").toString().trim() || null;
+  if (description && description.length > MAX_DESCRIPTION) {
+    return { ok: false, error: `Description must be ${MAX_DESCRIPTION} characters or fewer.` };
+  }
 
   const latRaw = (formData.get("latitude") || "").toString().trim();
   const lngRaw = (formData.get("longitude") || "").toString().trim();

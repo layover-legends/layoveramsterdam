@@ -142,13 +142,16 @@ async function main() {
 
   // ── 3) Translate each non-EN locale via DeepL ─────────────────────────────
 
-  const glossary = await loadGlossary("en" as Locale);
   let totalChars = 0;
   let totalWritten = 0;
   let totalSkipped = 0;
 
   for (const locale of TARGET_LOCALES) {
     console.log(`\n🤖  Translating → ${locale}…`);
+
+    // Glossary is locale-specific (EN → target). Load with the service-role
+    // client so we don't fall through to the cookie-based createClient.
+    const glossary = await loadGlossary(locale, supabase as never);
 
     // Decide which keys need translation.
     const toTranslate: Array<{ key: string; text: string; hash: string }> = [];

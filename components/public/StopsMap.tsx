@@ -23,7 +23,7 @@ export default function StopsMap({ stops }: Props) {
       container: containerRef.current,
       style: "mapbox://styles/mapbox/dark-v11",
       center: [4.8902, 52.371],
-      zoom: 12.5,
+      zoom: 11.5,
       pitch: 35,
       bearing: -8,
       antialias: true,
@@ -37,6 +37,37 @@ export default function StopsMap({ stops }: Props) {
 
     map.on("load", () => {
       if (!mapRef.current) return;
+
+      // Schiphol Airport marker — the start point of every layover
+      const airportEl = document.createElement("div");
+      airportEl.style.cssText = [
+        "width:36px",
+        "height:36px",
+        "background:#1B4F72",
+        "border:2px solid #F7F3EC",
+        "border-radius:50%",
+        "display:flex",
+        "align-items:center",
+        "justify-content:center",
+        "cursor:pointer",
+        "box-shadow:0 2px 8px rgba(0,0,0,0.4)",
+      ].join(";");
+      airportEl.innerHTML =
+        '<svg width="20" height="20" viewBox="0 0 24 24" fill="#F7F3EC" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>' +
+        "</svg>";
+
+      new mapboxgl.Marker({ element: airportEl, anchor: "center" })
+        .setLngLat([4.7683, 52.3105])
+        .setPopup(
+          new mapboxgl.Popup({ offset: 24, closeButton: true, maxWidth: "220px" }).setHTML(
+            '<div style="font-family:inherit;padding:4px 2px">' +
+              '<p style="font-weight:600;font-size:13px;margin:0 0 2px">Schiphol Airport</p>' +
+              '<p style="font-size:11px;color:#1B4F72;margin:0">AMS · Your starting point</p>' +
+              "</div>",
+          ),
+        )
+        .addTo(map);
 
       const geojson: GeoJSON.FeatureCollection<GeoJSON.Point> = {
         type: "FeatureCollection",

@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+﻿import { notFound } from "next/navigation";
 import StopForm from "@/components/admin/StopForm";
 import PhotoManager from "@/components/admin/PhotoManager";
 import TranslationsEditor from "@/components/admin/TranslationsEditor";
@@ -71,7 +71,7 @@ export default async function EditStopPage({ params, searchParams }: PageProps) 
     <div className="space-y-8">
       <header className="space-y-1">
         {stop.category_name && (
-          <p className="text-xs uppercase tracking-wide text-brand-cream/55">{stop.category_name}</p>
+          <p className="text-xs uppercase tracking-wide text-warm-cream/55">{stop.category_name}</p>
         )}
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{stop.name}</h1>
       </header>
@@ -88,7 +88,7 @@ export default async function EditStopPage({ params, searchParams }: PageProps) 
       )}
 
       <section className="space-y-3">
-        <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">{t(s, "admin.stop.photos_section", "Photos")}</h2>
+        <h2 className="text-sm uppercase tracking-wide text-warm-cream/55">{t(s, "admin.stop.photos_section", "Photos")}</h2>
         <PhotoManager
           destinationId={stop.id}
           photos={photos}
@@ -100,13 +100,13 @@ export default async function EditStopPage({ params, searchParams }: PageProps) 
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">{t(s, "admin.stop.details_section", "Details")}</h2>
+        <h2 className="text-sm uppercase tracking-wide text-warm-cream/55">{t(s, "admin.stop.details_section", "Details")}</h2>
         <StopForm stop={stop} categories={categories} action={updateAction} deleteAction={deleteAction} mode="edit" labels={s} />
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">{t(s, "admin.stop.translations_section", "Translations")}</h2>
-        <p className="text-xs text-brand-cream/45">
+        <h2 className="text-sm uppercase tracking-wide text-warm-cream/55">{t(s, "admin.stop.translations_section", "Translations")}</h2>
+        <p className="text-xs text-warm-cream/45">
           {t(s, "admin.stop.translations_hint", "Edit name, area, and description in each non-English language. Blank = falls back to the default content.")}
         </p>
         <TranslationsEditor

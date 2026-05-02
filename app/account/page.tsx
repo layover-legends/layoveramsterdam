@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import AccountForm from "@/components/AccountForm";
@@ -75,7 +75,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
   };
 
   return (
-    <main className="min-h-screen flex flex-col items-center px-6 py-12 bg-brand-navy text-brand-cream">
+    <main className="min-h-screen flex flex-col items-center px-6 py-12 bg-ink-black text-warm-cream">
       <section className="w-full max-w-2xl flex flex-col gap-8">
         <header className="flex flex-col items-center text-center gap-4">
           {profile.avatar_url ? (
@@ -84,11 +84,11 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
               alt={displayName}
               width={88}
               height={88}
-              className="rounded-full border-2 border-brand-orange shadow-lg"
+              className="rounded-full border-2 border-legend-gold shadow-lg"
               unoptimized
             />
           ) : (
-            <div className="w-22 h-22 w-[88px] h-[88px] rounded-full bg-brand-orange/20 border-2 border-brand-orange flex items-center justify-center text-3xl font-bold">
+            <div className="w-22 h-22 w-[88px] h-[88px] rounded-full bg-legend-gold/20 border-2 border-legend-gold flex items-center justify-center text-3xl font-bold">
               {initial}
             </div>
           )}
@@ -96,7 +96,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
               {tpl(t(s, "account.welcome", "Welcome, {name}"), { name: firstName })}
             </h1>
-            <p className="text-sm text-brand-cream/70">
+            <p className="text-sm text-warm-cream/70">
               {t(s, "account.subtitle", "Your Layover Amsterdam account")}
             </p>
           </div>
@@ -119,11 +119,11 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
           </div>
         )}
 
-        <div className="rounded-2xl border border-brand-cream/10 bg-brand-cream/5 p-6 sm:p-8">
-          <h2 className="text-lg font-semibold text-brand-orange mb-1">
+        <div className="rounded-2xl border border-warm-cream/10 bg-warm-cream/5 p-6 sm:p-8">
+          <h2 className="text-lg font-semibold text-legend-gold mb-1">
             {t(s, "account.details_title", "Your details")}
           </h2>
-          <p className="text-sm text-brand-cream/70 mb-6">
+          <p className="text-sm text-warm-cream/70 mb-6">
             {t(s, "account.details_hint", "We'll use these for your bookings, your launch invite, and to show prices in your currency. Nothing is shared.")}
           </p>
           <AccountForm profile={profile} labels={formLabels} />
@@ -132,21 +132,21 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <a
             href="/"
-            className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-full border border-brand-cream/30 text-brand-cream font-medium hover:bg-brand-cream/10 transition-colors"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-full border border-warm-cream/30 text-warm-cream font-medium hover:bg-warm-cream/10 transition-colors"
           >
             {t(s, "common.back_to_home", "Back to home")}
           </a>
           <form action="/auth/signout" method="post" className="w-full sm:w-auto sm:ml-auto">
             <button
               type="submit"
-              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-full border border-brand-cream/30 text-brand-cream/80 font-medium hover:bg-brand-cream/10 transition-colors"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-full border border-warm-cream/30 text-warm-cream/80 font-medium hover:bg-warm-cream/10 transition-colors"
             >
               {t(s, "auth.signout", "Sign out")}
             </button>
           </form>
         </div>
 
-        <div className="text-xs text-brand-cream/40 text-center pt-2">
+        <div className="text-xs text-warm-cream/40 text-center pt-2">
           {tpl(t(s, "footer.copyright", "© {year} Layover Amsterdam. All rights reserved."), { year })}
         </div>
       </section>

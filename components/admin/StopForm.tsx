@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
@@ -36,8 +36,8 @@ function StopTypeRadio({ defaultValue, labels }: { defaultValue: StopType; label
               className={
                 "flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all border " +
                 (active
-                  ? "bg-brand-orange/15 border-brand-orange/60 ring-1 ring-brand-orange/40"
-                  : "bg-brand-cream/5 border-brand-cream/10 hover:bg-brand-cream/[0.07]")
+                  ? "bg-legend-gold/15 border-legend-gold/60 ring-1 ring-legend-gold/40"
+                  : "bg-warm-cream/5 border-warm-cream/10 hover:bg-warm-cream/[0.07]")
               }
             >
               <input
@@ -46,13 +46,13 @@ function StopTypeRadio({ defaultValue, labels }: { defaultValue: StopType; label
                 value={o.value}
                 checked={active}
                 onChange={() => setType(o.value)}
-                className="mt-0.5 h-4 w-4 text-brand-orange focus:ring-brand-orange/60"
+                className="mt-0.5 h-4 w-4 text-legend-gold focus:ring-legend-gold/60"
               />
-              <span className="text-sm text-brand-cream/85">
-                <span className="font-medium text-brand-cream">
+              <span className="text-sm text-warm-cream/85">
+                <span className="font-medium text-warm-cream">
                   {o.emoji} {o.title}
                 </span>
-                <span className="block text-xs text-brand-cream/55 mt-0.5">{o.hint}</span>
+                <span className="block text-xs text-warm-cream/55 mt-0.5">{o.hint}</span>
               </span>
             </label>
           );
@@ -79,15 +79,15 @@ function lbl(labels: Record<string, string> | undefined, key: string, fallback: 
 }
 
 const labelClass =
-  "block text-xs uppercase tracking-wide text-brand-cream/60 mb-1";
+  "block text-xs uppercase tracking-wide text-warm-cream/60 mb-1";
 const inputClass =
-  "w-full px-4 py-2.5 rounded-xl bg-brand-cream/5 border border-brand-cream/15 text-brand-cream placeholder:text-brand-cream/30 focus:outline-none focus:ring-2 focus:ring-brand-orange/60 focus:border-brand-orange/60";
+  "w-full px-4 py-2.5 rounded-xl bg-warm-cream/5 border border-warm-cream/15 text-warm-cream placeholder:text-warm-cream/30 focus:outline-none focus:ring-2 focus:ring-legend-gold/60 focus:border-legend-gold/60";
 
 function SaveButton({ mode, labels }: { mode: "create" | "edit"; labels?: Record<string, string> }) {
   const { pending } = useFormStatus();
   return (
     <button type="submit" disabled={pending}
-      className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-brand-orange text-brand-navy font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60">
+      className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-legend-gold text-ink-black font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60">
       {pending
         ? lbl(labels, "admin.stopForm.saving", "Saving…")
         : mode === "create"
@@ -129,16 +129,16 @@ function CheckboxField({
   defaultChecked?: boolean;
 }) {
   return (
-    <label className="flex items-start gap-3 p-3 rounded-xl bg-brand-cream/5 border border-brand-cream/10 cursor-pointer hover:bg-brand-cream/[0.07] transition-colors">
+    <label className="flex items-start gap-3 p-3 rounded-xl bg-warm-cream/5 border border-warm-cream/10 cursor-pointer hover:bg-warm-cream/[0.07] transition-colors">
       <input
         type="checkbox"
         name={name}
         defaultChecked={defaultChecked}
-        className="mt-0.5 h-4 w-4 rounded border-brand-cream/40 bg-brand-cream/10 text-brand-orange focus:ring-brand-orange/60"
+        className="mt-0.5 h-4 w-4 rounded border-warm-cream/40 bg-warm-cream/10 text-legend-gold focus:ring-legend-gold/60"
       />
-      <span className="text-sm text-brand-cream/85">
-        <span className="font-medium text-brand-cream">{label}</span>
-        {hint && <span className="block text-xs text-brand-cream/55 mt-0.5">{hint}</span>}
+      <span className="text-sm text-warm-cream/85">
+        <span className="font-medium text-warm-cream">{label}</span>
+        {hint && <span className="block text-xs text-warm-cream/55 mt-0.5">{hint}</span>}
       </span>
     </label>
   );
@@ -164,23 +164,23 @@ function SeoFields({
   return (
     <fieldset className="space-y-4">
       <legend className={labelClass + " mb-2"}>{lbl(labels, "admin.stopForm.seo_legend", "Search engine snippet")}</legend>
-      <p className="text-xs text-brand-cream/45 -mt-2">
+      <p className="text-xs text-warm-cream/45 -mt-2">
         {lbl(labels, "admin.stopForm.seo_hint", "Leave blank to use the name and description automatically.")}
       </p>
 
       {/* Google preview */}
-      <div className="rounded-xl border border-brand-cream/10 bg-brand-cream/[0.03] px-4 py-3 space-y-0.5">
+      <div className="rounded-xl border border-warm-cream/10 bg-warm-cream/[0.03] px-4 py-3 space-y-0.5">
         <p className="text-[13px] text-[#1a0dab] truncate">{displayTitle}</p>
-        <p className="text-[11px] text-brand-cream/40">
+        <p className="text-[11px] text-warm-cream/40">
           layover-legends.com/stops/{previewSlug || "…"}
         </p>
-        <p className="text-[12px] text-brand-cream/65 line-clamp-2">{displayDesc}</p>
+        <p className="text-[12px] text-warm-cream/65 line-clamp-2">{displayDesc}</p>
       </div>
 
       <div>
         <div className="flex items-center justify-between mb-1">
           <label htmlFor="meta_title" className={labelClass}>{lbl(labels, "admin.stopForm.meta_title_label", "Meta title")}</label>
-          <span className={`text-xs tabular-nums ${title.length > 60 ? "text-brand-orange" : "text-brand-cream/40"}`}>
+          <span className={`text-xs tabular-nums ${title.length > 60 ? "text-legend-gold" : "text-warm-cream/40"}`}>
             {title.length}/70
           </span>
         </div>
@@ -199,7 +199,7 @@ function SeoFields({
       <div>
         <div className="flex items-center justify-between mb-1">
           <label htmlFor="meta_description" className={labelClass}>{lbl(labels, "admin.stopForm.meta_desc_label", "Meta description")}</label>
-          <span className={`text-xs tabular-nums ${desc.length > 140 ? "text-brand-orange" : "text-brand-cream/40"}`}>
+          <span className={`text-xs tabular-nums ${desc.length > 140 ? "text-legend-gold" : "text-warm-cream/40"}`}>
             {desc.length}/160
           </span>
         </div>
@@ -231,7 +231,7 @@ export default function StopForm({ stop, categories, action, mode, deleteAction,
         <div>
           <label htmlFor="category_id" className={labelClass}>{lbl(labels, "admin.stopForm.category_label", "Category")}</label>
           <select id="category_id" name="category_id" required defaultValue={stop?.category_id ?? ""}
-            className={inputClass + " [&>option]:bg-brand-navy [&>option]:text-brand-cream"}>
+            className={inputClass + " [&>option]:bg-ink-black [&>option]:text-warm-cream"}>
             <option value="" disabled style={{ backgroundColor: "#0F172A", color: "#FFF7ED" }}>
               {lbl(labels, "admin.stopForm.category_placeholder", "Pick a category…")}
             </option>
@@ -275,7 +275,7 @@ export default function StopForm({ stop, categories, action, mode, deleteAction,
           <input id="longitude" name="longitude" type="number" step="0.000001" min={-180} max={180}
             defaultValue={stop?.longitude ?? ""} className={inputClass + " tabular-nums"} placeholder="4.9041" />
         </div>
-        <p className="sm:col-span-2 -mt-3 text-xs text-brand-cream/45">
+        <p className="sm:col-span-2 -mt-3 text-xs text-warm-cream/45">
           {lbl(labels, "admin.stopForm.coords_hint", "Tip: open Google Maps, right-click the spot, and copy the lat/lng pair.")}
         </p>
       </div>
@@ -307,7 +307,7 @@ export default function StopForm({ stop, categories, action, mode, deleteAction,
         <SaveButton mode={mode} labels={labels} />
         {mode === "edit" && deleteAction && <DeleteButton formAction={deleteAction} labels={labels} />}
         <a href="/admin/stops"
-          className="inline-flex items-center justify-center px-5 py-2.5 rounded-full border border-brand-cream/20 text-brand-cream/70 hover:bg-brand-cream/5 transition-colors sm:ml-auto">
+          className="inline-flex items-center justify-center px-5 py-2.5 rounded-full border border-warm-cream/20 text-warm-cream/70 hover:bg-warm-cream/5 transition-colors sm:ml-auto">
           {lbl(labels, "admin.stopForm.back", "Back to list")}
         </a>
       </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -53,7 +53,7 @@ export default function SignInWithGoogle({
         <span>{loading ? loadingLabel : label}</span>
       </button>
       {gdprNotice && (
-        <p className="text-[11px] text-brand-cream/45 max-w-xs text-center">
+        <p className="text-[11px] text-warm-cream/45 max-w-xs text-center">
           {gdprNotice}
         </p>
       )}

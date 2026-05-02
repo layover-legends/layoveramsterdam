@@ -1,4 +1,4 @@
-import TourForm from "@/components/admin/TourForm";
+﻿import TourForm from "@/components/admin/TourForm";
 import { createTour } from "@/app/admin/tours/actions";
 import { getUiStrings, t } from "@/lib/i18n/ui";
 
@@ -16,7 +16,7 @@ export default async function NewTourPage({ searchParams }: PageProps) {
     <div className="space-y-6">
       <header className="space-y-1">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t(s, "admin.tour.new_title", "Add a new tour")}</h1>
-        <p className="text-sm text-brand-cream/60">
+        <p className="text-sm text-warm-cream/60">
           {t(s, "admin.tour.new_subtitle", "Create the tour first, then add stops and details on the next screen.")}
         </p>
       </header>

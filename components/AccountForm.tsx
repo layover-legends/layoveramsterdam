@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useFormStatus } from "react-dom";
 import { SUPPORTED_LANGUAGES } from "@/lib/constants/locales";
@@ -22,7 +22,7 @@ function SubmitButton({ labels }: { labels?: Record<string, string> }) {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-brand-orange text-brand-navy font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+      className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-legend-gold text-ink-black font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
     >
       {pending
         ? lbl(labels, "common.saving", "Saving…")
@@ -37,7 +37,7 @@ export default function AccountForm({ profile, labels }: Props) {
       <div>
         <label
           htmlFor="full_name"
-          className="block text-xs uppercase tracking-wide text-brand-cream/60 mb-1"
+          className="block text-xs uppercase tracking-wide text-warm-cream/60 mb-1"
         >
           {lbl(labels, "account.field.full_name", "Full name")}
         </label>
@@ -48,7 +48,7 @@ export default function AccountForm({ profile, labels }: Props) {
           maxLength={100}
           defaultValue={profile.full_name ?? ""}
           autoComplete="name"
-          className="w-full px-4 py-3 rounded-xl bg-brand-cream/5 border border-brand-cream/15 text-brand-cream placeholder:text-brand-cream/30 focus:outline-none focus:ring-2 focus:ring-brand-orange/60 focus:border-brand-orange/60"
+          className="w-full px-4 py-3 rounded-xl bg-warm-cream/5 border border-warm-cream/15 text-warm-cream placeholder:text-warm-cream/30 focus:outline-none focus:ring-2 focus:ring-legend-gold/60 focus:border-legend-gold/60"
           placeholder={lbl(labels, "account.field.full_name_hint", "As you'd like it on your booking")}
         />
       </div>
@@ -56,7 +56,7 @@ export default function AccountForm({ profile, labels }: Props) {
       <div>
         <label
           htmlFor="email"
-          className="block text-xs uppercase tracking-wide text-brand-cream/60 mb-1"
+          className="block text-xs uppercase tracking-wide text-warm-cream/60 mb-1"
         >
           {lbl(labels, "account.field.email", "Email")}
         </label>
@@ -66,9 +66,9 @@ export default function AccountForm({ profile, labels }: Props) {
           type="email"
           value={profile.email}
           disabled
-          className="w-full px-4 py-3 rounded-xl bg-brand-cream/[0.02] border border-brand-cream/10 text-brand-cream/60 cursor-not-allowed"
+          className="w-full px-4 py-3 rounded-xl bg-warm-cream/[0.02] border border-warm-cream/10 text-warm-cream/60 cursor-not-allowed"
         />
-        <p className="text-xs text-brand-cream/40 mt-1">
+        <p className="text-xs text-warm-cream/40 mt-1">
           {lbl(labels, "account.field.email_hint", "Managed by your Google account.")}
         </p>
       </div>
@@ -77,7 +77,7 @@ export default function AccountForm({ profile, labels }: Props) {
         <div>
           <label
             htmlFor="phone"
-            className="block text-xs uppercase tracking-wide text-brand-cream/60 mb-1"
+            className="block text-xs uppercase tracking-wide text-warm-cream/60 mb-1"
           >
             {lbl(labels, "account.field.phone", "Phone")}
           </label>
@@ -89,7 +89,7 @@ export default function AccountForm({ profile, labels }: Props) {
             maxLength={20}
             defaultValue={profile.phone ?? ""}
             autoComplete="tel"
-            className="w-full px-4 py-3 rounded-xl bg-brand-cream/5 border border-brand-cream/15 text-brand-cream placeholder:text-brand-cream/30 focus:outline-none focus:ring-2 focus:ring-brand-orange/60 focus:border-brand-orange/60"
+            className="w-full px-4 py-3 rounded-xl bg-warm-cream/5 border border-warm-cream/15 text-warm-cream placeholder:text-warm-cream/30 focus:outline-none focus:ring-2 focus:ring-legend-gold/60 focus:border-legend-gold/60"
             placeholder="+31 6 12 34 56 78"
           />
         </div>
@@ -97,7 +97,7 @@ export default function AccountForm({ profile, labels }: Props) {
         <div>
           <label
             htmlFor="nationality"
-            className="block text-xs uppercase tracking-wide text-brand-cream/60 mb-1"
+            className="block text-xs uppercase tracking-wide text-warm-cream/60 mb-1"
           >
             {lbl(labels, "account.field.nationality", "Nationality")}
           </label>
@@ -105,7 +105,7 @@ export default function AccountForm({ profile, labels }: Props) {
             id="nationality"
             name="nationality"
             defaultValue={profile.nationality ?? ""}
-            className="w-full px-4 py-3 rounded-xl bg-brand-cream/5 border border-brand-cream/15 text-brand-cream focus:outline-none focus:ring-2 focus:ring-brand-orange/60 focus:border-brand-orange/60 [&>option]:bg-brand-navy [&>option]:text-brand-cream"
+            className="w-full px-4 py-3 rounded-xl bg-warm-cream/5 border border-warm-cream/15 text-warm-cream focus:outline-none focus:ring-2 focus:ring-legend-gold/60 focus:border-legend-gold/60 [&>option]:bg-ink-black [&>option]:text-warm-cream"
           >
             <option value="" style={{ backgroundColor: "#0F172A", color: "#FFF7ED" }}>
               {lbl(labels, "account.field.select", "Select…")}
@@ -126,7 +126,7 @@ export default function AccountForm({ profile, labels }: Props) {
       <div>
         <label
           htmlFor="preferred_language"
-          className="block text-xs uppercase tracking-wide text-brand-cream/60 mb-1"
+          className="block text-xs uppercase tracking-wide text-warm-cream/60 mb-1"
         >
           {lbl(labels, "account.field.language", "Preferred language")}
         </label>
@@ -134,7 +134,7 @@ export default function AccountForm({ profile, labels }: Props) {
           id="preferred_language"
           name="preferred_language"
           defaultValue={profile.preferred_language ?? "en"}
-          className="w-full px-4 py-3 rounded-xl bg-brand-cream/5 border border-brand-cream/15 text-brand-cream focus:outline-none focus:ring-2 focus:ring-brand-orange/60 focus:border-brand-orange/60 [&>option]:bg-brand-navy [&>option]:text-brand-cream"
+          className="w-full px-4 py-3 rounded-xl bg-warm-cream/5 border border-warm-cream/15 text-warm-cream focus:outline-none focus:ring-2 focus:ring-legend-gold/60 focus:border-legend-gold/60 [&>option]:bg-ink-black [&>option]:text-warm-cream"
         >
           {SUPPORTED_LANGUAGES.map((l) => (
             <option
@@ -148,18 +148,18 @@ export default function AccountForm({ profile, labels }: Props) {
         </select>
       </div>
 
-      <label className="flex items-start gap-3 p-4 rounded-xl bg-brand-cream/5 border border-brand-cream/10 cursor-pointer hover:bg-brand-cream/[0.07] transition-colors">
+      <label className="flex items-start gap-3 p-4 rounded-xl bg-warm-cream/5 border border-warm-cream/10 cursor-pointer hover:bg-warm-cream/[0.07] transition-colors">
         <input
           type="checkbox"
           name="marketing_opt_in"
           defaultChecked={profile.marketing_opt_in}
-          className="mt-1 h-4 w-4 rounded border-brand-cream/40 bg-brand-cream/10 text-brand-orange focus:ring-brand-orange/60"
+          className="mt-1 h-4 w-4 rounded border-warm-cream/40 bg-warm-cream/10 text-legend-gold focus:ring-legend-gold/60"
         />
-        <span className="text-sm text-brand-cream/80">
-          <span className="font-medium text-brand-cream">
+        <span className="text-sm text-warm-cream/80">
+          <span className="font-medium text-warm-cream">
             {lbl(labels, "account.field.newsletter_label", "Email me at launch")}
           </span>
-          <span className="block text-xs text-brand-cream/60 mt-0.5">
+          <span className="block text-xs text-warm-cream/60 mt-0.5">
             {lbl(labels, "account.field.newsletter_hint", "One email when tours go live, plus occasional travel-tip emails. You can turn this off any time.")}
           </span>
         </span>

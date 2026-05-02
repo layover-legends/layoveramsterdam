@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+﻿import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getStopBySlug } from "@/lib/public/stop-detail";
 import { SITE, canonicalFor, ogImageFor, langAlternates } from "@/lib/seo/site";
@@ -62,15 +62,15 @@ export default async function StopPage({ params }: PageProps) {
         { name: stop.name, url: canonicalFor(`/stops/${stop.slug}`) },
       ]),
     ]} />
-    <main className="min-h-screen bg-brand-navy text-brand-cream px-5 py-12 max-w-3xl mx-auto space-y-6">
+    <main className="min-h-screen bg-ink-black text-warm-cream px-5 py-12 max-w-3xl mx-auto space-y-6">
       {stop.category_name && (
-        <p className="text-xs uppercase tracking-wide text-brand-orange/80">
+        <p className="text-xs uppercase tracking-wide text-legend-gold/80">
           {stop.category_name}
         </p>
       )}
       <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{stop.name}</h1>
       {stop.area && (
-        <p className="text-brand-cream/60">{stop.area}</p>
+        <p className="text-warm-cream/60">{stop.area}</p>
       )}
       {stop.primary_photo_url && (
         // eslint-disable-next-line @next/next/no-img-element
@@ -81,7 +81,7 @@ export default async function StopPage({ params }: PageProps) {
         />
       )}
       {stop.description && (
-        <p className="text-brand-cream/80 leading-relaxed">{stop.description}</p>
+        <p className="text-warm-cream/80 leading-relaxed">{stop.description}</p>
       )}
     </main>
     </>

@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import Link from "next/link";
 import { listUsers } from "@/lib/admin/metrics";
 import { getCountry } from "@/lib/constants/countries";
@@ -38,17 +38,17 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
       <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div className="space-y-1">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t(s, "admin.users.title", "Users")}</h1>
-          <p className="text-sm text-brand-cream/60">
+          <p className="text-sm text-warm-cream/60">
             {totalMatching} total{q ? ` ${tpl(t(s, "admin.users.empty_search", "matching \"{q}\""), { q })}` : ""}
           </p>
         </div>
         <UsersSearch initialValue={q} labels={s} />
       </header>
 
-      <div className="rounded-2xl border border-brand-cream/10 bg-brand-cream/5 overflow-hidden">
+      <div className="rounded-2xl border border-warm-cream/10 bg-warm-cream/5 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
-            <thead className="bg-brand-cream/[0.04] text-xs uppercase tracking-wide text-brand-cream/55">
+            <thead className="bg-warm-cream/[0.04] text-xs uppercase tracking-wide text-warm-cream/55">
               <tr>
                 <th className="px-4 py-3 text-left font-medium">{t(s, "admin.users.col_person", "Person")}</th>
                 <th className="px-4 py-3 text-left font-medium">{t(s, "admin.users.col_phone", "Phone")}</th>
@@ -58,10 +58,10 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                 <th className="px-4 py-3 text-left font-medium">{t(s, "admin.users.col_joined", "Joined")}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-brand-cream/10">
+            <tbody className="divide-y divide-warm-cream/10">
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-10 text-center text-brand-cream/55">
+                  <td colSpan={6} className="px-4 py-10 text-center text-warm-cream/55">
                     {q
                       ? tpl(t(s, "admin.users.empty_search", "No users match \"{q}\"."), { q })
                       : t(s, "admin.users.empty_default", "No users yet.")}
@@ -72,38 +72,38 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                   const country = getCountry(u.nationality);
                   const lang = u.preferred_language ? getLanguage(u.preferred_language) : null;
                   return (
-                    <tr key={u.id} className="hover:bg-brand-cream/[0.03]">
+                    <tr key={u.id} className="hover:bg-warm-cream/[0.03]">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3 min-w-0">
                           {u.avatar_url ? (
                             <Image src={u.avatar_url} alt={u.full_name ?? u.email} width={32} height={32}
-                              className="rounded-full border border-brand-cream/20 flex-shrink-0" unoptimized />
+                              className="rounded-full border border-warm-cream/20 flex-shrink-0" unoptimized />
                           ) : (
-                            <div className="w-8 h-8 rounded-full bg-brand-cream/10 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-warm-cream/10 flex items-center justify-center text-xs font-bold flex-shrink-0">
                               {(u.full_name ?? u.email).charAt(0).toUpperCase()}
                             </div>
                           )}
                           <div className="min-w-0">
-                            <div className="text-brand-cream truncate flex items-center gap-2">
+                            <div className="text-warm-cream truncate flex items-center gap-2">
                               <span className="truncate">{u.full_name ?? "—"}</span>
                               {u.is_admin && (
-                                <span className="inline-block px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider bg-brand-orange/20 text-brand-orange">
+                                <span className="inline-block px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider bg-legend-gold/20 text-legend-gold">
                                   {t(s, "admin.users.badge_admin", "admin")}
                                 </span>
                               )}
                             </div>
-                            <div className="text-xs text-brand-cream/55 truncate">{u.email}</div>
+                            <div className="text-xs text-warm-cream/55 truncate">{u.email}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-brand-cream/80 whitespace-nowrap">{u.phone || "—"}</td>
+                      <td className="px-4 py-3 text-warm-cream/80 whitespace-nowrap">{u.phone || "—"}</td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         {country ? <span title={country.name}>{country.flag} {country.code}</span>
-                          : <span className="text-brand-cream/40">—</span>}
+                          : <span className="text-warm-cream/40">—</span>}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         {lang ? <span title={lang.name}>{lang.flag} {lang.code.toUpperCase()}</span>
-                          : <span className="text-brand-cream/40">—</span>}
+                          : <span className="text-warm-cream/40">—</span>}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         {u.marketing_opt_in ? (
@@ -111,12 +111,12 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                             {t(s, "admin.users.marketing_yes", "Yes")}
                           </span>
                         ) : (
-                          <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-brand-cream/10 text-brand-cream/60">
+                          <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-warm-cream/10 text-warm-cream/60">
                             {t(s, "admin.users.marketing_no", "No")}
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-brand-cream/70 whitespace-nowrap">{formatDate(u.created_at)}</td>
+                      <td className="px-4 py-3 text-warm-cream/70 whitespace-nowrap">{formatDate(u.created_at)}</td>
                     </tr>
                   );
                 })
@@ -126,11 +126,11 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
         </div>
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-brand-cream/10 text-xs text-brand-cream/60">
+          <div className="flex items-center justify-between px-4 py-3 border-t border-warm-cream/10 text-xs text-warm-cream/60">
             <span>{tpl(t(s, "admin.pagination.page", "Page {page} of {total}"), { page, total: totalPages })}</span>
             <div className="flex items-center gap-2">
-              {page > 1 && <Link href={buildPageHref(page - 1)} className="px-3 py-1.5 rounded-lg border border-brand-cream/15 hover:bg-brand-cream/5 transition-colors">{t(s, "admin.pagination.prev", "← Prev")}</Link>}
-              {page < totalPages && <Link href={buildPageHref(page + 1)} className="px-3 py-1.5 rounded-lg border border-brand-cream/15 hover:bg-brand-cream/5 transition-colors">{t(s, "admin.pagination.next", "Next →")}</Link>}
+              {page > 1 && <Link href={buildPageHref(page - 1)} className="px-3 py-1.5 rounded-lg border border-warm-cream/15 hover:bg-warm-cream/5 transition-colors">{t(s, "admin.pagination.prev", "← Prev")}</Link>}
+              {page < totalPages && <Link href={buildPageHref(page + 1)} className="px-3 py-1.5 rounded-lg border border-warm-cream/15 hover:bg-warm-cream/5 transition-colors">{t(s, "admin.pagination.next", "Next →")}</Link>}
             </div>
           </div>
         )}

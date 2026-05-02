@@ -1,4 +1,4 @@
-import ArticleForm from "@/components/admin/ArticleForm";
+﻿import ArticleForm from "@/components/admin/ArticleForm";
 import { createArticle } from "@/app/admin/articles/actions";
 import { getUiStrings, t } from "@/lib/i18n/ui";
 
@@ -12,7 +12,7 @@ export default async function NewArticlePage({ searchParams }: PageProps) {
     <div className="space-y-6">
       <header className="space-y-1">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t(s, "admin.article.new_title", "New article")}</h1>
-        <p className="text-sm text-brand-cream/60">{t(s, "admin.article.new_subtitle", "Write in Markdown. Publish when ready.")}</p>
+        <p className="text-sm text-warm-cream/60">{t(s, "admin.article.new_subtitle", "Write in Markdown. Publish when ready.")}</p>
       </header>
 
       {searchParams?.error && (

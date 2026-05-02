@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { listArticles } from "@/lib/admin/articles";
 import { ARTICLE_FILTERS, type ArticleFilter } from "@/lib/admin/articles-types";
 import { getUiStrings, t, tpl } from "@/lib/i18n/ui";
@@ -43,13 +43,13 @@ export default async function AdminArticlesPage({ searchParams }: PageProps) {
       <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div className="space-y-1">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t(s, "admin.articles.title", "Articles")}</h1>
-          <p className="text-sm text-brand-cream/60">
+          <p className="text-sm text-warm-cream/60">
             {totalMatching} {filter === "published" ? "published" : filter === "draft" ? "draft" : "total"}
             {q ? ` ${tpl(t(s, "admin.articles.empty_search", "matching \"{q}\""), { q })}` : ""}
           </p>
         </div>
         <Link href="/admin/articles/new"
-          className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-brand-orange text-brand-navy font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all">
+          className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-legend-gold text-ink-black font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all">
           {t(s, "admin.articles.new_button", "+ New article")}
         </Link>
       </header>
@@ -65,7 +65,7 @@ export default async function AdminArticlesPage({ searchParams }: PageProps) {
           type="search"
           defaultValue={q}
           placeholder={t(s, "admin.articles.search_placeholder", "Search title or excerpt…")}
-          className="w-full sm:max-w-md px-4 py-2.5 rounded-xl bg-brand-cream/5 border border-brand-cream/15 text-brand-cream placeholder:text-brand-cream/30 focus:outline-none focus:ring-2 focus:ring-brand-orange/60"
+          className="w-full sm:max-w-md px-4 py-2.5 rounded-xl bg-warm-cream/5 border border-warm-cream/15 text-warm-cream placeholder:text-warm-cream/30 focus:outline-none focus:ring-2 focus:ring-legend-gold/60"
           onKeyDown={undefined}
         />
         <div className="flex flex-wrap gap-2">
@@ -78,19 +78,19 @@ export default async function AdminArticlesPage({ searchParams }: PageProps) {
             return (
               <Link key={f.key} href={href}
                 className={"inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border transition-colors whitespace-nowrap " +
-                  (isActive ? "bg-brand-orange/15 border-brand-orange/40 text-brand-orange" : "border-brand-cream/15 text-brand-cream/70 hover:bg-brand-cream/5")}>
+                  (isActive ? "bg-legend-gold/15 border-legend-gold/40 text-legend-gold" : "border-warm-cream/15 text-warm-cream/70 hover:bg-warm-cream/5")}>
                 {f.label}
-                <span className="text-brand-cream/50 tabular-nums">{filterCounts[f.key]}</span>
+                <span className="text-warm-cream/50 tabular-nums">{filterCounts[f.key]}</span>
               </Link>
             );
           })}
         </div>
       </div>
 
-      <div className="rounded-2xl border border-brand-cream/10 bg-brand-cream/5 overflow-hidden">
+      <div className="rounded-2xl border border-warm-cream/10 bg-warm-cream/5 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
-            <thead className="bg-brand-cream/[0.04] text-xs uppercase tracking-wide text-brand-cream/55">
+            <thead className="bg-warm-cream/[0.04] text-xs uppercase tracking-wide text-warm-cream/55">
               <tr>
                 <th className="px-4 py-3 text-left font-medium">{t(s, "admin.articles.col_article", "Article")}</th>
                 <th className="px-4 py-3 text-left font-medium">{t(s, "admin.articles.col_status", "Status")}</th>
@@ -98,10 +98,10 @@ export default async function AdminArticlesPage({ searchParams }: PageProps) {
                 <th className="px-4 py-3 text-left font-medium">{t(s, "admin.articles.col_updated", "Updated")}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-brand-cream/10">
+            <tbody className="divide-y divide-warm-cream/10">
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-10 text-center text-brand-cream/55">
+                  <td colSpan={4} className="px-4 py-10 text-center text-warm-cream/55">
                     {q
                       ? tpl(t(s, "admin.articles.empty_search", "No articles match \"{q}\"."), { q })
                       : t(s, "admin.articles.empty_default", "No articles yet. Write your first one!")}
@@ -109,19 +109,19 @@ export default async function AdminArticlesPage({ searchParams }: PageProps) {
                 </tr>
               ) : (
                 rows.map((a) => (
-                  <tr key={a.id} className="hover:bg-brand-cream/[0.03]">
+                  <tr key={a.id} className="hover:bg-warm-cream/[0.03]">
                     <td className="px-4 py-3 max-w-[28rem]">
                       <Link href={`/admin/articles/${a.id}`} className="block group">
                         <div className="flex items-center gap-3">
                           {a.cover_url ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={a.cover_url} alt="" className="w-12 h-10 rounded-lg object-cover border border-brand-cream/10 flex-shrink-0" />
+                            <img src={a.cover_url} alt="" className="w-12 h-10 rounded-lg object-cover border border-warm-cream/10 flex-shrink-0" />
                           ) : (
-                            <div className="w-12 h-10 rounded-lg bg-brand-cream/5 border border-brand-cream/10 flex-shrink-0 flex items-center justify-center text-brand-cream/20 text-lg">✍</div>
+                            <div className="w-12 h-10 rounded-lg bg-warm-cream/5 border border-warm-cream/10 flex-shrink-0 flex items-center justify-center text-warm-cream/20 text-lg">✍</div>
                           )}
                           <div className="min-w-0">
-                            <p className="text-brand-cream font-medium group-hover:text-brand-orange transition-colors truncate">{a.title}</p>
-                            {a.excerpt && <p className="text-xs text-brand-cream/50 mt-0.5 truncate">{a.excerpt}</p>}
+                            <p className="text-warm-cream font-medium group-hover:text-legend-gold transition-colors truncate">{a.title}</p>
+                            {a.excerpt && <p className="text-xs text-warm-cream/50 mt-0.5 truncate">{a.excerpt}</p>}
                           </div>
                         </div>
                       </Link>
@@ -129,10 +129,10 @@ export default async function AdminArticlesPage({ searchParams }: PageProps) {
                     <td className="px-4 py-3 whitespace-nowrap">
                       {a.is_published
                         ? <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-emerald-400/15 text-emerald-200">{t(s, "admin.articles.status_published", "Published")}</span>
-                        : <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-brand-cream/10 text-brand-cream/60">{t(s, "admin.articles.status_draft", "Draft")}</span>}
+                        : <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-warm-cream/10 text-warm-cream/60">{t(s, "admin.articles.status_draft", "Draft")}</span>}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-brand-cream/55 text-xs tabular-nums">{fmt(a.published_at)}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-brand-cream/55 text-xs tabular-nums">{fmt(a.updated_at)}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-warm-cream/55 text-xs tabular-nums">{fmt(a.published_at)}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-warm-cream/55 text-xs tabular-nums">{fmt(a.updated_at)}</td>
                   </tr>
                 ))
               )}
@@ -141,11 +141,11 @@ export default async function AdminArticlesPage({ searchParams }: PageProps) {
         </div>
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-brand-cream/10 text-xs text-brand-cream/60">
+          <div className="flex items-center justify-between px-4 py-3 border-t border-warm-cream/10 text-xs text-warm-cream/60">
             <span>{tpl(t(s, "admin.pagination.page", "Page {page} of {total}"), { page, total: totalPages })}</span>
             <div className="flex gap-2">
-              {page > 1 && <Link href={buildHref(page - 1)} className="px-3 py-1.5 rounded-lg border border-brand-cream/15 hover:bg-brand-cream/5">{t(s, "admin.pagination.prev", "← Prev")}</Link>}
-              {page < totalPages && <Link href={buildHref(page + 1)} className="px-3 py-1.5 rounded-lg border border-brand-cream/15 hover:bg-brand-cream/5">{t(s, "admin.pagination.next", "Next →")}</Link>}
+              {page > 1 && <Link href={buildHref(page - 1)} className="px-3 py-1.5 rounded-lg border border-warm-cream/15 hover:bg-warm-cream/5">{t(s, "admin.pagination.prev", "← Prev")}</Link>}
+              {page < totalPages && <Link href={buildHref(page + 1)} className="px-3 py-1.5 rounded-lg border border-warm-cream/15 hover:bg-warm-cream/5">{t(s, "admin.pagination.next", "Next →")}</Link>}
             </div>
           </div>
         )}

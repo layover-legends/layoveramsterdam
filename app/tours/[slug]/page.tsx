@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+﻿import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getTourBySlug } from "@/lib/public/tour-detail";
 import { SITE, canonicalFor, ogImageFor, langAlternates } from "@/lib/seo/site";
@@ -71,17 +71,17 @@ export default async function TourPage({ params }: PageProps) {
         { name: tour.name, url: canonicalFor(`/tours/${tour.slug}`) },
       ]),
     ]} />
-    <main className="min-h-screen bg-brand-navy text-brand-cream px-5 py-12 max-w-3xl mx-auto space-y-6">
+    <main className="min-h-screen bg-ink-black text-warm-cream px-5 py-12 max-w-3xl mx-auto space-y-6">
       <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{tour.name}</h1>
       {tour.tagline && (
-        <p className="text-xl text-brand-orange">{tour.tagline}</p>
+        <p className="text-xl text-legend-gold">{tour.tagline}</p>
       )}
-      <div className="flex gap-4 text-sm text-brand-cream/60">
+      <div className="flex gap-4 text-sm text-warm-cream/60">
         {tour.duration_hours !== null && <span>{tour.duration_hours}h</span>}
         {price && <span>{price}</span>}
       </div>
       {tour.description && (
-        <p className="text-brand-cream/80 leading-relaxed">{tour.description}</p>
+        <p className="text-warm-cream/80 leading-relaxed">{tour.description}</p>
       )}
     </main>
     </>

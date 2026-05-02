@@ -1,4 +1,4 @@
-import { Suspense, type ReactNode } from "react";
+﻿import { Suspense, type ReactNode } from "react";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { getUiStrings } from "@/lib/i18n/ui";
@@ -9,8 +9,8 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   const [admin, s] = await Promise.all([requireAdmin(), getUiStrings()]);
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-brand-navy text-brand-cream">
-      <Suspense fallback={<aside className="w-full lg:w-64 bg-brand-navy border-b lg:border-b-0 lg:border-r border-brand-cream/10" />}>
+    <div className="min-h-screen flex flex-col lg:flex-row bg-ink-black text-warm-cream">
+      <Suspense fallback={<aside className="w-full lg:w-64 bg-ink-black border-b lg:border-b-0 lg:border-r border-warm-cream/10" />}>
         <AdminSidebar
           email={admin.email}
           fullName={admin.fullName}

@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+﻿import { notFound } from "next/navigation";
 import TourForm from "@/components/admin/TourForm";
 import TourStopsEditor from "@/components/admin/TourStopsEditor";
 import TranslationsEditor from "@/components/admin/TranslationsEditor";
@@ -57,7 +57,7 @@ export default async function EditTourPage({ params, searchParams }: PageProps) 
   return (
     <div className="space-y-8">
       <header className="space-y-1">
-        <p className="text-xs uppercase tracking-wide text-brand-cream/55">
+        <p className="text-xs uppercase tracking-wide text-warm-cream/55">
           {tour.is_active ? t(s, "admin.common.active", "Active") : t(s, "admin.common.draft", "Draft")}
           {tour.duration_hours !== null ? ` · ${tour.duration_hours}h` : ""}
         </p>
@@ -76,20 +76,20 @@ export default async function EditTourPage({ params, searchParams }: PageProps) 
       )}
 
       <section className="space-y-3">
-        <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">
+        <h2 className="text-sm uppercase tracking-wide text-warm-cream/55">
           {tpl(t(s, "admin.tour.stops_section", "Stops ({count})"), { count: stops.length })}
         </h2>
         <TourStopsEditor tourId={tour.id} initialStops={stops} labels={s} />
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">{t(s, "admin.tour.details_section", "Details")}</h2>
+        <h2 className="text-sm uppercase tracking-wide text-warm-cream/55">{t(s, "admin.tour.details_section", "Details")}</h2>
         <TourForm tour={tour} action={updateAction} deleteAction={deleteAction} mode="edit" labels={s} />
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">{t(s, "admin.tour.translations_section", "Translations")}</h2>
-        <p className="text-xs text-brand-cream/45">
+        <h2 className="text-sm uppercase tracking-wide text-warm-cream/55">{t(s, "admin.tour.translations_section", "Translations")}</h2>
+        <p className="text-xs text-warm-cream/45">
           {t(s, "admin.tour.translations_hint", "Edit name, tagline, and description in each non-English language.")}
         </p>
         <TranslationsEditor

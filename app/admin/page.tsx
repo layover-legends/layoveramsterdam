@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import Link from "next/link";
 import { getAdminOverview } from "@/lib/admin/metrics";
 import MetricCard from "@/components/admin/MetricCard";
@@ -36,7 +36,7 @@ export default async function AdminOverviewPage() {
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
           {t(s, "admin.overview.title", "Overview")}
         </h1>
-        <p className="text-sm text-brand-cream/60">
+        <p className="text-sm text-warm-cream/60">
           {t(s, "admin.overview.subtitle", "A live read of your early-access list.")}
         </p>
       </header>
@@ -49,14 +49,14 @@ export default async function AdminOverviewPage() {
       </section>
 
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="rounded-2xl border border-brand-cream/10 bg-brand-cream/5 p-6">
-          <h2 className="text-sm uppercase tracking-wide text-brand-cream/55 mb-4">
+        <div className="rounded-2xl border border-warm-cream/10 bg-warm-cream/5 p-6">
+          <h2 className="text-sm uppercase tracking-wide text-warm-cream/55 mb-4">
             {t(s, "admin.overview.marketing_label", "Marketing opt-in")}
           </h2>
           <p className="text-4xl font-bold text-emerald-300">
             {formatPct(m.marketingOptInRate)}
           </p>
-          <p className="text-xs text-brand-cream/50 mt-1">
+          <p className="text-xs text-warm-cream/50 mt-1">
             {tpl(t(s, "admin.overview.marketing_desc", "{count} of {total} agreed to launch emails"), {
               count: m.marketingOptInCount,
               total: m.totalUsers,
@@ -64,12 +64,12 @@ export default async function AdminOverviewPage() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-brand-cream/10 bg-brand-cream/5 p-6">
-          <h2 className="text-sm uppercase tracking-wide text-brand-cream/55 mb-4">
+        <div className="rounded-2xl border border-warm-cream/10 bg-warm-cream/5 p-6">
+          <h2 className="text-sm uppercase tracking-wide text-warm-cream/55 mb-4">
             {t(s, "admin.overview.top_countries_label", "Top countries")}
           </h2>
           {m.topCountries.length === 0 ? (
-            <p className="text-sm text-brand-cream/50">
+            <p className="text-sm text-warm-cream/50">
               {t(s, "admin.overview.top_countries_empty", "No nationality data yet.")}
             </p>
           ) : (
@@ -82,7 +82,7 @@ export default async function AdminOverviewPage() {
                       <span>{country?.flag ?? "🏳️"}</span>
                       <span>{country?.name ?? c.code}</span>
                     </span>
-                    <span className="text-brand-cream/60 tabular-nums">{c.count}</span>
+                    <span className="text-warm-cream/60 tabular-nums">{c.count}</span>
                   </li>
                 );
               })}
@@ -90,12 +90,12 @@ export default async function AdminOverviewPage() {
           )}
         </div>
 
-        <div className="rounded-2xl border border-brand-cream/10 bg-brand-cream/5 p-6">
-          <h2 className="text-sm uppercase tracking-wide text-brand-cream/55 mb-4">
+        <div className="rounded-2xl border border-warm-cream/10 bg-warm-cream/5 p-6">
+          <h2 className="text-sm uppercase tracking-wide text-warm-cream/55 mb-4">
             {t(s, "admin.overview.top_languages_label", "Top languages")}
           </h2>
           {m.topLanguages.length === 0 ? (
-            <p className="text-sm text-brand-cream/50">
+            <p className="text-sm text-warm-cream/50">
               {t(s, "admin.overview.top_languages_empty", "No language data yet.")}
             </p>
           ) : (
@@ -108,7 +108,7 @@ export default async function AdminOverviewPage() {
                       <span>{lang.flag}</span>
                       <span>{lang.nativeName}</span>
                     </span>
-                    <span className="text-brand-cream/60 tabular-nums">{l.count}</span>
+                    <span className="text-warm-cream/60 tabular-nums">{l.count}</span>
                   </li>
                 );
               })}
@@ -117,21 +117,21 @@ export default async function AdminOverviewPage() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-brand-cream/10 bg-brand-cream/5 p-6">
+      <section className="rounded-2xl border border-warm-cream/10 bg-warm-cream/5 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">
+          <h2 className="text-sm uppercase tracking-wide text-warm-cream/55">
             {t(s, "admin.overview.recent_label", "Recent signups")}
           </h2>
-          <Link href="/admin/users" className="text-xs text-brand-orange hover:underline">
+          <Link href="/admin/users" className="text-xs text-legend-gold hover:underline">
             {t(s, "admin.overview.recent_view_all", "View all →")}
           </Link>
         </div>
         {m.recentSignups.length === 0 ? (
-          <p className="text-sm text-brand-cream/50">
+          <p className="text-sm text-warm-cream/50">
             {t(s, "admin.overview.recent_empty", "No signups yet. They'll appear here in real time.")}
           </p>
         ) : (
-          <ul className="divide-y divide-brand-cream/10">
+          <ul className="divide-y divide-warm-cream/10">
             {m.recentSignups.map((u) => {
               const country = getCountry(u.nationality);
               const lang = u.preferred_language ? getLanguage(u.preferred_language) : null;
@@ -139,21 +139,21 @@ export default async function AdminOverviewPage() {
                 <li key={u.id} className="py-3 flex items-center gap-4">
                   {u.avatar_url ? (
                     <Image src={u.avatar_url} alt={u.full_name ?? u.email} width={32} height={32}
-                      className="rounded-full border border-brand-cream/20" unoptimized />
+                      className="rounded-full border border-warm-cream/20" unoptimized />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-brand-cream/10 flex items-center justify-center text-xs font-bold">
+                    <div className="w-8 h-8 rounded-full bg-warm-cream/10 flex items-center justify-center text-xs font-bold">
                       {(u.full_name ?? u.email).charAt(0).toUpperCase()}
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm text-brand-cream truncate">{u.full_name ?? "—"}</p>
-                    <p className="text-xs text-brand-cream/50 truncate">{u.email}</p>
+                    <p className="text-sm text-warm-cream truncate">{u.full_name ?? "—"}</p>
+                    <p className="text-xs text-warm-cream/50 truncate">{u.email}</p>
                   </div>
-                  <div className="hidden sm:flex items-center gap-3 text-xs text-brand-cream/55">
+                  <div className="hidden sm:flex items-center gap-3 text-xs text-warm-cream/55">
                     {country && <span title={country.name}>{country.flag}</span>}
                     {lang && <span title={lang.name}>{lang.flag}</span>}
                   </div>
-                  <span className="text-xs text-brand-cream/45 tabular-nums whitespace-nowrap">
+                  <span className="text-xs text-warm-cream/45 tabular-nums whitespace-nowrap">
                     {formatRelativeTime(u.created_at)}
                   </span>
                 </li>

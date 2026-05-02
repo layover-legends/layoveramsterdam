@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
@@ -16,15 +16,15 @@ function lbl(labels: Record<string, string> | undefined, key: string, fallback: 
   return labels?.[key] ?? fallback;
 }
 
-const labelClass = "block text-xs uppercase tracking-wide text-brand-cream/60 mb-1";
+const labelClass = "block text-xs uppercase tracking-wide text-warm-cream/60 mb-1";
 const inputClass =
-  "w-full px-4 py-2.5 rounded-xl bg-brand-cream/5 border border-brand-cream/15 text-brand-cream placeholder:text-brand-cream/30 focus:outline-none focus:ring-2 focus:ring-brand-orange/60 focus:border-brand-orange/60";
+  "w-full px-4 py-2.5 rounded-xl bg-warm-cream/5 border border-warm-cream/15 text-warm-cream placeholder:text-warm-cream/30 focus:outline-none focus:ring-2 focus:ring-legend-gold/60 focus:border-legend-gold/60";
 
 function SaveButton({ mode, labels }: { mode: "create" | "edit"; labels?: Record<string, string> }) {
   const { pending } = useFormStatus();
   return (
     <button type="submit" disabled={pending}
-      className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-brand-orange text-brand-navy font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60">
+      className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-legend-gold text-ink-black font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60">
       {pending
         ? lbl(labels, "admin.articleForm.saving", "Saving…")
         : mode === "create"
@@ -93,7 +93,7 @@ export default function ArticleForm({ article, action, mode, deleteAction, label
       <div>
         <div className="flex items-center justify-between mb-1">
           <label htmlFor="excerpt" className={labelClass}>{lbl(labels, "admin.articleForm.excerpt_label", "Excerpt")}</label>
-          <span className={`text-xs tabular-nums ${excerpt.length > 250 ? "text-brand-orange" : "text-brand-cream/40"}`}>{excerpt.length}/280</span>
+          <span className={`text-xs tabular-nums ${excerpt.length > 250 ? "text-legend-gold" : "text-warm-cream/40"}`}>{excerpt.length}/280</span>
         </div>
         <textarea id="excerpt" name="excerpt" rows={2} maxLength={280}
           value={excerpt} onChange={(e) => setExcerpt(e.target.value)}
@@ -107,7 +107,7 @@ export default function ArticleForm({ article, action, mode, deleteAction, label
           defaultValue={article?.body_md ?? ""}
           className={inputClass + " resize-y font-mono text-sm leading-relaxed"}
           placeholder={"# What to do during a 6-hour Schiphol layover\n\nStart with a walk along the canals…"} />
-        <p className="mt-1 text-xs text-brand-cream/40">
+        <p className="mt-1 text-xs text-warm-cream/40">
           {lbl(labels, "admin.articleForm.body_hint", "GitHub-Flavoured Markdown — headings, **bold**, *italic*, `code`, tables, fenced code blocks.")}
         </p>
       </div>
@@ -119,25 +119,25 @@ export default function ArticleForm({ article, action, mode, deleteAction, label
         {coverUrl && (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={coverUrl} alt={lbl(labels, "admin.articleForm.cover_alt", "Cover preview")}
-            className="mt-2 rounded-xl max-h-40 object-cover border border-brand-cream/10"
+            className="mt-2 rounded-xl max-h-40 object-cover border border-warm-cream/10"
             onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
         )}
       </div>
 
       <fieldset className="space-y-4">
         <legend className={labelClass + " mb-2"}>{lbl(labels, "admin.articleForm.seo_legend", "Search engine snippet")}</legend>
-        <p className="text-xs text-brand-cream/45 -mt-2">{lbl(labels, "admin.articleForm.seo_hint", "Leave blank to use title and excerpt automatically.")}</p>
+        <p className="text-xs text-warm-cream/45 -mt-2">{lbl(labels, "admin.articleForm.seo_hint", "Leave blank to use title and excerpt automatically.")}</p>
 
-        <div className="rounded-xl border border-brand-cream/10 bg-brand-cream/[0.03] px-4 py-3 space-y-0.5">
+        <div className="rounded-xl border border-warm-cream/10 bg-warm-cream/[0.03] px-4 py-3 space-y-0.5">
           <p className="text-[13px] text-[#1a0dab] truncate">{previewTitle}</p>
-          <p className="text-[11px] text-brand-cream/40">layover-legends.com/blog/{slug || "…"}</p>
-          <p className="text-[12px] text-brand-cream/65 line-clamp-2">{previewDesc}</p>
+          <p className="text-[11px] text-warm-cream/40">layover-legends.com/blog/{slug || "…"}</p>
+          <p className="text-[12px] text-warm-cream/65 line-clamp-2">{previewDesc}</p>
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-1">
             <label htmlFor="meta_title" className={labelClass}>{lbl(labels, "admin.articleForm.meta_title_label", "Meta title")}</label>
-            <span className={`text-xs tabular-nums ${metaTitle.length > 60 ? "text-brand-orange" : "text-brand-cream/40"}`}>{metaTitle.length}/70</span>
+            <span className={`text-xs tabular-nums ${metaTitle.length > 60 ? "text-legend-gold" : "text-warm-cream/40"}`}>{metaTitle.length}/70</span>
           </div>
           <input id="meta_title" name="meta_title" type="text" maxLength={70}
             value={metaTitle} onChange={(e) => setMetaTitle(e.target.value)} className={inputClass}
@@ -147,7 +147,7 @@ export default function ArticleForm({ article, action, mode, deleteAction, label
         <div>
           <div className="flex items-center justify-between mb-1">
             <label htmlFor="meta_description" className={labelClass}>{lbl(labels, "admin.articleForm.meta_desc_label", "Meta description")}</label>
-            <span className={`text-xs tabular-nums ${metaDesc.length > 140 ? "text-brand-orange" : "text-brand-cream/40"}`}>{metaDesc.length}/160</span>
+            <span className={`text-xs tabular-nums ${metaDesc.length > 140 ? "text-legend-gold" : "text-warm-cream/40"}`}>{metaDesc.length}/160</span>
           </div>
           <textarea id="meta_description" name="meta_description" rows={2} maxLength={160}
             value={metaDesc} onChange={(e) => setMetaDesc(e.target.value)}
@@ -156,12 +156,12 @@ export default function ArticleForm({ article, action, mode, deleteAction, label
         </div>
       </fieldset>
 
-      <label className="flex items-start gap-3 p-4 rounded-xl bg-brand-cream/5 border border-brand-cream/10 cursor-pointer hover:bg-brand-cream/[0.07] transition-colors">
+      <label className="flex items-start gap-3 p-4 rounded-xl bg-warm-cream/5 border border-warm-cream/10 cursor-pointer hover:bg-warm-cream/[0.07] transition-colors">
         <input type="checkbox" name="is_published" defaultChecked={!!article?.is_published}
-          className="mt-0.5 h-4 w-4 rounded border-brand-cream/40 bg-brand-cream/10 text-brand-orange focus:ring-brand-orange/60" />
-        <span className="text-sm text-brand-cream/85">
-          <span className="font-medium text-brand-cream">{lbl(labels, "admin.articleForm.published_label", "Published")}</span>
-          <span className="block text-xs text-brand-cream/55 mt-0.5">
+          className="mt-0.5 h-4 w-4 rounded border-warm-cream/40 bg-warm-cream/10 text-legend-gold focus:ring-legend-gold/60" />
+        <span className="text-sm text-warm-cream/85">
+          <span className="font-medium text-warm-cream">{lbl(labels, "admin.articleForm.published_label", "Published")}</span>
+          <span className="block text-xs text-warm-cream/55 mt-0.5">
             {lbl(labels, "admin.articleForm.published_hint", "Visible on /blog and included in the sitemap. Uncheck to save as draft.")}
           </span>
         </span>
@@ -171,7 +171,7 @@ export default function ArticleForm({ article, action, mode, deleteAction, label
         <SaveButton mode={mode} labels={labels} />
         {mode === "edit" && deleteAction && <DeleteButton formAction={deleteAction} labels={labels} />}
         <a href="/admin/articles"
-          className="inline-flex items-center justify-center px-5 py-2.5 rounded-full border border-brand-cream/20 text-brand-cream/70 hover:bg-brand-cream/5 transition-colors sm:ml-auto">
+          className="inline-flex items-center justify-center px-5 py-2.5 rounded-full border border-warm-cream/20 text-warm-cream/70 hover:bg-warm-cream/5 transition-colors sm:ml-auto">
           {lbl(labels, "admin.articleForm.back", "Back to list")}
         </a>
       </div>

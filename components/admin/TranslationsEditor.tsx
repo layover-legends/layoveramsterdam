@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition } from "react";
 import { LOCALES, DEFAULT_LOCALE, type Locale } from "@/lib/i18n/locales";
@@ -19,9 +19,9 @@ function lbl(labels: Record<string, string> | undefined, key: string, fallback: 
   return labels?.[key] ?? fallback;
 }
 
-const labelClass = "block text-xs uppercase tracking-wide text-brand-cream/60 mb-1";
+const labelClass = "block text-xs uppercase tracking-wide text-warm-cream/60 mb-1";
 const inputBase =
-  "w-full px-3 py-2 rounded-lg bg-brand-cream/5 border border-brand-cream/15 text-brand-cream placeholder:text-brand-cream/25 text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/60";
+  "w-full px-3 py-2 rounded-lg bg-warm-cream/5 border border-warm-cream/15 text-warm-cream placeholder:text-warm-cream/25 text-sm focus:outline-none focus:ring-2 focus:ring-legend-gold/60";
 
 const NON_DEFAULT = LOCALES.filter((l) => l.code !== DEFAULT_LOCALE);
 
@@ -92,8 +92,8 @@ export default function TranslationsEditor({ entityType, entityId, fields, exist
             className={
               "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border transition-colors " +
               (activeLocale === l.code
-                ? "bg-brand-orange/15 border-brand-orange/40 text-brand-orange font-medium"
-                : "border-brand-cream/15 text-brand-cream/60 hover:bg-brand-cream/5")
+                ? "bg-legend-gold/15 border-legend-gold/40 text-legend-gold font-medium"
+                : "border-warm-cream/15 text-warm-cream/60 hover:bg-warm-cream/5")
             }>
             {l.flag} {l.label}
           </button>
@@ -101,8 +101,8 @@ export default function TranslationsEditor({ entityType, entityId, fields, exist
       </div>
 
       {/* Fields panel */}
-      <div className="rounded-xl border border-brand-cream/10 bg-brand-cream/[0.03] p-5 space-y-5">
-        <p className="text-xs text-brand-cream/45">
+      <div className="rounded-xl border border-warm-cream/10 bg-warm-cream/[0.03] p-5 space-y-5">
+        <p className="text-xs text-warm-cream/45">
           {lbl(labels, "admin.translationsEditor.hint",
             "Leave a field blank to use the default language content as fallback.")}
         </p>
@@ -121,7 +121,7 @@ export default function TranslationsEditor({ entityType, entityId, fields, exist
                   disabled={isTranslating || !!translatingField}
                   onClick={() => handleAutoTranslate(f.key)}
                   title={`Auto-translate "${f.label}" from English using DeepL`}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] uppercase tracking-wider border transition-colors disabled:opacity-40 disabled:cursor-not-allowed bg-brand-cream/5 border-brand-cream/15 text-brand-cream/60 hover:bg-brand-orange/10 hover:border-brand-orange/30 hover:text-brand-orange"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] uppercase tracking-wider border transition-colors disabled:opacity-40 disabled:cursor-not-allowed bg-warm-cream/5 border-warm-cream/15 text-warm-cream/60 hover:bg-legend-gold/10 hover:border-legend-gold/30 hover:text-legend-gold"
                 >
                   {isTranslating ? (
                     <span className="animate-pulse">⏳</span>
@@ -172,7 +172,7 @@ export default function TranslationsEditor({ entityType, entityId, fields, exist
           type="button"
           disabled={isPendingSave}
           onClick={() => startSaveTransition(() => handleSave(activeLocale))}
-          className="inline-flex items-center justify-center px-5 py-2 rounded-full bg-brand-orange text-brand-navy text-sm font-semibold disabled:opacity-60 hover:scale-[1.02] transition-all"
+          className="inline-flex items-center justify-center px-5 py-2 rounded-full bg-legend-gold text-ink-black text-sm font-semibold disabled:opacity-60 hover:scale-[1.02] transition-all"
         >
           {isPendingSave
             ? lbl(labels, "admin.translationsEditor.saving", "Saving…")

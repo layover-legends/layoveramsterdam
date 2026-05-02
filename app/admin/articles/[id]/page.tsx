@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+﻿import { notFound } from "next/navigation";
 import ArticleForm from "@/components/admin/ArticleForm";
 import { getArticleById } from "@/lib/admin/articles";
 import { updateArticle, deleteArticle } from "@/app/admin/articles/actions";
@@ -21,7 +21,7 @@ export default async function EditArticlePage({ params, searchParams }: PageProp
   return (
     <div className="space-y-8">
       <header className="space-y-1">
-        <p className="text-xs uppercase tracking-wide text-brand-cream/55">
+        <p className="text-xs uppercase tracking-wide text-warm-cream/55">
           {article.is_published ? t(s, "admin.articles.status_published", "Published") : t(s, "admin.common.draft", "Draft")}
         </p>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight line-clamp-2">{article.title}</h1>
@@ -39,7 +39,7 @@ export default async function EditArticlePage({ params, searchParams }: PageProp
       )}
 
       <section className="space-y-3">
-        <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">{t(s, "admin.article.content_section", "Content")}</h2>
+        <h2 className="text-sm uppercase tracking-wide text-warm-cream/55">{t(s, "admin.article.content_section", "Content")}</h2>
         <ArticleForm article={article} action={updateAction} deleteAction={deleteAction} mode="edit" labels={s} />
       </section>
     </div>

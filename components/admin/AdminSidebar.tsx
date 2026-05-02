@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -55,21 +55,21 @@ export default function AdminSidebar({ email, fullName, avatarUrl, labels }: Pro
   }
 
   return (
-    <aside className="w-full lg:w-64 lg:min-h-screen lg:sticky lg:top-0 border-b lg:border-b-0 lg:border-r border-brand-cream/10 bg-brand-navy flex flex-col">
-      <div className="px-5 py-5 flex items-center gap-3 border-b border-brand-cream/10">
+    <aside className="w-full lg:w-64 lg:min-h-screen lg:sticky lg:top-0 border-b lg:border-b-0 lg:border-r border-warm-cream/10 bg-ink-black flex flex-col">
+      <div className="px-5 py-5 flex items-center gap-3 border-b border-warm-cream/10">
         {avatarUrl ? (
           <Image src={avatarUrl} alt={fullName || email} width={36} height={36}
-            className="rounded-full border border-brand-orange/60" unoptimized />
+            className="rounded-full border border-legend-gold/60" unoptimized />
         ) : (
-          <div className="w-9 h-9 rounded-full bg-brand-orange/20 border border-brand-orange/60 flex items-center justify-center text-sm font-bold">
+          <div className="w-9 h-9 rounded-full bg-legend-gold/20 border border-legend-gold/60 flex items-center justify-center text-sm font-bold">
             {initial}
           </div>
         )}
         <div className="min-w-0">
-          <p className="text-xs uppercase tracking-wider text-brand-orange font-semibold">
+          <p className="text-xs uppercase tracking-wider text-legend-gold font-semibold">
             {lbl(labels, "admin.sidebar.admin", "Admin")}
           </p>
-          <p className="text-sm text-brand-cream truncate">{fullName || email}</p>
+          <p className="text-sm text-warm-cream truncate">{fullName || email}</p>
         </div>
       </div>
 
@@ -81,8 +81,8 @@ export default function AdminSidebar({ email, fullName, avatarUrl, labels }: Pro
               className={
                 "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors " +
                 (active
-                  ? "bg-brand-orange/15 text-brand-orange font-medium"
-                  : "text-brand-cream/75 hover:bg-brand-cream/5")
+                  ? "bg-legend-gold/15 text-legend-gold font-medium"
+                  : "text-warm-cream/75 hover:bg-warm-cream/5")
               }
             >
               <span className="text-base leading-none">{item.icon}</span>
@@ -92,12 +92,12 @@ export default function AdminSidebar({ email, fullName, avatarUrl, labels }: Pro
         })}
       </nav>
 
-      <div className="mt-auto hidden lg:flex flex-col gap-2 px-5 py-5 text-xs text-brand-cream/40 border-t border-brand-cream/10">
-        <Link href="/" className="hover:text-brand-cream/70 transition-colors">
+      <div className="mt-auto hidden lg:flex flex-col gap-2 px-5 py-5 text-xs text-warm-cream/40 border-t border-warm-cream/10">
+        <Link href="/" className="hover:text-warm-cream/70 transition-colors">
           {lbl(labels, "admin.sidebar.back_to_site", "← Back to site")}
         </Link>
         <form action="/auth/signout" method="post">
-          <button type="submit" className="hover:text-brand-cream/70 transition-colors">
+          <button type="submit" className="hover:text-warm-cream/70 transition-colors">
             {lbl(labels, "admin.sidebar.signout", "Sign out")}
           </button>
         </form>

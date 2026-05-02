@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef } from "react";
 import mapboxgl, { type Map as MapboxMap } from "mapbox-gl";
@@ -57,7 +57,7 @@ export default function AmsterdamMap() {
     mapRef.current = map;
 
     map.on("load", () => {
-      // Tour-route line: dotted brand-orange line.
+      // Tour-route line: dotted legend-gold line.
       map.addSource("tour-route", {
         type: "geojson",
         data: ROUTE_GEOJSON,
@@ -127,17 +127,17 @@ export default function AmsterdamMap() {
     !!process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
   return (
-    <div className="relative w-full aspect-square max-w-xl rounded-2xl overflow-hidden border border-brand-cream/10 shadow-2xl">
-      <div ref={containerRef} className="absolute inset-0 bg-brand-navy" />
+    <div className="relative w-full aspect-square max-w-xl rounded-2xl overflow-hidden border border-warm-cream/10 shadow-2xl">
+      <div ref={containerRef} className="absolute inset-0 bg-ink-black" />
       {!hasToken && (
-        <div className="absolute inset-0 flex items-center justify-center text-sm text-brand-cream/60 px-6 text-center">
+        <div className="absolute inset-0 flex items-center justify-center text-sm text-warm-cream/60 px-6 text-center">
           Map preview is loading. (Mapbox token not configured.)
         </div>
       )}
 
       {/* Subtle vignette + brand watermark layered above the map */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-brand-navy/70" />
-      <div className="pointer-events-none absolute bottom-3 left-4 text-[10px] tracking-[0.2em] uppercase text-brand-cream/70 font-semibold">
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-ink-black/70" />
+      <div className="pointer-events-none absolute bottom-3 left-4 text-[10px] tracking-[0.2em] uppercase text-warm-cream/70 font-semibold">
         Amsterdam · Layover Legends
       </div>
     </div>

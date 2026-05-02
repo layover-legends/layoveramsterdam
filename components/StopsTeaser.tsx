@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import type { StopsTeaser as StopsTeaserData } from "@/lib/public/stops";
 import { t, tpl } from "@/lib/i18n/ui";
 
@@ -16,7 +16,7 @@ export default function StopsTeaser({ data, strings }: Props) {
       className="w-full max-w-4xl mx-auto pt-12 sm:pt-20 pb-4 space-y-10"
     >
       <header className="text-center space-y-3">
-        <p className="text-xs uppercase tracking-[0.25em] text-brand-orange/90 font-semibold">
+        <p className="text-xs uppercase tracking-[0.25em] text-legend-gold/90 font-semibold">
           {t(strings, "stops_teaser.discover", "What you'll discover")}
         </p>
         <h2
@@ -28,7 +28,7 @@ export default function StopsTeaser({ data, strings }: Props) {
             { count: data.totalCount },
           )}
         </h2>
-        <p className="text-sm sm:text-base text-brand-cream/75 max-w-2xl mx-auto">
+        <p className="text-sm sm:text-base text-warm-cream/75 max-w-2xl mx-auto">
           {t(
             strings,
             "stops_teaser.description",
@@ -42,7 +42,7 @@ export default function StopsTeaser({ data, strings }: Props) {
           {data.featured.slice(0, 6).map((stop) => (
             <div
               key={stop.id}
-              className="rounded-2xl border border-brand-cream/10 bg-brand-cream/5 hover:bg-brand-cream/[0.07] transition-colors text-left flex flex-col overflow-hidden"
+              className="rounded-2xl border border-warm-cream/10 bg-warm-cream/5 hover:bg-warm-cream/[0.07] transition-colors text-left flex flex-col overflow-hidden"
             >
               {stop.primary_photo_url && (
                 <div className="relative w-full h-40">
@@ -58,20 +58,20 @@ export default function StopsTeaser({ data, strings }: Props) {
               )}
               <div className="p-5 flex flex-col gap-2 flex-1">
                 {stop.category_name && (
-                  <div className="text-xs uppercase tracking-wide text-brand-cream/55">
+                  <div className="text-xs uppercase tracking-wide text-warm-cream/55">
                     {stop.category_name}
                   </div>
                 )}
-                <h3 className="text-base font-semibold text-brand-cream">
+                <h3 className="text-base font-semibold text-warm-cream">
                   {stop.name}
                 </h3>
                 {stop.description && (
-                  <p className="text-xs text-brand-cream/70 line-clamp-3">
+                  <p className="text-xs text-warm-cream/70 line-clamp-3">
                     {stop.description}
                   </p>
                 )}
                 {stop.area && (
-                  <p className="text-xs text-brand-orange/80 mt-auto pt-2">
+                  <p className="text-xs text-legend-gold/80 mt-auto pt-2">
                     {stop.area}
                   </p>
                 )}
@@ -81,8 +81,8 @@ export default function StopsTeaser({ data, strings }: Props) {
         </div>
       )}
 
-      <div className="rounded-2xl border border-brand-cream/10 bg-brand-cream/[0.03] p-5 sm:p-6">
-        <p className="text-xs uppercase tracking-wide text-brand-cream/55 mb-4">
+      <div className="rounded-2xl border border-warm-cream/10 bg-warm-cream/[0.03] p-5 sm:p-6">
+        <p className="text-xs uppercase tracking-wide text-warm-cream/55 mb-4">
           {tpl(
             t(strings, "stops_teaser.categories", "Across {count} categories"),
             { count: data.byCategory.length },
@@ -92,10 +92,10 @@ export default function StopsTeaser({ data, strings }: Props) {
           {data.byCategory.map((c) => (
             <li
               key={c.category_id}
-              className="flex items-center justify-between text-sm text-brand-cream/85"
+              className="flex items-center justify-between text-sm text-warm-cream/85"
             >
               <span className="truncate">{c.name}</span>
-              <span className="text-brand-orange font-semibold tabular-nums">
+              <span className="text-legend-gold font-semibold tabular-nums">
                 {c.count}
               </span>
             </li>
@@ -103,7 +103,7 @@ export default function StopsTeaser({ data, strings }: Props) {
         </ul>
       </div>
 
-      <p className="text-center text-xs text-brand-cream/50">
+      <p className="text-center text-xs text-warm-cream/50">
         {t(
           strings,
           "stops_teaser.signup_cta",

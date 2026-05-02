@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+﻿import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getArticleBySlug } from "@/lib/public/articles";
 import { renderMarkdown } from "@/lib/markdown";
@@ -75,7 +75,7 @@ export default async function BlogArticlePage({ params }: PageProps) {
         { name: article.title, url: canonicalFor(`/blog/${article.slug}`) },
       ]),
     ]} />
-    <main className="min-h-screen bg-brand-navy text-brand-cream">
+    <main className="min-h-screen bg-ink-black text-warm-cream">
       {article.cover_url && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -91,23 +91,23 @@ export default async function BlogArticlePage({ params }: PageProps) {
             {article.title}
           </h1>
           {article.excerpt && (
-            <p className="text-lg text-brand-cream/70 leading-relaxed">{article.excerpt}</p>
+            <p className="text-lg text-warm-cream/70 leading-relaxed">{article.excerpt}</p>
           )}
           {date && (
-            <time className="block text-sm text-brand-cream/40">{date}</time>
+            <time className="block text-sm text-warm-cream/40">{date}</time>
           )}
         </header>
 
         {/* Sanitized markdown rendered as HTML */}
         <article
-          className="prose prose-invert max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-brand-orange prose-a:no-underline hover:prose-a:underline prose-code:text-brand-orange/90 prose-code:bg-brand-cream/5 prose-code:px-1 prose-code:rounded"
+          className="prose prose-invert max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-legend-gold prose-a:no-underline hover:prose-a:underline prose-code:text-legend-gold/90 prose-code:bg-warm-cream/5 prose-code:px-1 prose-code:rounded"
           dangerouslySetInnerHTML={{ __html: html }}
         />
 
-        <footer className="pt-8 border-t border-brand-cream/10">
+        <footer className="pt-8 border-t border-warm-cream/10">
           <a
             href="/blog"
-            className="text-sm text-brand-cream/50 hover:text-brand-orange transition-colors"
+            className="text-sm text-warm-cream/50 hover:text-legend-gold transition-colors"
           >
             {t(s, "blog.back", "← Back to all articles")}
           </a>

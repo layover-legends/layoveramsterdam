@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter } from "next/navigation";
 import { LOCALES, type Locale } from "@/lib/i18n/locales";
@@ -23,7 +23,7 @@ export default function LanguageSwitcher({ currentLocale, ariaLabel = "Select la
       value={currentLocale}
       onChange={handleChange}
       aria-label={ariaLabel}
-      className="bg-transparent border border-brand-cream/20 text-brand-cream/70 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/60 hover:border-brand-cream/40 transition-colors cursor-pointer"
+      className="bg-transparent border border-warm-cream/20 text-warm-cream/70 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-legend-gold/60 hover:border-warm-cream/40 transition-colors cursor-pointer"
     >
       {LOCALES.map((l) => (
         <option

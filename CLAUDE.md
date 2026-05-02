@@ -211,6 +211,59 @@ independent and can run any time after `tours` exists.
 
 ---
 
+## UI strings workflow
+
+Every user-facing label, button, placeholder, and error message is wired
+through the `t()` helper — never hardcoded in JSX.
+
+### The catalog
+
+`lib/i18n/ui-strings.ts` — the single source of truth for all 300 UI keys.
+Each entry becomes one `translations` row with `entity_type='ui'` and
+`entity_id='00000000-0000-0000-0000-000000000001'`.
+
+### Adding a new string
+
+1. Add the key + English value to `lib/i18n/ui-strings.ts` (keep alphabetical
+   within its prefix block).
+2. Use it in JSX via `t(strings, "your.new.key", "English fallback")`.
+3. Run the seeder to push the new row to the DB + DeepL-translate all locales:
+   ```
+   npm run seed:ui        # full run (all 8 locales, uses DEEPL_API_KEY)
+   npm run seed:ui:en     # EN only — safe without a DeepL key
+   npm run seed:ui:dry    # dry-run — shows what would be written
+   ```
+
+### Pattern — server resolves, props flow down
+
+Server components call `getUiStrings()` once per render and pass the bundle
+as `labels: Record<string, string>` to any client components that need it.
+**Never call `loadUiStrings()` inside a `"use client"` file** — it makes a
+DB round-trip that can't be cached at the component level.
+
+```tsx
+// ✅ correct — server component
+const s = await getUiStrings();
+return <MyClientForm labels={s} />;
+
+// ❌ wrong — avoid in "use client" files
+const s = await loadUiStrings(locale);
+```
+
+### Translation jobs
+
+Every call to `autoTranslateEntity()` writes a row to `translation_jobs`.
+The `/admin/seo` dashboard shows the last 20 jobs with status pills
+(✅ ok / ⚠️ partial / ❌ failed), the trigger surface, written count, DeepL
+char usage, and the first error inline.
+
+If a job shows ❌ failed, check:
+1. `DEEPL_API_KEY` is set in Vercel project Settings → Environment Variables.
+2. The error column in the dashboard for the exact message.
+3. Vercel function logs for the full `[autoTranslateEntity]` log line.
+
+---
+
 ## Active tasks & near-term roadmap
 
 - Mapbox preview: env var fixed, but homepage uses the legacy image. Bring it

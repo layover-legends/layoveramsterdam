@@ -16,7 +16,7 @@ export default function FinalCTA() {
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
           <a
-            href="#hero"
+            href="#hero-form"
             className="w-full sm:w-auto px-8 py-4 rounded-full bg-legend-gold text-ink-black font-semibold text-sm uppercase tracking-widest hover:bg-gold-light active:bg-gold-dark transition-colors shadow-xl shadow-legend-gold/20 animate-cta-pulse"
           >
             Book your tour

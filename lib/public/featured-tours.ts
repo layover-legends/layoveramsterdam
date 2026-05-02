@@ -30,3 +30,19 @@ export async function getFeaturedTours(): Promise<FeaturedTour[]> {
     return [];
   }
 }
+
+export async function getAllTours(): Promise<FeaturedTour[]> {
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("tours")
+      .select("id, name, slug, tagline, price_cents, currency, duration_hours, max_group_size, is_adult_only")
+      .eq("is_active", true)
+      .order("name", { ascending: true });
+
+    if (error) return [];
+    return (data ?? []) as FeaturedTour[];
+  } catch {
+    return [];
+  }
+}

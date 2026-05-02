@@ -115,9 +115,10 @@ export default function HeroFlightForm({ cityId, formAction }: Props) {
 
   return (
     <form
+      id="hero-form"
       ref={formRef}
       onSubmit={handleSubmit}
-      className="w-full max-w-2xl mx-auto bg-ink-black/60 backdrop-blur-sm border border-warm-cream/10 rounded-2xl p-5 sm:p-7 space-y-5 shadow-2xl"
+      className="w-full max-w-2xl mx-auto bg-ink-black/60 backdrop-blur-sm border border-warm-cream/10 rounded-2xl p-5 sm:p-7 space-y-5 shadow-2xl scroll-mt-24"
     >
       {cityId && <input type="hidden" name="city_id" value={cityId} />}
 

@@ -46,6 +46,12 @@ export const UI_STRINGS = {
   "stops_teaser.free_count":               "{count} free stops, hand-picked.",
   "stops_teaser.signup_cta":               "Sign up above to be the first to plan your tour when bookings open.",
 
+  // ── Tours ─────────────────────────────────────────────────────────────────
+  "tours.index.back":                      "← Back to home",
+  "tours.index.empty":                     "No tours available yet. Check back soon.",
+  "tours.index.subtitle":                  "Premium layover experiences between your flights at Amsterdam Schiphol.",
+  "tours.index.title":                     "All Tours",
+
   // ── Blog ──────────────────────────────────────────────────────────────────
   "blog.back":                             "← Back to all articles",
   "blog.empty":                            "No articles published yet.",

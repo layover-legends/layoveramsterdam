@@ -23,6 +23,26 @@ const config: Config = {
         sans:    ["var(--font-outfit)", "system-ui", "sans-serif"],
         mono:    ["var(--font-jetbrains)", "ui-monospace", "monospace"],
       },
+      // Blueprint+ B3 — motion language tokens
+      animation: {
+        "fade-in-up":      "fadeInUp 0.5s ease-out both",
+        "price-shimmer":   "priceShimmer 0.4s ease-out both",
+        "cta-pulse":       "ctaPulse 2s ease-in-out infinite",
+      },
+      keyframes: {
+        fadeInUp: {
+          "0%":   { opacity: "0", transform: "translateY(16px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        priceShimmer: {
+          "0%":   { opacity: "0.4" },
+          "100%": { opacity: "1" },
+        },
+        ctaPulse: {
+          "0%, 100%": { boxShadow: "0 0 0 0 rgba(201,150,58,0)" },
+          "50%":      { boxShadow: "0 0 0 8px rgba(201,150,58,0)" },
+        },
+      },
     },
   },
   plugins: [],

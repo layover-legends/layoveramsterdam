@@ -1,4 +1,5 @@
 ﻿import { notFound } from "next/navigation";
+import Link from "next/link";
 import type { Metadata } from "next";
 import { getTourBySlug } from "@/lib/public/tour-detail";
 import { SITE, canonicalFor, ogImageFor, langAlternates } from "@/lib/seo/site";
@@ -6,10 +7,11 @@ import { StructuredData } from "@/components/seo/StructuredData";
 import { tourLd, breadcrumbLd } from "@/lib/seo/jsonld";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { OG_LOCALE } from "@/lib/i18n/locales";
+import { createBooking } from "@/app/booking/actions";
 
 export const dynamic = "force-dynamic";
 
-type PageProps = { params: { slug: string } };
+type PageProps = { params: { slug: string }; searchParams?: { layover?: string } };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const tour = await getTourBySlug(params.slug);
@@ -50,7 +52,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function TourPage({ params }: PageProps) {
+export default async function TourPage({ params, searchParams }: PageProps) {
   const tour = await getTourBySlug(params.slug);
   if (!tour) notFound();
 
@@ -60,6 +62,8 @@ export default async function TourPage({ params }: PageProps) {
           tour.price_cents / 100,
         )
       : null;
+
+  const layoverId = searchParams?.layover ?? null;
 
   return (
     <>
@@ -83,6 +87,33 @@ export default async function TourPage({ params }: PageProps) {
       {tour.description && (
         <p className="text-warm-cream/80 leading-relaxed">{tour.description}</p>
       )}
+
+      <div className="pt-4 border-t border-warm-cream/10 space-y-3">
+        {layoverId ? (
+          <form action={createBooking}>
+            <input type="hidden" name="tour_id" value={tour.id} />
+            <input type="hidden" name="layover_id" value={layoverId} />
+            <button
+              type="submit"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-legend-gold text-ink-black font-semibold tracking-wide hover:bg-gold-light active:bg-gold-dark transition-colors"
+            >
+              Book this tour →
+            </button>
+          </form>
+        ) : (
+          <div className="space-y-2">
+            <Link
+              href="/layover"
+              className="inline-block px-8 py-3.5 rounded-full bg-legend-gold text-ink-black font-semibold tracking-wide hover:bg-gold-light transition-colors"
+            >
+              Enter your flights to book →
+            </Link>
+            <p className="text-xs text-warm-cream/40">
+              Tell us your layover details and we&apos;ll check availability.
+            </p>
+          </div>
+        )}
+      </div>
     </main>
     </>
   );

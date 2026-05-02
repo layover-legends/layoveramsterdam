@@ -52,7 +52,7 @@ export default function StopsListClient({
     () =>
       categories.filter((c) =>
         stops.some(
-          (s) => s.category_id === c.id && (showAdult || !s.is_adult_only),
+          (s) => s.category_id === c.id && (showAdult ? s.is_adult_only : !s.is_adult_only),
         ),
       ),
     [categories, stops, showAdult],
@@ -61,8 +61,8 @@ export default function StopsListClient({
   const filtered = useMemo(() => {
     let list = stops;
 
-    // Adult filter
-    if (!showAdult) list = list.filter((s) => !s.is_adult_only);
+    // Adult filter — show only adult stops when toggled on, only family stops when off
+    list = list.filter((s) => showAdult ? s.is_adult_only : !s.is_adult_only);
 
     // Free / Paid filter
     if (filterMode === "free") list = list.filter((s) => !s.requires_booking);
@@ -98,6 +98,7 @@ export default function StopsListClient({
   function handleAdultToggle() {
     if (showAdult) {
       setShowAdult(false);
+      setCategoryId(null);
     } else {
       setAdultPending(true);
     }
@@ -106,6 +107,7 @@ export default function StopsListClient({
   function confirmAdult() {
     setShowAdult(true);
     setAdultPending(false);
+    setCategoryId(null);
   }
 
   function cancelAdult() {

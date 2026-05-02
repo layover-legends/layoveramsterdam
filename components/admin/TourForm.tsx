@@ -9,7 +9,12 @@ type Props = {
   action: (formData: FormData) => void | Promise<void>;
   mode: "create" | "edit";
   deleteAction?: (formData: FormData) => void | Promise<void>;
+  labels?: Record<string, string>;
 };
+
+function lbl(labels: Record<string, string> | undefined, key: string, fallback: string): string {
+  return labels?.[key] ?? fallback;
+}
 
 const labelClass =
   "block text-xs uppercase tracking-wide text-brand-cream/60 mb-1";
@@ -18,38 +23,36 @@ const inputClass =
 
 const CURRENCIES = ["EUR", "USD", "GBP", "CHF", "CAD", "AUD"] as const;
 
-function SaveButton({ mode }: { mode: "create" | "edit" }) {
+function SaveButton({ mode, labels }: { mode: "create" | "edit"; labels?: Record<string, string> }) {
   const { pending } = useFormStatus();
   return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-brand-orange text-brand-navy font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60"
-    >
-      {pending ? "Saving…" : mode === "create" ? "Create tour" : "Save changes"}
+    <button type="submit" disabled={pending}
+      className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-brand-orange text-brand-navy font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60">
+      {pending
+        ? lbl(labels, "admin.tourForm.saving", "Saving…")
+        : mode === "create"
+        ? lbl(labels, "admin.tourForm.create", "Create tour")
+        : lbl(labels, "admin.tourForm.save", "Save changes")}
     </button>
   );
 }
 
 function DeleteButton({
-  formAction,
+  formAction, labels,
 }: {
   formAction: (formData: FormData) => void | Promise<void>;
+  labels?: Record<string, string>;
 }) {
   const { pending } = useFormStatus();
   return (
-    <button
-      type="submit"
-      formAction={formAction}
-      disabled={pending}
+    <button type="submit" formAction={formAction} disabled={pending}
       onClick={(e) => {
-        if (!confirm("Delete this tour permanently? All stop associations will be removed too.")) {
+        if (!confirm(lbl(labels, "admin.tourForm.confirm_delete", "Delete this tour permanently? All stop associations will be removed too."))) {
           e.preventDefault();
         }
       }}
-      className="inline-flex items-center justify-center px-5 py-2.5 rounded-full border border-red-400/40 text-red-200 hover:bg-red-400/10 transition-colors disabled:opacity-60"
-    >
-      Delete
+      className="inline-flex items-center justify-center px-5 py-2.5 rounded-full border border-red-400/40 text-red-200 hover:bg-red-400/10 transition-colors disabled:opacity-60">
+      {lbl(labels, "admin.tourForm.delete", "Delete")}
     </button>
   );
 }
@@ -86,21 +89,23 @@ function TourSeoFields({
   initialDescription,
   previewSlug,
   previewName,
+  labels,
 }: {
   initialTitle: string | null;
   initialDescription: string | null;
   previewSlug: string;
   previewName: string;
+  labels?: Record<string, string>;
 }) {
   const [title, setTitle] = useState(initialTitle ?? "");
   const [desc, setDesc] = useState(initialDescription ?? "");
   const displayTitle = title || `${previewName} · LayoverAmsterdam`;
-  const displayDesc = desc || "Leave blank to use the description automatically.";
+  const displayDesc = desc || lbl(labels, "admin.tourForm.seo_hint", "Leave blank to use the description automatically.");
   return (
     <fieldset className="space-y-4">
-      <legend className={labelClass + " mb-2"}>Search engine snippet</legend>
+      <legend className={labelClass + " mb-2"}>{lbl(labels, "admin.tourForm.seo_legend", "Search engine snippet")}</legend>
       <p className="text-xs text-brand-cream/45 -mt-2">
-        Leave blank to use the name and description automatically.
+        {lbl(labels, "admin.tourForm.seo_hint", "Leave blank to use the name and description automatically.")}
       </p>
 
       <div className="rounded-xl border border-brand-cream/10 bg-brand-cream/[0.03] px-4 py-3 space-y-0.5">
@@ -113,7 +118,7 @@ function TourSeoFields({
 
       <div>
         <div className="flex items-center justify-between mb-1">
-          <label htmlFor="tour_meta_title" className={labelClass}>Meta title</label>
+          <label htmlFor="tour_meta_title" className={labelClass}>{lbl(labels, "admin.tourForm.meta_title_label", "Meta title")}</label>
           <span className={`text-xs tabular-nums ${title.length > 60 ? "text-brand-orange" : "text-brand-cream/40"}`}>
             {title.length}/70
           </span>
@@ -132,7 +137,7 @@ function TourSeoFields({
 
       <div>
         <div className="flex items-center justify-between mb-1">
-          <label htmlFor="tour_meta_description" className={labelClass}>Meta description</label>
+          <label htmlFor="tour_meta_description" className={labelClass}>{lbl(labels, "admin.tourForm.meta_desc_label", "Meta description")}</label>
           <span className={`text-xs tabular-nums ${desc.length > 140 ? "text-brand-orange" : "text-brand-cream/40"}`}>
             {desc.length}/160
           </span>
@@ -145,162 +150,88 @@ function TourSeoFields({
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
           className={inputClass + " resize-none"}
-          placeholder="Why should a Schiphol traveler book this tour? (auto-generated when blank)"
+          placeholder={lbl(labels, "admin.tourForm.meta_desc_placeholder", "Why should a Schiphol traveler book this tour? (auto-generated when blank)")}
         />
       </div>
     </fieldset>
   );
 }
 
-export default function TourForm({ tour, action, mode, deleteAction }: Props) {
+export default function TourForm({ tour, action, mode, deleteAction, labels }: Props) {
   return (
     <form action={action} className="space-y-6 max-w-3xl">
-      {/* Name + slug */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
-          <label htmlFor="name" className={labelClass}>Name</label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            required
-            maxLength={200}
-            defaultValue={tour?.name ?? ""}
-            className={inputClass}
-            placeholder="e.g. Golden Age Canal Walk"
-          />
+          <label htmlFor="name" className={labelClass}>{lbl(labels, "admin.tourForm.name_label", "Name")}</label>
+          <input id="name" name="name" type="text" required maxLength={200}
+            defaultValue={tour?.name ?? ""} className={inputClass}
+            placeholder={lbl(labels, "admin.tourForm.name_placeholder", "e.g. Golden Age Canal Walk")} />
         </div>
         <div>
-          <label htmlFor="slug" className={labelClass}>Slug (URL)</label>
-          <input
-            id="slug"
-            name="slug"
-            type="text"
-            maxLength={200}
-            defaultValue={tour?.slug ?? ""}
-            className={inputClass + " font-mono text-sm"}
-            placeholder="leave blank to auto-generate from name"
-          />
+          <label htmlFor="slug" className={labelClass}>{lbl(labels, "admin.tourForm.slug_label", "Slug (URL)")}</label>
+          <input id="slug" name="slug" type="text" maxLength={200}
+            defaultValue={tour?.slug ?? ""} className={inputClass + " font-mono text-sm"}
+            placeholder={lbl(labels, "admin.tourForm.slug_placeholder", "leave blank to auto-generate from name")} />
         </div>
       </div>
 
-      {/* Tagline */}
       <div>
-        <label htmlFor="tagline" className={labelClass}>Tagline</label>
-        <input
-          id="tagline"
-          name="tagline"
-          type="text"
-          maxLength={300}
-          defaultValue={tour?.tagline ?? ""}
-          className={inputClass}
-          placeholder="One punchy line shown on listing cards"
-        />
+        <label htmlFor="tagline" className={labelClass}>{lbl(labels, "admin.tourForm.tagline_label", "Tagline")}</label>
+        <input id="tagline" name="tagline" type="text" maxLength={300}
+          defaultValue={tour?.tagline ?? ""} className={inputClass}
+          placeholder={lbl(labels, "admin.tourForm.tagline_placeholder", "One punchy line shown on listing cards")} />
       </div>
 
-      {/* Description */}
       <div>
-        <label htmlFor="description" className={labelClass}>Description</label>
-        <textarea
-          id="description"
-          name="description"
-          rows={4}
-          maxLength={2000}
-          defaultValue={tour?.description ?? ""}
-          className={inputClass + " resize-y"}
-          placeholder="Full tour description for the detail page"
-        />
+        <label htmlFor="description" className={labelClass}>{lbl(labels, "admin.tourForm.description_label", "Description")}</label>
+        <textarea id="description" name="description" rows={4} maxLength={2000}
+          defaultValue={tour?.description ?? ""} className={inputClass + " resize-y"}
+          placeholder={lbl(labels, "admin.tourForm.description_placeholder", "Full tour description for the detail page")} />
       </div>
 
-      {/* Duration + price + currency + group size */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <div>
-          <label htmlFor="duration_hours" className={labelClass}>Duration (hours)</label>
-          <input
-            id="duration_hours"
-            name="duration_hours"
-            type="number"
-            step="0.5"
-            min="0.5"
-            max="24"
-            defaultValue={tour?.duration_hours ?? ""}
-            className={inputClass + " tabular-nums"}
-            placeholder="4"
-          />
+          <label htmlFor="duration_hours" className={labelClass}>{lbl(labels, "admin.tourForm.duration_label", "Duration (hours)")}</label>
+          <input id="duration_hours" name="duration_hours" type="number" step="0.5" min="0.5" max="24"
+            defaultValue={tour?.duration_hours ?? ""} className={inputClass + " tabular-nums"} placeholder="4" />
         </div>
         <div>
-          <label htmlFor="price_cents" className={labelClass}>Price (cents)</label>
-          <input
-            id="price_cents"
-            name="price_cents"
-            type="number"
-            step="1"
-            min="0"
-            defaultValue={tour?.price_cents ?? ""}
-            className={inputClass + " tabular-nums"}
-            placeholder="2500 = €25.00"
-          />
+          <label htmlFor="price_cents" className={labelClass}>{lbl(labels, "admin.tourForm.price_cents_label", "Price (cents)")}</label>
+          <input id="price_cents" name="price_cents" type="number" step="1" min="0"
+            defaultValue={tour?.price_cents ?? ""} className={inputClass + " tabular-nums"} placeholder="2500 = €25.00" />
         </div>
         <div>
-          <label htmlFor="currency" className={labelClass}>Currency</label>
-          <select
-            id="currency"
-            name="currency"
-            defaultValue={tour?.currency ?? "EUR"}
-            className={inputClass}
-          >
+          <label htmlFor="currency" className={labelClass}>{lbl(labels, "admin.tourForm.currency_label", "Currency")}</label>
+          <select id="currency" name="currency" defaultValue={tour?.currency ?? "EUR"} className={inputClass}>
             {CURRENCIES.map((c) => (
-              <option key={c} value={c} style={{ backgroundColor: "#0F172A", color: "#FFF7ED" }}>
-                {c}
-              </option>
+              <option key={c} value={c} style={{ backgroundColor: "#0F172A", color: "#FFF7ED" }}>{c}</option>
             ))}
           </select>
         </div>
         <div>
-          <label htmlFor="max_group_size" className={labelClass}>Max group size</label>
-          <input
-            id="max_group_size"
-            name="max_group_size"
-            type="number"
-            step="1"
-            min="1"
-            defaultValue={tour?.max_group_size ?? ""}
-            className={inputClass + " tabular-nums"}
-            placeholder="12"
-          />
+          <label htmlFor="max_group_size" className={labelClass}>{lbl(labels, "admin.tourForm.group_size_label", "Max group size")}</label>
+          <input id="max_group_size" name="max_group_size" type="number" step="1" min="1"
+            defaultValue={tour?.max_group_size ?? ""} className={inputClass + " tabular-nums"} placeholder="12" />
         </div>
       </div>
       <p className="-mt-3 text-xs text-brand-cream/45">
-        Price is stored in the smallest currency unit (cents). Leave blank for free tours. Duration and group size are displayed on tour cards.
+        {lbl(labels, "admin.tourForm.price_hint", "Price is stored in the smallest currency unit (cents). Leave blank for free tours.")}
       </p>
 
-      {/* Flags */}
       <fieldset className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        <legend className={labelClass + " sm:col-span-2 lg:col-span-3"}>Flags</legend>
-        <CheckboxField
-          name="is_active"
-          label="Active"
-          hint="Visible on the public site."
-          defaultChecked={tour ? tour.is_active : false}
-        />
-        <CheckboxField
-          name="requires_booking"
-          label="Requires booking"
-          hint="Tour must be reserved in advance."
-          defaultChecked={tour ? tour.requires_booking : true}
-        />
-        <CheckboxField
-          name="is_seasonal"
-          label="Seasonal"
-          hint="Only available during certain months."
-          defaultChecked={!!tour?.is_seasonal}
-        />
-        <CheckboxField
-          name="is_adult_only"
-          label="Adult only (18+)"
-          hint="After-dark or age-restricted."
-          defaultChecked={!!tour?.is_adult_only}
-        />
+        <legend className={labelClass + " sm:col-span-2 lg:col-span-3"}>{lbl(labels, "admin.tourForm.flags_legend", "Flags")}</legend>
+        <CheckboxField name="is_active" label={lbl(labels, "admin.tourForm.active_label", "Active")}
+          hint={lbl(labels, "admin.tourForm.active_hint", "Visible on the public site.")}
+          defaultChecked={tour ? tour.is_active : false} />
+        <CheckboxField name="requires_booking" label={lbl(labels, "admin.tourForm.requires_booking_label", "Requires booking")}
+          hint={lbl(labels, "admin.tourForm.requires_booking_hint", "Tour must be reserved in advance.")}
+          defaultChecked={tour ? tour.requires_booking : true} />
+        <CheckboxField name="is_seasonal" label={lbl(labels, "admin.tourForm.seasonal_label", "Seasonal")}
+          hint={lbl(labels, "admin.tourForm.seasonal_hint", "Only available during certain months.")}
+          defaultChecked={!!tour?.is_seasonal} />
+        <CheckboxField name="is_adult_only" label={lbl(labels, "admin.tourForm.adult_only_label", "Adult only (18+)")}
+          hint={lbl(labels, "admin.tourForm.adult_only_hint", "After-dark or age-restricted.")}
+          defaultChecked={!!tour?.is_adult_only} />
       </fieldset>
 
       <TourSeoFields
@@ -308,16 +239,15 @@ export default function TourForm({ tour, action, mode, deleteAction }: Props) {
         initialDescription={tour?.meta_description ?? null}
         previewSlug={tour?.slug ?? ""}
         previewName={tour?.name ?? ""}
+        labels={labels}
       />
 
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
-        <SaveButton mode={mode} />
-        {mode === "edit" && deleteAction && <DeleteButton formAction={deleteAction} />}
-        <a
-          href="/admin/tours"
-          className="inline-flex items-center justify-center px-5 py-2.5 rounded-full border border-brand-cream/20 text-brand-cream/70 hover:bg-brand-cream/5 transition-colors sm:ml-auto"
-        >
-          Back to list
+        <SaveButton mode={mode} labels={labels} />
+        {mode === "edit" && deleteAction && <DeleteButton formAction={deleteAction} labels={labels} />}
+        <a href="/admin/tours"
+          className="inline-flex items-center justify-center px-5 py-2.5 rounded-full border border-brand-cream/20 text-brand-cream/70 hover:bg-brand-cream/5 transition-colors sm:ml-auto">
+          {lbl(labels, "admin.tourForm.back", "Back to list")}
         </a>
       </div>
     </form>

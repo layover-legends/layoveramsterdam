@@ -3,6 +3,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import AccountForm from "@/components/AccountForm";
 import type { UserProfile } from "@/lib/types/profile";
+import { getUiStrings, t, tpl } from "@/lib/i18n/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -13,16 +14,15 @@ type AccountPageProps = {
 export default async function AccountPage({ searchParams }: AccountPageProps) {
   const supabase = createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const [{ data: { user } }, s] = await Promise.all([
+    supabase.auth.getUser(),
+    getUiStrings(),
+  ]);
 
   if (!user) {
     redirect("/?auth_required=1");
   }
 
-  // Fetch the profile row created by the on_auth_user_created trigger.
-  // RLS guarantees this returns at most the signed-in user's own row.
   const { data: profileRow } = await supabase
     .from("users")
     .select(
@@ -31,8 +31,6 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
     .eq("id", user.id)
     .maybeSingle();
 
-  // Fallback to OAuth metadata if the profile row is unexpectedly missing
-  // (shouldn't happen — trigger handles it — but defensive code is cheap).
   const profile: UserProfile = profileRow ?? {
     id: user.id,
     email: user.email ?? "",
@@ -58,6 +56,23 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
 
   const saved = searchParams?.saved === "1";
   const error = searchParams?.error;
+  const year = String(new Date().getFullYear());
+
+  // Labels passed to AccountForm (client component — resolved once server-side)
+  const formLabels: Record<string, string> = {
+    "account.field.full_name":        t(s, "account.field.full_name",        "Full name"),
+    "account.field.full_name_hint":   t(s, "account.field.full_name_hint",   "As you'd like it on your booking"),
+    "account.field.email":            t(s, "account.field.email",            "Email"),
+    "account.field.email_hint":       t(s, "account.field.email_hint",       "Managed by your Google account."),
+    "account.field.phone":            t(s, "account.field.phone",            "Phone"),
+    "account.field.nationality":      t(s, "account.field.nationality",      "Nationality"),
+    "account.field.language":         t(s, "account.field.language",         "Preferred language"),
+    "account.field.newsletter_label": t(s, "account.field.newsletter_label", "Email me at launch"),
+    "account.field.newsletter_hint":  t(s, "account.field.newsletter_hint",  "One email when tours go live, plus occasional travel-tip emails. You can turn this off any time."),
+    "account.field.select":           t(s, "account.field.select",           "Select…"),
+    "common.save_changes":            t(s, "common.save_changes",            "Save changes"),
+    "common.saving":                  t(s, "common.saving",                  "Saving…"),
+  };
 
   return (
     <main className="min-h-screen flex flex-col items-center px-6 py-12 bg-brand-navy text-brand-cream">
@@ -79,10 +94,10 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
           )}
           <div className="space-y-1">
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              Welcome, {firstName}
+              {tpl(t(s, "account.welcome", "Welcome, {name}"), { name: firstName })}
             </h1>
             <p className="text-sm text-brand-cream/70">
-              Your Layover Amsterdam account
+              {t(s, "account.subtitle", "Your Layover Amsterdam account")}
             </p>
           </div>
         </header>
@@ -92,7 +107,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
             role="status"
             className="rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100"
           >
-            Saved.
+            {t(s, "common.saved", "Saved.")}
           </div>
         )}
         {error && (
@@ -106,13 +121,12 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
 
         <div className="rounded-2xl border border-brand-cream/10 bg-brand-cream/5 p-6 sm:p-8">
           <h2 className="text-lg font-semibold text-brand-orange mb-1">
-            Your details
+            {t(s, "account.details_title", "Your details")}
           </h2>
           <p className="text-sm text-brand-cream/70 mb-6">
-            We&apos;ll use these for your bookings, your launch invite, and to
-            show prices in your currency. Nothing is shared.
+            {t(s, "account.details_hint", "We'll use these for your bookings, your launch invite, and to show prices in your currency. Nothing is shared.")}
           </p>
-          <AccountForm profile={profile} />
+          <AccountForm profile={profile} labels={formLabels} />
         </div>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -120,20 +134,20 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
             href="/"
             className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-full border border-brand-cream/30 text-brand-cream font-medium hover:bg-brand-cream/10 transition-colors"
           >
-            Back to home
+            {t(s, "common.back_to_home", "Back to home")}
           </a>
           <form action="/auth/signout" method="post" className="w-full sm:w-auto sm:ml-auto">
             <button
               type="submit"
               className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-full border border-brand-cream/30 text-brand-cream/80 font-medium hover:bg-brand-cream/10 transition-colors"
             >
-              Sign out
+              {t(s, "auth.signout", "Sign out")}
             </button>
           </form>
         </div>
 
         <div className="text-xs text-brand-cream/40 text-center pt-2">
-          © {new Date().getFullYear()} Layover Amsterdam. All rights reserved.
+          {tpl(t(s, "footer.copyright", "© {year} Layover Amsterdam. All rights reserved."), { year })}
         </div>
       </section>
     </main>

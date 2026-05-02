@@ -7,6 +7,7 @@ import { StructuredData } from "@/components/seo/StructuredData";
 import { articleLd, breadcrumbLd } from "@/lib/seo/jsonld";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { OG_LOCALE } from "@/lib/i18n/locales";
+import { getUiStrings, t } from "@/lib/i18n/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -58,7 +59,7 @@ function fmt(dateStr: string | null) {
 }
 
 export default async function BlogArticlePage({ params }: PageProps) {
-  const article = await getArticleBySlug(params.slug);
+  const [article, s] = await Promise.all([getArticleBySlug(params.slug), getUiStrings()]);
   if (!article) notFound();
 
   const html = renderMarkdown(article.body_md);
@@ -108,7 +109,7 @@ export default async function BlogArticlePage({ params }: PageProps) {
             href="/blog"
             className="text-sm text-brand-cream/50 hover:text-brand-orange transition-colors"
           >
-            ← Back to all articles
+            {t(s, "blog.back", "← Back to all articles")}
           </a>
         </footer>
       </div>

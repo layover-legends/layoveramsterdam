@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { FALLBACK_CHAIN, DEFAULT_LOCALE, type Locale } from "@/lib/i18n/locales";
+import { resolveLocale } from "@/lib/i18n/resolve";
 
 /**
  * Load UI string translations for the given locale.
@@ -47,6 +48,18 @@ export function tpl(
   vars: Record<string, string | number>,
 ): string {
   return str.replace(/\{(\w+)\}/g, (_, key) => String(vars[key] ?? `{${key}}`));
+}
+
+/**
+ * Convenience: resolve locale from request cookies/headers then load the
+ * strings bundle in one call.  Use in every server component that renders
+ * user-facing text.
+ *
+ *   const s = await getUiStrings();
+ *   <h1>{t(s, "admin.stops.title", "Stops")}</h1>
+ */
+export async function getUiStrings(): Promise<Record<string, string>> {
+  return loadUiStrings(resolveLocale());
 }
 
 /** Keys used across public pages. Always fetch these. */

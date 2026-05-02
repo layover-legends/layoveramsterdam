@@ -4,6 +4,7 @@ import { getAdminOverview } from "@/lib/admin/metrics";
 import MetricCard from "@/components/admin/MetricCard";
 import { getCountry } from "@/lib/constants/countries";
 import { getLanguage } from "@/lib/constants/locales";
+import { getUiStrings, t, tpl } from "@/lib/i18n/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -27,43 +28,50 @@ function formatPct(rate: number): string {
 }
 
 export default async function AdminOverviewPage() {
-  const m = await getAdminOverview();
+  const [m, s] = await Promise.all([getAdminOverview(), getUiStrings()]);
 
   return (
     <div className="space-y-8">
       <header className="space-y-1">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Overview</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+          {t(s, "admin.overview.title", "Overview")}
+        </h1>
         <p className="text-sm text-brand-cream/60">
-          A live read of your early-access list.
+          {t(s, "admin.overview.subtitle", "A live read of your early-access list.")}
         </p>
       </header>
 
       <section className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <MetricCard label="Total signups" value={m.totalUsers} accent="orange" />
-        <MetricCard label="Today" value={m.signupsToday} />
-        <MetricCard label="Last 7 days" value={m.signupsThisWeek} />
-        <MetricCard label="This month" value={m.signupsThisMonth} />
+        <MetricCard label={t(s, "admin.overview.metric_signups", "Total signups")} value={m.totalUsers} accent="orange" />
+        <MetricCard label={t(s, "admin.overview.metric_today", "Today")} value={m.signupsToday} />
+        <MetricCard label={t(s, "admin.overview.metric_week", "Last 7 days")} value={m.signupsThisWeek} />
+        <MetricCard label={t(s, "admin.overview.metric_month", "This month")} value={m.signupsThisMonth} />
       </section>
 
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="rounded-2xl border border-brand-cream/10 bg-brand-cream/5 p-6">
           <h2 className="text-sm uppercase tracking-wide text-brand-cream/55 mb-4">
-            Marketing opt-in
+            {t(s, "admin.overview.marketing_label", "Marketing opt-in")}
           </h2>
           <p className="text-4xl font-bold text-emerald-300">
             {formatPct(m.marketingOptInRate)}
           </p>
           <p className="text-xs text-brand-cream/50 mt-1">
-            {m.marketingOptInCount} of {m.totalUsers} agreed to launch emails
+            {tpl(t(s, "admin.overview.marketing_desc", "{count} of {total} agreed to launch emails"), {
+              count: m.marketingOptInCount,
+              total: m.totalUsers,
+            })}
           </p>
         </div>
 
         <div className="rounded-2xl border border-brand-cream/10 bg-brand-cream/5 p-6">
           <h2 className="text-sm uppercase tracking-wide text-brand-cream/55 mb-4">
-            Top countries
+            {t(s, "admin.overview.top_countries_label", "Top countries")}
           </h2>
           {m.topCountries.length === 0 ? (
-            <p className="text-sm text-brand-cream/50">No nationality data yet.</p>
+            <p className="text-sm text-brand-cream/50">
+              {t(s, "admin.overview.top_countries_empty", "No nationality data yet.")}
+            </p>
           ) : (
             <ul className="space-y-2">
               {m.topCountries.map((c) => {
@@ -84,10 +92,12 @@ export default async function AdminOverviewPage() {
 
         <div className="rounded-2xl border border-brand-cream/10 bg-brand-cream/5 p-6">
           <h2 className="text-sm uppercase tracking-wide text-brand-cream/55 mb-4">
-            Top languages
+            {t(s, "admin.overview.top_languages_label", "Top languages")}
           </h2>
           {m.topLanguages.length === 0 ? (
-            <p className="text-sm text-brand-cream/50">No language data yet.</p>
+            <p className="text-sm text-brand-cream/50">
+              {t(s, "admin.overview.top_languages_empty", "No language data yet.")}
+            </p>
           ) : (
             <ul className="space-y-2">
               {m.topLanguages.map((l) => {
@@ -110,15 +120,15 @@ export default async function AdminOverviewPage() {
       <section className="rounded-2xl border border-brand-cream/10 bg-brand-cream/5 p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">
-            Recent signups
+            {t(s, "admin.overview.recent_label", "Recent signups")}
           </h2>
           <Link href="/admin/users" className="text-xs text-brand-orange hover:underline">
-            View all →
+            {t(s, "admin.overview.recent_view_all", "View all →")}
           </Link>
         </div>
         {m.recentSignups.length === 0 ? (
           <p className="text-sm text-brand-cream/50">
-            No signups yet. They&apos;ll appear here in real time.
+            {t(s, "admin.overview.recent_empty", "No signups yet. They'll appear here in real time.")}
           </p>
         ) : (
           <ul className="divide-y divide-brand-cream/10">
@@ -128,23 +138,15 @@ export default async function AdminOverviewPage() {
               return (
                 <li key={u.id} className="py-3 flex items-center gap-4">
                   {u.avatar_url ? (
-                    <Image
-                      src={u.avatar_url}
-                      alt={u.full_name ?? u.email}
-                      width={32}
-                      height={32}
-                      className="rounded-full border border-brand-cream/20"
-                      unoptimized
-                    />
+                    <Image src={u.avatar_url} alt={u.full_name ?? u.email} width={32} height={32}
+                      className="rounded-full border border-brand-cream/20" unoptimized />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-brand-cream/10 flex items-center justify-center text-xs font-bold">
                       {(u.full_name ?? u.email).charAt(0).toUpperCase()}
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm text-brand-cream truncate">
-                      {u.full_name ?? "—"}
-                    </p>
+                    <p className="text-sm text-brand-cream truncate">{u.full_name ?? "—"}</p>
                     <p className="text-xs text-brand-cream/50 truncate">{u.email}</p>
                   </div>
                   <div className="hidden sm:flex items-center gap-3 text-xs text-brand-cream/55">

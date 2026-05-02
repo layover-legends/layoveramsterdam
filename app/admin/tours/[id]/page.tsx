@@ -7,6 +7,7 @@ import { getTourStops } from "@/lib/admin/tour-stops";
 import { updateTour, deleteTour } from "@/app/admin/tours/actions";
 import { createClient } from "@/lib/supabase/server";
 import { LOCALES, DEFAULT_LOCALE } from "@/lib/i18n/locales";
+import { getUiStrings, t, tpl } from "@/lib/i18n/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -39,10 +40,11 @@ async function loadExistingTranslations(entityId: string) {
 }
 
 export default async function EditTourPage({ params, searchParams }: PageProps) {
-  const [tour, stops, existingTranslations] = await Promise.all([
+  const [tour, stops, existingTranslations, s] = await Promise.all([
     getTourById(params.id),
     getTourStops(params.id),
     loadExistingTranslations(params.id),
+    getUiStrings(),
   ]);
   if (!tour) notFound();
 
@@ -56,7 +58,7 @@ export default async function EditTourPage({ params, searchParams }: PageProps) 
     <div className="space-y-8">
       <header className="space-y-1">
         <p className="text-xs uppercase tracking-wide text-brand-cream/55">
-          {tour.is_active ? "Active" : "Draft"}
+          {tour.is_active ? t(s, "admin.common.active", "Active") : t(s, "admin.common.draft", "Draft")}
           {tour.duration_hours !== null ? ` · ${tour.duration_hours}h` : ""}
         </p>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{tour.name}</h1>
@@ -64,7 +66,7 @@ export default async function EditTourPage({ params, searchParams }: PageProps) 
 
       {saved && (
         <div role="status" className="rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
-          Saved.
+          {t(s, "admin.common.saved", "Saved.")}
         </div>
       )}
       {error && (
@@ -75,26 +77,27 @@ export default async function EditTourPage({ params, searchParams }: PageProps) 
 
       <section className="space-y-3">
         <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">
-          Stops ({stops.length})
+          {tpl(t(s, "admin.tour.stops_section", "Stops ({count})"), { count: stops.length })}
         </h2>
-        <TourStopsEditor tourId={tour.id} initialStops={stops} />
+        <TourStopsEditor tourId={tour.id} initialStops={stops} labels={s} />
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">Details</h2>
-        <TourForm tour={tour} action={updateAction} deleteAction={deleteAction} mode="edit" />
+        <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">{t(s, "admin.tour.details_section", "Details")}</h2>
+        <TourForm tour={tour} action={updateAction} deleteAction={deleteAction} mode="edit" labels={s} />
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">Translations</h2>
+        <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">{t(s, "admin.tour.translations_section", "Translations")}</h2>
         <p className="text-xs text-brand-cream/45">
-          Edit name, tagline, and description in each non-English language.
+          {t(s, "admin.tour.translations_hint", "Edit name, tagline, and description in each non-English language.")}
         </p>
         <TranslationsEditor
           entityType="tour"
           entityId={tour.id}
           fields={TOUR_FIELDS}
           existing={existingTranslations}
+          labels={s}
         />
       </section>
     </div>

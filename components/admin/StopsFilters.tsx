@@ -15,6 +15,7 @@ type Props = {
   activeCategorySlug: string | null;
   filterCounts: Record<StopFilter, number>;
   categoriesByCount: Array<{ category: Category; count: number }>;
+  labels?: Record<string, string>;
 };
 
 const chipBase =
@@ -26,6 +27,7 @@ export default function StopsFilters({
   activeCategorySlug,
   filterCounts,
   categoriesByCount,
+  labels,
 }: Props) {
   const router = useRouter();
   const params = useSearchParams();
@@ -74,7 +76,7 @@ export default function StopsFilters({
         type="search"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="Search name, area or description…"
+        placeholder={labels?.["admin.stopsFilters.search_placeholder"] ?? "Search name, area or description…"}
         className="w-full sm:max-w-md px-4 py-2.5 rounded-xl bg-brand-cream/5 border border-brand-cream/15 text-brand-cream placeholder:text-brand-cream/30 focus:outline-none focus:ring-2 focus:ring-brand-orange/60 focus:border-brand-orange/60"
       />
 
@@ -113,7 +115,7 @@ export default function StopsFilters({
               : "border-brand-cream/10 text-brand-cream/55 hover:bg-brand-cream/5")
           }
         >
-          All categories
+          {labels?.["admin.stopsFilters.all_categories"] ?? "All categories"}
         </Link>
         {categoriesByCount.map(({ category, count }) => {
           const isActive = activeCategorySlug === category.slug;

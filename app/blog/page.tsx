@@ -4,15 +4,16 @@ import { listPublishedArticles } from "@/lib/public/articles";
 import { SITE, canonicalFor, ogImageFor, langAlternates } from "@/lib/seo/site";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { OG_LOCALE } from "@/lib/i18n/locales";
+import { getUiStrings, t } from "@/lib/i18n/ui";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = resolveLocale();
-  const title = "Layover Guides · LayoverAmsterdam";
-  const description =
-    "Amsterdam layover tips, canal walk guides, and everything you need to turn a Schiphol stopover into an unforgettable experience.";
-  const ogImage = ogImageFor({ title: "Layover Guides", subtitle: "Amsterdam tips & itineraries" });
+  const s = await getUiStrings();
+  const title = t(s, "blog.index.title", "Layover Guides") + " · LayoverAmsterdam";
+  const description = t(s, "blog.index.description", "Amsterdam layover tips, canal walk guides, and everything you need to turn a Schiphol stopover into an unforgettable experience.");
+  const ogImage = ogImageFor({ title: t(s, "blog.index.title", "Layover Guides"), subtitle: "Amsterdam tips & itineraries" });
   return {
     title,
     description,
@@ -32,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
       creator: SITE.twitter,
       title,
       description,
-      images: [ogImageFor({ title: "Layover Guides", subtitle: "Amsterdam tips & itineraries" })],
+      images: [ogImage],
     },
   };
 }
@@ -47,22 +48,22 @@ function fmt(dateStr: string | null) {
 }
 
 export default async function BlogPage() {
-  const articles = await listPublishedArticles();
+  const [articles, s] = await Promise.all([listPublishedArticles(), getUiStrings()]);
 
   return (
     <main className="min-h-screen bg-brand-navy text-brand-cream">
       <div className="max-w-5xl mx-auto px-5 py-16 space-y-12">
         <header className="space-y-3 text-center">
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
-            Layover Guides
+            {t(s, "blog.index.title", "Layover Guides")}
           </h1>
           <p className="text-brand-cream/60 text-lg max-w-2xl mx-auto">
-            Everything you need to make the most of your Amsterdam stopover.
+            {t(s, "blog.index.header_description", "Everything you need to make the most of your Amsterdam stopover.")}
           </p>
         </header>
 
         {articles.length === 0 ? (
-          <p className="text-center text-brand-cream/50 py-20">No articles published yet.</p>
+          <p className="text-center text-brand-cream/50 py-20">{t(s, "blog.empty", "No articles published yet.")}</p>
         ) : (
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {articles.map((a) => (

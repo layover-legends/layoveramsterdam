@@ -8,9 +8,15 @@ import { updateProfile } from "@/app/account/actions";
 
 type Props = {
   profile: UserProfile;
+  /** UI labels resolved server-side; falls back to English when not provided. */
+  labels?: Record<string, string>;
 };
 
-function SubmitButton() {
+function lbl(labels: Record<string, string> | undefined, key: string, fallback: string): string {
+  return labels?.[key] ?? fallback;
+}
+
+function SubmitButton({ labels }: { labels?: Record<string, string> }) {
   const { pending } = useFormStatus();
   return (
     <button
@@ -18,12 +24,14 @@ function SubmitButton() {
       disabled={pending}
       className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-brand-orange text-brand-navy font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
     >
-      {pending ? "Saving…" : "Save changes"}
+      {pending
+        ? lbl(labels, "common.saving", "Saving…")
+        : lbl(labels, "common.save_changes", "Save changes")}
     </button>
   );
 }
 
-export default function AccountForm({ profile }: Props) {
+export default function AccountForm({ profile, labels }: Props) {
   return (
     <form action={updateProfile} className="w-full space-y-5 text-left">
       <div>
@@ -31,7 +39,7 @@ export default function AccountForm({ profile }: Props) {
           htmlFor="full_name"
           className="block text-xs uppercase tracking-wide text-brand-cream/60 mb-1"
         >
-          Full name
+          {lbl(labels, "account.field.full_name", "Full name")}
         </label>
         <input
           id="full_name"
@@ -41,7 +49,7 @@ export default function AccountForm({ profile }: Props) {
           defaultValue={profile.full_name ?? ""}
           autoComplete="name"
           className="w-full px-4 py-3 rounded-xl bg-brand-cream/5 border border-brand-cream/15 text-brand-cream placeholder:text-brand-cream/30 focus:outline-none focus:ring-2 focus:ring-brand-orange/60 focus:border-brand-orange/60"
-          placeholder="As you'd like it on your booking"
+          placeholder={lbl(labels, "account.field.full_name_hint", "As you'd like it on your booking")}
         />
       </div>
 
@@ -50,7 +58,7 @@ export default function AccountForm({ profile }: Props) {
           htmlFor="email"
           className="block text-xs uppercase tracking-wide text-brand-cream/60 mb-1"
         >
-          Email
+          {lbl(labels, "account.field.email", "Email")}
         </label>
         <input
           id="email"
@@ -61,7 +69,7 @@ export default function AccountForm({ profile }: Props) {
           className="w-full px-4 py-3 rounded-xl bg-brand-cream/[0.02] border border-brand-cream/10 text-brand-cream/60 cursor-not-allowed"
         />
         <p className="text-xs text-brand-cream/40 mt-1">
-          Managed by your Google account.
+          {lbl(labels, "account.field.email_hint", "Managed by your Google account.")}
         </p>
       </div>
 
@@ -71,7 +79,7 @@ export default function AccountForm({ profile }: Props) {
             htmlFor="phone"
             className="block text-xs uppercase tracking-wide text-brand-cream/60 mb-1"
           >
-            Phone
+            {lbl(labels, "account.field.phone", "Phone")}
           </label>
           <input
             id="phone"
@@ -91,7 +99,7 @@ export default function AccountForm({ profile }: Props) {
             htmlFor="nationality"
             className="block text-xs uppercase tracking-wide text-brand-cream/60 mb-1"
           >
-            Nationality
+            {lbl(labels, "account.field.nationality", "Nationality")}
           </label>
           <select
             id="nationality"
@@ -100,7 +108,7 @@ export default function AccountForm({ profile }: Props) {
             className="w-full px-4 py-3 rounded-xl bg-brand-cream/5 border border-brand-cream/15 text-brand-cream focus:outline-none focus:ring-2 focus:ring-brand-orange/60 focus:border-brand-orange/60 [&>option]:bg-brand-navy [&>option]:text-brand-cream"
           >
             <option value="" style={{ backgroundColor: "#0F172A", color: "#FFF7ED" }}>
-              Select…
+              {lbl(labels, "account.field.select", "Select…")}
             </option>
             {COUNTRIES.map((c) => (
               <option
@@ -120,7 +128,7 @@ export default function AccountForm({ profile }: Props) {
           htmlFor="preferred_language"
           className="block text-xs uppercase tracking-wide text-brand-cream/60 mb-1"
         >
-          Preferred language
+          {lbl(labels, "account.field.language", "Preferred language")}
         </label>
         <select
           id="preferred_language"
@@ -149,17 +157,16 @@ export default function AccountForm({ profile }: Props) {
         />
         <span className="text-sm text-brand-cream/80">
           <span className="font-medium text-brand-cream">
-            Email me at launch
+            {lbl(labels, "account.field.newsletter_label", "Email me at launch")}
           </span>
           <span className="block text-xs text-brand-cream/60 mt-0.5">
-            One email when tours go live, plus occasional travel-tip emails. You
-            can turn this off any time.
+            {lbl(labels, "account.field.newsletter_hint", "One email when tours go live, plus occasional travel-tip emails. You can turn this off any time.")}
           </span>
         </span>
       </label>
 
       <div className="pt-2">
-        <SubmitButton />
+        <SubmitButton labels={labels} />
       </div>
     </form>
   );

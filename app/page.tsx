@@ -115,7 +115,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               {t(strings, "homepage.go_to_account", "Go to your account")}
             </Link>
           ) : (
-            <SignInWithGoogle />
+            <SignInWithGoogle
+              label={t(strings, "auth.signin_google", "Sign in with Google for early access")}
+              loadingLabel={t(strings, "auth.redirecting", "Redirecting…")}
+            />
           )}
           <p className="text-xs text-brand-cream/60 max-w-sm">
             {user

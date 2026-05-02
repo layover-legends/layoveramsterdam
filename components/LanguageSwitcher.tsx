@@ -5,9 +5,10 @@ import { LOCALES, type Locale } from "@/lib/i18n/locales";
 
 type Props = {
   currentLocale: Locale;
+  ariaLabel?: string;
 };
 
-export default function LanguageSwitcher({ currentLocale }: Props) {
+export default function LanguageSwitcher({ currentLocale, ariaLabel = "Select language" }: Props) {
   const router = useRouter();
 
   function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
@@ -21,7 +22,7 @@ export default function LanguageSwitcher({ currentLocale }: Props) {
     <select
       value={currentLocale}
       onChange={handleChange}
-      aria-label="Select language"
+      aria-label={ariaLabel}
       className="bg-transparent border border-brand-cream/20 text-brand-cream/70 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/60 hover:border-brand-cream/40 transition-colors cursor-pointer"
     >
       {LOCALES.map((l) => (

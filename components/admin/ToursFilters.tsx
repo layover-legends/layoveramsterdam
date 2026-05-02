@@ -9,12 +9,13 @@ type Props = {
   initialSearch: string;
   activeFilter: TourFilter;
   filterCounts: Record<TourFilter, number>;
+  labels?: Record<string, string>;
 };
 
 const chipBase =
   "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border transition-colors whitespace-nowrap";
 
-export default function ToursFilters({ initialSearch, activeFilter, filterCounts }: Props) {
+export default function ToursFilters({ initialSearch, activeFilter, filterCounts, labels }: Props) {
   const router = useRouter();
   const params = useSearchParams();
   const [value, setValue] = useState(initialSearch);
@@ -51,7 +52,7 @@ export default function ToursFilters({ initialSearch, activeFilter, filterCounts
         type="search"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="Search name, tagline or description…"
+        placeholder={labels?.["admin.toursFilters.search_placeholder"] ?? "Search name, tagline or description…"}
         className="w-full sm:max-w-md px-4 py-2.5 rounded-xl bg-brand-cream/5 border border-brand-cream/15 text-brand-cream placeholder:text-brand-cream/30 focus:outline-none focus:ring-2 focus:ring-brand-orange/60 focus:border-brand-orange/60"
       />
 

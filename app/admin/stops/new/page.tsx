@@ -1,6 +1,7 @@
 import StopForm from "@/components/admin/StopForm";
 import { listCategories } from "@/lib/admin/stops";
 import { createStop } from "@/app/admin/stops/actions";
+import { getUiStrings, t } from "@/lib/i18n/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -9,18 +10,17 @@ type PageProps = {
 };
 
 export default async function NewStopPage({ searchParams }: PageProps) {
-  const categories = await listCategories();
+  const [categories, s] = await Promise.all([listCategories(), getUiStrings()]);
   const error = searchParams?.error;
 
   return (
     <div className="space-y-6">
       <header className="space-y-1">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-          Add a new stop
+          {t(s, "admin.stop.new_title", "Add a new stop")}
         </h1>
         <p className="text-sm text-brand-cream/60">
-          Create the destination first, then add photos and opening hours
-          on the next screen.
+          {t(s, "admin.stop.new_subtitle", "Create the destination first, then add photos and opening hours on the next screen.")}
         </p>
       </header>
 
@@ -30,11 +30,7 @@ export default async function NewStopPage({ searchParams }: PageProps) {
         </div>
       )}
 
-      <StopForm
-        categories={categories}
-        action={createStop}
-        mode="create"
-      />
+      <StopForm categories={categories} action={createStop} mode="create" labels={s} />
     </div>
   );
 }

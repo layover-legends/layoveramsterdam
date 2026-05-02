@@ -34,7 +34,12 @@ import {
 type Props = {
   tourId: string;
   initialStops: TourStopRow[];
+  labels?: Record<string, string>;
 };
+
+function lbl(labels: Record<string, string> | undefined, key: string, fallback: string): string {
+  return labels?.[key] ?? fallback;
+}
 
 // ─── sortable row ─────────────────────────────────────────────────────────────
 
@@ -48,6 +53,7 @@ type RowProps = {
   onEditToggle: () => void;
   onRemove: () => void;
   onSaveFields: (fields: { is_optional: boolean; duration_override: number | null; notes: string | null }) => void;
+  labels?: Record<string, string>;
 };
 
 function SortableStopRow({
@@ -60,6 +66,7 @@ function SortableStopRow({
   onEditToggle,
   onRemove,
   onSaveFields,
+  labels,
 }: RowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: stop.id });
@@ -126,7 +133,7 @@ function SortableStopRow({
           type="button"
           {...attributes}
           {...listeners}
-          aria-label="Drag to reorder"
+          aria-label={lbl(labels, "admin.tourStopsEditor.drag_label", "Drag to reorder")}
           className="mt-0.5 flex-shrink-0 cursor-grab active:cursor-grabbing text-brand-cream/30 hover:text-brand-cream/60 touch-none"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
@@ -159,7 +166,7 @@ function SortableStopRow({
             <span className="text-sm font-medium text-brand-cream truncate">{d.name}</span>
             {stop.is_optional && (
               <span className="px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider bg-brand-cream/10 text-brand-cream/60">
-                Optional
+                {lbl(labels, "admin.tourStopsEditor.optional_badge", "Optional")}
               </span>
             )}
             {catLabel && (
@@ -182,11 +189,11 @@ function SortableStopRow({
                   onChange={(e) => setLocalOptional(e.target.checked)}
                   className="h-4 w-4 rounded border-brand-cream/40 bg-brand-cream/10 text-brand-orange focus:ring-brand-orange/60"
                 />
-                <span className="text-xs text-brand-cream/80">Mark as optional stop</span>
+                <span className="text-xs text-brand-cream/80">{lbl(labels, "admin.tourStopsEditor.optional_label", "Mark as optional stop")}</span>
               </label>
               <div>
                 <label className="block text-xs text-brand-cream/55 mb-1">
-                  Duration override (minutes)
+                  {lbl(labels, "admin.tourStopsEditor.duration_label", "Duration override (minutes)")}
                 </label>
                 <input
                   type="number"
@@ -194,20 +201,20 @@ function SortableStopRow({
                   max={480}
                   value={localDuration}
                   onChange={(e) => setLocalDuration(e.target.value)}
-                  placeholder="Default from destination"
+                  placeholder={lbl(labels, "admin.tourStopsEditor.duration_placeholder", "Default from destination")}
                   className="w-full sm:w-40 px-3 py-1.5 rounded-lg bg-brand-cream/5 border border-brand-cream/15 text-brand-cream placeholder:text-brand-cream/25 text-xs focus:outline-none focus:ring-2 focus:ring-brand-orange/60"
                 />
               </div>
               <div>
                 <label className="block text-xs text-brand-cream/55 mb-1">
-                  Notes (max 500 chars)
+                  {lbl(labels, "admin.tourStopsEditor.notes_label", "Notes (max 500 chars)")}
                 </label>
                 <textarea
                   rows={2}
                   maxLength={500}
                   value={localNotes}
                   onChange={(e) => setLocalNotes(e.target.value)}
-                  placeholder="Guide notes for this stop…"
+                  placeholder={lbl(labels, "admin.tourStopsEditor.notes_placeholder", "Guide notes for this stop…")}
                   className="w-full px-3 py-1.5 rounded-lg bg-brand-cream/5 border border-brand-cream/15 text-brand-cream placeholder:text-brand-cream/25 text-xs resize-y focus:outline-none focus:ring-2 focus:ring-brand-orange/60"
                 />
               </div>
@@ -218,14 +225,14 @@ function SortableStopRow({
                   disabled={saving}
                   className="px-3 py-1.5 rounded-full bg-brand-orange text-brand-navy text-xs font-semibold disabled:opacity-60"
                 >
-                  {saving ? "Saving…" : "Save"}
+                  {saving ? lbl(labels, "admin.tourStopsEditor.saving", "Saving…") : lbl(labels, "admin.tourStopsEditor.save", "Save")}
                 </button>
                 <button
                   type="button"
                   onClick={onEditToggle}
                   className="px-3 py-1.5 rounded-full border border-brand-cream/20 text-brand-cream/60 text-xs hover:bg-brand-cream/5"
                 >
-                  Cancel
+                  {lbl(labels, "admin.tourStopsEditor.cancel", "Cancel")}
                 </button>
               </div>
             </div>
@@ -244,7 +251,7 @@ function SortableStopRow({
           <button
             type="button"
             onClick={onMenuToggle}
-            aria-label="Stop options"
+            aria-label={lbl(labels, "admin.tourStopsEditor.menu_label", "Stop options")}
             className="p-1 rounded-lg text-brand-cream/40 hover:text-brand-cream/80 hover:bg-brand-cream/5 transition-colors"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
@@ -260,17 +267,17 @@ function SortableStopRow({
                 onClick={() => { onMenuClose(); onEditToggle(); }}
                 className="w-full text-left px-4 py-2 text-sm text-brand-cream/80 hover:bg-brand-cream/5 transition-colors"
               >
-                Edit details
+                {lbl(labels, "admin.tourStopsEditor.edit_details", "Edit details")}
               </button>
               <button
                 type="button"
                 onClick={() => {
                   onMenuClose();
-                  if (confirm(`Remove "${d.name}" from this tour?`)) onRemove();
+                  if (confirm((labels?.["admin.tourStopsEditor.confirm_remove"] ?? `Remove "${d.name}" from this tour?`).replace("{name}", d.name))) onRemove();
                 }}
                 className="w-full text-left px-4 py-2 text-sm text-red-300 hover:bg-red-400/10 transition-colors"
               >
-                Remove stop
+                {lbl(labels, "admin.tourStopsEditor.remove_stop", "Remove stop")}
               </button>
             </div>
           )}
@@ -282,7 +289,7 @@ function SortableStopRow({
 
 // ─── main editor ──────────────────────────────────────────────────────────────
 
-export default function TourStopsEditor({ tourId, initialStops }: Props) {
+export default function TourStopsEditor({ tourId, initialStops, labels }: Props) {
   const router = useRouter();
   const [stops, setStops] = useState<TourStopRow[]>(initialStops);
   const [saving, setSaving] = useState(false);
@@ -436,7 +443,7 @@ export default function TourStopsEditor({ tourId, initialStops }: Props) {
 
       {/* Saving indicator */}
       {saving && (
-        <p className="text-xs text-brand-cream/50">Saving…</p>
+        <p className="text-xs text-brand-cream/50">{lbl(labels, "admin.tourStopsEditor.saving", "Saving…")}</p>
       )}
 
       {/* Draggable stop list */}
@@ -450,7 +457,7 @@ export default function TourStopsEditor({ tourId, initialStops }: Props) {
           <div className="space-y-2">
             {stops.length === 0 ? (
               <p className="text-sm text-brand-cream/50 py-6 text-center">
-                No stops yet. Add your first stop below.
+                {lbl(labels, "admin.tourStopsEditor.empty", "No stops yet. Add your first stop below.")}
               </p>
             ) : (
               stops.map((stop) => (
@@ -469,6 +476,7 @@ export default function TourStopsEditor({ tourId, initialStops }: Props) {
                   }
                   onRemove={() => handleRemove(stop.id)}
                   onSaveFields={(fields) => handleSaveFields(stop.id, fields)}
+                  labels={labels}
                 />
               ))
             )}
@@ -486,12 +494,12 @@ export default function TourStopsEditor({ tourId, initialStops }: Props) {
             onFocus={() => {
               if (pickerResults.length > 0) setPickerOpen(true);
             }}
-            placeholder="Search destinations to add…"
+            placeholder={lbl(labels, "admin.tourStopsEditor.search_placeholder", "Search destinations to add…")}
             disabled={saving}
             className="flex-1 px-4 py-2.5 rounded-xl bg-brand-cream/5 border border-brand-cream/15 text-brand-cream placeholder:text-brand-cream/30 focus:outline-none focus:ring-2 focus:ring-brand-orange/60 disabled:opacity-50 text-sm"
           />
           {pickerLoading && (
-            <span className="text-xs text-brand-cream/40">Searching…</span>
+            <span className="text-xs text-brand-cream/40">{lbl(labels, "admin.tourStopsEditor.searching", "Searching…")}</span>
           )}
         </div>
 
@@ -521,7 +529,7 @@ export default function TourStopsEditor({ tourId, initialStops }: Props) {
 
         {pickerOpen && pickerResults.length === 0 && pickerQuery.trim() && !pickerLoading && (
           <div className="absolute left-0 right-0 top-full mt-1 z-20 rounded-xl border border-brand-cream/10 bg-brand-navy shadow-xl px-4 py-3 text-sm text-brand-cream/50">
-            No destinations match "{pickerQuery}" (already added or not found).
+            {(labels?.["admin.tourStopsEditor.no_results"] ?? `No destinations match "{q}" (already added or not found).`).replace("{q}", pickerQuery)}
           </div>
         )}
       </div>

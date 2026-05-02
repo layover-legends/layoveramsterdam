@@ -5,9 +5,10 @@ import { useEffect, useRef, useState } from "react";
 
 type Props = {
   initialValue: string;
+  labels?: Record<string, string>;
 };
 
-export default function UsersSearch({ initialValue }: Props) {
+export default function UsersSearch({ initialValue, labels }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [value, setValue] = useState(initialValue);
@@ -36,7 +37,7 @@ export default function UsersSearch({ initialValue }: Props) {
         type="search"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="Search by name or email…"
+        placeholder={labels?.["admin.users.search_placeholder"] ?? "Search by name or email…"}
         className="w-full px-4 py-2.5 rounded-xl bg-brand-cream/5 border border-brand-cream/15 text-brand-cream placeholder:text-brand-cream/30 focus:outline-none focus:ring-2 focus:ring-brand-orange/60 focus:border-brand-orange/60"
       />
     </div>

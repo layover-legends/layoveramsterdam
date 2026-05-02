@@ -16,6 +16,7 @@ import {
 } from "@/app/admin/stops/actions";
 import { createClient } from "@/lib/supabase/server";
 import { LOCALES, DEFAULT_LOCALE } from "@/lib/i18n/locales";
+import { getUiStrings, t } from "@/lib/i18n/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -48,11 +49,12 @@ async function loadExistingTranslations(entityId: string) {
 }
 
 export default async function EditStopPage({ params, searchParams }: PageProps) {
-  const [stop, categories, photos, existingTranslations] = await Promise.all([
+  const [stop, categories, photos, existingTranslations, s] = await Promise.all([
     getStopById(params.id),
     listCategories(),
     listPhotosFor(params.id),
     loadExistingTranslations(params.id),
+    getUiStrings(),
   ]);
   if (!stop) notFound();
 
@@ -76,7 +78,7 @@ export default async function EditStopPage({ params, searchParams }: PageProps) 
 
       {saved && (
         <div role="status" className="rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
-          Saved.
+          {t(s, "admin.common.saved", "Saved.")}
         </div>
       )}
       {error && (
@@ -86,31 +88,33 @@ export default async function EditStopPage({ params, searchParams }: PageProps) 
       )}
 
       <section className="space-y-3">
-        <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">Photos</h2>
+        <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">{t(s, "admin.stop.photos_section", "Photos")}</h2>
         <PhotoManager
           destinationId={stop.id}
           photos={photos}
           addAction={addPhotoAction}
           deleteAction={deletePhotoAction}
           primaryAction={makePrimaryAction}
+          labels={s}
         />
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">Details</h2>
-        <StopForm stop={stop} categories={categories} action={updateAction} deleteAction={deleteAction} mode="edit" />
+        <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">{t(s, "admin.stop.details_section", "Details")}</h2>
+        <StopForm stop={stop} categories={categories} action={updateAction} deleteAction={deleteAction} mode="edit" labels={s} />
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">Translations</h2>
+        <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">{t(s, "admin.stop.translations_section", "Translations")}</h2>
         <p className="text-xs text-brand-cream/45">
-          Edit name, area, and description in each non-English language. Blank = falls back to the default content.
+          {t(s, "admin.stop.translations_hint", "Edit name, area, and description in each non-English language. Blank = falls back to the default content.")}
         </p>
         <TranslationsEditor
           entityType="destination"
           entityId={stop.id}
           fields={STOP_FIELDS}
           existing={existingTranslations}
+          labels={s}
         />
       </section>
     </div>

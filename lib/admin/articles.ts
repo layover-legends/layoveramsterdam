@@ -7,7 +7,7 @@ export { ARTICLE_FILTERS } from "@/lib/admin/articles-types";
 const PAGE_SIZE = 25;
 
 const ARTICLE_SELECT =
-  "id, slug, title, excerpt, body_md, cover_url, meta_title, meta_description, is_published, published_at, author_id, created_at, updated_at";
+  "id, city_id, slug, title, excerpt, body_md, cover_url, meta_title, meta_description, is_published, published_at, author_id, created_at, updated_at";
 
 export type ArticlesListResult = {
   rows: Article[];

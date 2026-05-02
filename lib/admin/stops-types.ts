@@ -25,6 +25,7 @@ export type OpeningHour = {
 
 export type Stop = {
   id: string;
+  city_id: string;
   category_id: string | null;
   category_slug: string | null;
   category_name: string | null;

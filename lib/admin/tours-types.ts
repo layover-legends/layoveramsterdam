@@ -3,6 +3,7 @@
 
 export type Tour = {
   id: string;
+  city_id: string;
   name: string;
   slug: string;
   tagline: string | null;

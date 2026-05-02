@@ -3,6 +3,7 @@
 
 export type Article = {
   id: string;
+  city_id: string;
   slug: string;
   title: string;
   excerpt: string | null;

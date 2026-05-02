@@ -19,7 +19,7 @@ export { DAY_LABELS, STOP_FILTERS } from "@/lib/admin/stops-types";
 const PAGE_SIZE = 50;
 
 const STOP_SELECT = `
-  id, category_id, name, slug, area, description, latitude, longitude,
+  id, city_id, category_id, name, slug, area, description, latitude, longitude,
   is_active, is_adult_only, is_seasonal, requires_booking, wheelchair_accessible,
   meta_title, meta_description, created_at, updated_at,
   destination_categories ( name, slug ),
@@ -28,6 +28,7 @@ const STOP_SELECT = `
 
 type Row = {
   id: string;
+  city_id: string;
   category_id: string | null;
   name: string;
   slug: string;
@@ -53,6 +54,7 @@ function rowToStop(r: Row): Stop {
   const primary = photos.find((p) => p.is_primary)?.url ?? photos[0]?.url ?? null;
   return {
     id: r.id,
+    city_id: r.city_id,
     category_id: r.category_id,
     category_slug: r.destination_categories?.slug ?? null,
     category_name: r.destination_categories?.name ?? null,

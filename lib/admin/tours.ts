@@ -7,7 +7,7 @@ export { TOUR_FILTERS } from "@/lib/admin/tours-types";
 const PAGE_SIZE = 25;
 
 const TOUR_SELECT = `
-  id, name, slug, tagline, description, duration_hours, price_cents, currency,
+  id, city_id, name, slug, tagline, description, duration_hours, price_cents, currency,
   max_group_size, is_active, requires_booking, is_adult_only, is_seasonal,
   meta_title, meta_description, created_at, updated_at,
   tour_stops ( id )
@@ -15,6 +15,7 @@ const TOUR_SELECT = `
 
 type Row = {
   id: string;
+  city_id: string;
   name: string;
   slug: string;
   tagline: string | null;
@@ -37,6 +38,7 @@ type Row = {
 function rowToTour(r: Row): Tour {
   return {
     id: r.id,
+    city_id: r.city_id,
     name: r.name,
     slug: r.slug,
     tagline: r.tagline,

@@ -30,6 +30,19 @@
  *   Subsequent re-runs are nearly free since most rows are already filled.
  */
 
+// Auto-load .env.local so the script "just works" without a CLI flag.
+// loadEnvFile is Node 20.12+ / 21+ native — no external dotenv dep needed.
+import { loadEnvFile } from "node:process";
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
+for (const envPath of [".env.local", ".env"]) {
+  const abs = resolve(process.cwd(), envPath);
+  if (existsSync(abs)) {
+    try { loadEnvFile(abs); } catch { /* node <20.12 fallback: do nothing */ }
+    break;
+  }
+}
+
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { deepl, sourceHash } from "../lib/i18n/providers/deepl";
 import { loadGlossary } from "../lib/i18n/glossary";
@@ -51,7 +64,10 @@ interface Args {
 type EntityType = "destination" | "tour" | "article";
 const DEFAULT_ENTITIES: EntityType[] = ["destination", "tour", "article"];
 const FIELDS_BY_ENTITY: Record<EntityType, string[]> = {
-  destination: ["name", "description", "tagline", "area"],
+  // destinations.tagline does not exist; meta_title/meta_description live on
+  // the destinations row but we leave them out of bulk-translate by default
+  // (SEO meta is short and benefits from human curation; can add later).
+  destination: ["name", "description", "area"],
   tour: ["name", "description", "tagline"],
   article: ["title", "excerpt", "body_md", "meta_title", "meta_description"],
 };
@@ -149,7 +165,7 @@ async function loadSources(
     .select(["id", ...fields].join(","));
   if (error) throw new Error(`load ${entity}: ${error.message}`);
   return (data ?? []).map((row) => {
-    const r = row as Record<string, unknown>;
+    const r = row as unknown as Record<string, unknown>;
     const values: Record<string, string | null> = {};
     for (const f of fields) {
       const v = r[f];

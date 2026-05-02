@@ -7,6 +7,7 @@
 //   - skips AI rows whose source_hash matches the current source (no churn)
 //   - parallelises across locales (one Promise per target language)
 //   - never throws — caller can ignore the result, or surface it in the UI
+//   - always writes a translation_jobs row so the dashboard can audit outcomes
 
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
@@ -15,6 +16,8 @@ import { loadGlossary } from "./glossary";
 import type { Locale } from "./locales";
 
 type EntityKind = "destination" | "tour" | "article";
+
+export type TriggerSource = "admin_save" | "admin_button" | "cli_bulk" | "cron";
 
 const SOURCE_TABLE: Record<EntityKind, string> = {
   destination: "destinations",
@@ -28,9 +31,6 @@ const FIELDS_BY_KIND: Record<EntityKind, readonly string[]> = {
   article: ["title", "excerpt", "body_md"] as const,
 };
 
-// Target locales for auto-fill. FR is excluded by default because the
-// original seed content was curated French and we never want to clobber it
-// without explicit intent.
 const DEFAULT_TARGET_LOCALES: Locale[] = ["nl", "de", "es", "it", "pt", "zh"];
 
 export type AutoTranslateOptions = {
@@ -38,6 +38,10 @@ export type AutoTranslateOptions = {
   locales?: Locale[];
   /** If true, also re-translate rows where translated_by='human'. */
   overwriteHuman?: boolean;
+  /** Admin user UUID — written to translation_jobs.triggered_by. */
+  triggeredBy?: string;
+  /** Calling surface — written to translation_jobs.trigger_source. */
+  triggerSource?: TriggerSource;
 };
 
 export type AutoTranslateResult = {
@@ -53,6 +57,9 @@ export async function autoTranslateEntity(
   entityId: string,
   opts: AutoTranslateOptions = {},
 ): Promise<AutoTranslateResult> {
+  const startMs = Date.now();
+  const triggerSource = opts.triggerSource ?? "admin_save";
+
   const result: AutoTranslateResult = {
     ok: true,
     written: 0,
@@ -61,9 +68,17 @@ export async function autoTranslateEntity(
     perLocale: {},
   };
 
+  // ── DEEPL key guard — loud, not silent ──────────────────────────────────
   if (!process.env.DEEPL_API_KEY) {
+    console.error(
+      "[autoTranslateEntity] DEEPL_API_KEY missing on Vercel runtime — " +
+      "add it in Vercel project Settings → Environment Variables. " +
+      "Entity was NOT translated: %s %s (trigger=%s)",
+      kind, entityId, triggerSource,
+    );
     result.ok = false;
     result.errors.push("DEEPL_API_KEY not set in environment");
+    await writeJobRow({ kind, entityId, result, startMs, opts, triggerSource, deepl_chars: 0 });
     return result;
   }
 
@@ -80,6 +95,7 @@ export async function autoTranslateEntity(
   if (srcErr || !srcRow) {
     result.ok = false;
     result.errors.push(`source row not found: ${srcErr?.message ?? entityId}`);
+    await writeJobRow({ kind, entityId, result, startMs, opts, triggerSource, deepl_chars: 0 });
     return result;
   }
 
@@ -89,9 +105,12 @@ export async function autoTranslateEntity(
     const v = source[f];
     if (v && v.trim()) fieldTexts.push({ field: f, text: v, hash: sourceHash(v) });
   }
-  if (fieldTexts.length === 0) return result;
+  if (fieldTexts.length === 0) {
+    await writeJobRow({ kind, entityId, result, startMs, opts, triggerSource, deepl_chars: 0 });
+    return result;
+  }
 
-  // 2) Fetch existing translation rows so we can skip fresh ones + preserve human ones
+  // 2) Fetch existing rows to skip fresh AI and preserve human edits
   const { data: existingRows } = await supabase
     .from("translations")
     .select("field, language, source_hash, translated_by")
@@ -110,6 +129,8 @@ export async function autoTranslateEntity(
   }
 
   // 3) Translate each locale in parallel
+  let deepl_chars = 0;
+
   await Promise.allSettled(
     targets.map(async (locale) => {
       try {
@@ -117,7 +138,7 @@ export async function autoTranslateEntity(
           const have = existing.get(`${field}:${locale}`);
           if (!have) return true;
           if (have.translated_by === "human" && !opts.overwriteHuman) return false;
-          if (have.source_hash === hash) return false; // already up to date
+          if (have.source_hash === hash) return false;
           return true;
         });
 
@@ -128,12 +149,13 @@ export async function autoTranslateEntity(
         }
 
         const glossary = await loadGlossary(locale);
-        const { translations } = await deepl.translateBatch(
+        const { translations, charsBilled } = await deepl.translateBatch(
           toTranslate.map((x) => x.text),
           "en",
           locale,
           { glossary },
         );
+        deepl_chars += charsBilled;
 
         const upserts = toTranslate.map((x, i) => ({
           entity_type: kind,
@@ -163,13 +185,67 @@ export async function autoTranslateEntity(
   );
 
   if (result.errors.length > 0) result.ok = false;
+
+  // 4) Structured log — visible in Vercel function logs
+  const duration_ms = Date.now() - startMs;
+  console.log(
+    "[autoTranslateEntity] %s %s | trigger=%s | fields=%d locales=%s | " +
+    "written=%d skipped=%d ok=%s chars=%d duration=%dms%s",
+    kind, entityId, triggerSource,
+    fieldTexts.length, targets.join(","),
+    result.written, result.skipped, result.ok,
+    deepl_chars, duration_ms,
+    result.errors.length > 0 ? ` | errors=${JSON.stringify(result.errors)}` : "",
+  );
+
+  // 5) Persist job row for the dashboard
+  await writeJobRow({ kind, entityId, result, startMs, opts, triggerSource, deepl_chars });
+
   return result;
 }
 
+// ── Job-row writer (fire-and-log, never throws) ──────────────────────────────
+
+async function writeJobRow({
+  kind,
+  entityId,
+  result,
+  startMs,
+  opts,
+  triggerSource,
+  deepl_chars,
+}: {
+  kind: EntityKind;
+  entityId: string;
+  result: AutoTranslateResult;
+  startMs: number;
+  opts: AutoTranslateOptions;
+  triggerSource: TriggerSource;
+  deepl_chars: number;
+}) {
+  try {
+    const supabase = createClient();
+    await supabase.from("translation_jobs").insert({
+      entity_type:    kind,
+      entity_id:      entityId,
+      triggered_by:   opts.triggeredBy ?? null,
+      trigger_source: triggerSource,
+      written:        result.written,
+      skipped:        result.skipped,
+      errors:         result.errors,
+      per_locale:     result.perLocale,
+      duration_ms:    Date.now() - startMs,
+      deepl_chars,
+    });
+  } catch (e) {
+    // A job-log failure must never surface to the user.
+    console.error("[autoTranslateEntity] failed to write translation_jobs row:", e);
+  }
+}
+
 /**
- * When source content changes, mark every dependent translation row stale
- * EXCEPT the EN source mirror. Useful before re-running autoTranslateEntity
- * with intent to refresh.
+ * Mark every non-EN translation row stale for an entity so the next
+ * autoTranslateEntity call re-translates them.
  */
 export async function markAllTranslationsStale(
   kind: EntityKind,

@@ -147,7 +147,7 @@ async function storagePathFromUrl(url: string): Promise<string | null> {
 }
 
 export async function createStop(formData: FormData) {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const parsed = parseStop(formData);
   if (!parsed.ok) {
     redirect(`/admin/stops/new?error=${encodeURIComponent(parsed.error)}`);
@@ -165,11 +165,12 @@ export async function createStop(formData: FormData) {
     );
   }
 
-  // Auto-translate the new stop into all non-EN locales via DeepL.
-  // Wrapped in try/catch — never blocks the save if DeepL is down.
   let translateStatus = "ok";
   try {
-    const r = await autoTranslateEntity("destination", inserted.id);
+    const r = await autoTranslateEntity("destination", inserted.id, {
+      triggeredBy: admin.id,
+      triggerSource: "admin_save",
+    });
     if (!r.ok) translateStatus = "partial";
   } catch {
     translateStatus = "failed";
@@ -181,7 +182,7 @@ export async function createStop(formData: FormData) {
 }
 
 export async function updateStop(id: string, formData: FormData) {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const parsed = parseStop(formData);
   if (!parsed.ok) {
     redirect(`/admin/stops/${id}?error=${encodeURIComponent(parsed.error)}`);
@@ -198,11 +199,12 @@ export async function updateStop(id: string, formData: FormData) {
     );
   }
 
-  // Re-translate any fields whose source changed. autoTranslateEntity skips
-  // unchanged AI rows (source_hash match) and never overwrites human rows.
   let translateStatus = "ok";
   try {
-    const r = await autoTranslateEntity("destination", id);
+    const r = await autoTranslateEntity("destination", id, {
+      triggeredBy: admin.id,
+      triggerSource: "admin_save",
+    });
     if (!r.ok) translateStatus = "partial";
   } catch {
     translateStatus = "failed";

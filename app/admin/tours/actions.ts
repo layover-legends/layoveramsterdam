@@ -131,7 +131,7 @@ function parseTour(
 }
 
 export async function createTour(formData: FormData) {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const parsed = parseTour(formData);
   if (!parsed.ok) {
     redirect(`/admin/tours/new?error=${encodeURIComponent(parsed.error)}`);
@@ -149,10 +149,12 @@ export async function createTour(formData: FormData) {
     );
   }
 
-  // Auto-translate the new tour into all non-EN locales via DeepL.
   let translateStatus = "ok";
   try {
-    const r = await autoTranslateEntity("tour", inserted.id);
+    const r = await autoTranslateEntity("tour", inserted.id, {
+      triggeredBy: admin.id,
+      triggerSource: "admin_save",
+    });
     if (!r.ok) translateStatus = "partial";
   } catch {
     translateStatus = "failed";
@@ -163,7 +165,7 @@ export async function createTour(formData: FormData) {
 }
 
 export async function updateTour(id: string, formData: FormData) {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const parsed = parseTour(formData);
   if (!parsed.ok) {
     redirect(`/admin/tours/${id}?error=${encodeURIComponent(parsed.error)}`);
@@ -177,11 +179,12 @@ export async function updateTour(id: string, formData: FormData) {
     );
   }
 
-  // Re-translate any fields whose source actually changed (source_hash check
-  // inside autoTranslateEntity skips fresh AI rows automatically).
   let translateStatus = "ok";
   try {
-    const r = await autoTranslateEntity("tour", id);
+    const r = await autoTranslateEntity("tour", id, {
+      triggeredBy: admin.id,
+      triggerSource: "admin_save",
+    });
     if (!r.ok) translateStatus = "partial";
   } catch {
     translateStatus = "failed";

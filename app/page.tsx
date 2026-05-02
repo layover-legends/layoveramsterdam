@@ -169,12 +169,21 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
             <HeroFlightForm cityId={cityId} formAction={createLayover} />
 
-            <p className="text-xs text-warm-cream/30">
-              Already planned your layover?{" "}
-              <Link href="/tours" prefetch={false} className="text-legend-gold hover:text-gold-light underline underline-offset-2 transition-colors">
-                Browse all tours →
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1">
+              <p className="text-xs text-warm-cream/30">
+                Already planned your layover?{" "}
+                <Link href="/tours" prefetch={false} className="text-legend-gold hover:text-gold-light underline underline-offset-2 transition-colors">
+                  Browse all tours →
+                </Link>
+              </p>
+              <span className="hidden sm:block text-warm-cream/15 text-xs">or</span>
+              <Link
+                href="/builder?layover=auto"
+                className="text-xs text-warm-cream/50 hover:text-legend-gold transition-colors flex items-center gap-1"
+              >
+                🎯 Build my own route
               </Link>
-            </p>
+            </div>
           </div>
 
           {/* Scroll indicator */}

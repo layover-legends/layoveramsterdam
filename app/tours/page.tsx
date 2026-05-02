@@ -60,6 +60,25 @@ export default async function ToursPage() {
           </p>
         </header>
 
+        {/* Build-my-own banner */}
+        <Link
+          href="/builder?layover=auto"
+          className="flex flex-col sm:flex-row items-start sm:items-center gap-4 rounded-2xl border border-legend-gold/20 bg-legend-gold/5 px-6 py-5 hover:bg-legend-gold/10 hover:border-legend-gold/40 transition-colors group"
+        >
+          <span className="text-2xl">🎯</span>
+          <div className="flex-1">
+            <p className="font-semibold text-warm-cream group-hover:text-legend-gold transition-colors">
+              Build my own route
+            </p>
+            <p className="text-sm text-warm-cream/55 mt-0.5">
+              Pick your own stops and we&apos;ll optimize the order. Free, takes 2 minutes.
+            </p>
+          </div>
+          <span className="text-legend-gold/60 text-sm font-medium shrink-0 group-hover:text-legend-gold transition-colors">
+            Start →
+          </span>
+        </Link>
+
         {tours.length === 0 ? (
           <p className="text-center text-warm-cream/50 py-20">
             {t(s, "tours.index.empty", "No tours available yet. Check back soon.")}

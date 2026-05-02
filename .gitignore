@@ -34,3 +34,7 @@ yarn-error.log*
 next-env.d.ts
 .claude/settings.local.json
 .claude/prompts/
+
+# Lighthouse reports (contain secrets in network logs)
+*.report.html
+

@@ -201,6 +201,14 @@ export const UI_STRINGS = {
   "admin.users.title":                     "Users",
 
   // ── Admin — SEO dashboard ─────────────────────────────────────────────────
+  "admin.seo.card.desc_too_long":          "description > 160 chars",
+  "admin.seo.card.desc_too_short":         "description < 50 chars",
+  "admin.seo.card.duplicate_slugs":        "duplicate slugs",
+  "admin.seo.card.missing_alt":            "photos without alt text",
+  "admin.seo.card.missing_coords":         "missing coordinates",
+  "admin.seo.card.missing_description":    "missing description",
+  "admin.seo.card.missing_primary_photo":  "missing primary photo",
+  "admin.seo.card.missing_tagline":        "missing tagline",
   "admin.seo.all_articles_healthy":        "All articles are healthy. Nothing to fix.",
   "admin.seo.all_dests_healthy":           "All destinations are healthy. Nothing to fix.",
   "admin.seo.all_tours_healthy":           "All tours are healthy. Nothing to fix.",

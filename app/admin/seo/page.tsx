@@ -165,14 +165,14 @@ export default async function AdminSeoPage({ searchParams }: PageProps) {
             <HealthBadge healthy={dest.healthy} total={dest.total} />
           </div>
           <ul className="text-sm text-brand-cream/75 space-y-1">
-            <li>{dest.counts.missing_description} missing description</li>
-            <li>{dest.counts.description_too_short} description &lt; 50 chars</li>
-            <li>{dest.counts.description_too_long} description &gt; 160 chars</li>
-            <li>{dest.counts.missing_primary_photo} missing primary photo</li>
-            <li>{dest.counts.missing_alt_text} photos without alt text</li>
-            <li>{dest.counts.missing_coords} missing coordinates</li>
+            <li>{dest.counts.missing_description} {t(s, "admin.seo.card.missing_description", "missing description")}</li>
+            <li>{dest.counts.description_too_short} {t(s, "admin.seo.card.desc_too_short", "description < 50 chars")}</li>
+            <li>{dest.counts.description_too_long} {t(s, "admin.seo.card.desc_too_long", "description > 160 chars")}</li>
+            <li>{dest.counts.missing_primary_photo} {t(s, "admin.seo.card.missing_primary_photo", "missing primary photo")}</li>
+            <li>{dest.counts.missing_alt_text} {t(s, "admin.seo.card.missing_alt", "photos without alt text")}</li>
+            <li>{dest.counts.missing_coords} {t(s, "admin.seo.card.missing_coords", "missing coordinates")}</li>
             {dest.counts.duplicate_slug > 0 && (
-              <li className="text-red-200">{dest.counts.duplicate_slug} duplicate slugs ⚠️</li>
+              <li className="text-red-200">{dest.counts.duplicate_slug} {t(s, "admin.seo.card.duplicate_slugs", "duplicate slugs")} ⚠️</li>
             )}
           </ul>
         </div>
@@ -188,10 +188,10 @@ export default async function AdminSeoPage({ searchParams }: PageProps) {
             <HealthBadge healthy={tours.healthy} total={tours.total} />
           </div>
           <ul className="text-sm text-brand-cream/75 space-y-1">
-            <li>{tours.counts.missing_tagline} missing tagline</li>
-            <li>{tours.counts.missing_description} missing description</li>
-            <li>{tours.counts.description_too_short} description &lt; 50 chars</li>
-            <li>{tours.counts.description_too_long} description &gt; 160 chars</li>
+            <li>{tours.counts.missing_tagline} {t(s, "admin.seo.card.missing_tagline", "missing tagline")}</li>
+            <li>{tours.counts.missing_description} {t(s, "admin.seo.card.missing_description", "missing description")}</li>
+            <li>{tours.counts.description_too_short} {t(s, "admin.seo.card.desc_too_short", "description < 50 chars")}</li>
+            <li>{tours.counts.description_too_long} {t(s, "admin.seo.card.desc_too_long", "description > 160 chars")}</li>
           </ul>
         </div>
       </section>

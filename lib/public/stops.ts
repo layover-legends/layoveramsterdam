@@ -25,10 +25,11 @@ export type StopsTeaser = {
   featured: FeaturedStop[];
 };
 
-// Stable identifiers — slugs survive source-language flips. Update this list
-// to curate which stops appear in the homepage featured grid. Eight slots,
-// pick whatever mix makes sense.
-const FEATURED_SLUGS = [
+// Featured slugs — used IF they exist in the DB. Anything missing gets
+// gracefully replaced by the first eight active free stops with a primary
+// photo. So the homepage never shows an empty featured grid even when slugs
+// drift after a source-language flip or admin renames.
+const FEATURED_SLUGS_PREFERRED = [
   "dam-square",
   "vondelpark",
   "albert-cuyp-market",
@@ -38,6 +39,7 @@ const FEATURED_SLUGS = [
   "gvb-ferry",
   "oba-rooftop",
 ];
+const FEATURED_TARGET_COUNT = 8;
 
 /**
  * Public-facing teaser: free destinations only (requires_booking=false,
@@ -66,13 +68,14 @@ export async function getStopsTeaser(): Promise<StopsTeaser> {
       .eq("is_active", true)
       .eq("requires_booking", false)
       .eq("is_adult_only", false),
+    // Try preferred slugs first.
     supabase
       .from("destinations")
       .select(baseSelect)
       .eq("is_active", true)
       .eq("requires_booking", false)
       .eq("is_adult_only", false)
-      .in("slug", FEATURED_SLUGS),
+      .in("slug", FEATURED_SLUGS_PREFERRED),
   ]);
 
   if (allRes.error || !allRes.data) {
@@ -121,7 +124,20 @@ export async function getStopsTeaser(): Promise<StopsTeaser> {
     .filter((c) => c.count > 0)
     .sort((a, b) => b.count - a.count);
 
-  const featuredRaw = (featuredRes.data ?? []) as unknown as Row[];
+  let featuredRaw = (featuredRes.data ?? []) as unknown as Row[];
+
+  // Self-healing fallback: if preferred slugs returned fewer than the
+  // target, pad with the first stops that have a primary photo. Means the
+  // homepage never shows an empty grid after a source-language flip or
+  // admin rename.
+  if (featuredRaw.length < FEATURED_TARGET_COUNT) {
+    const seen = new Set(featuredRaw.map((r) => r.id));
+    const candidates = allRows
+      .filter((r) => !seen.has(r.id))
+      .filter((r) => (r.stop_photos ?? []).some((p) => p.is_primary))
+      .slice(0, FEATURED_TARGET_COUNT - featuredRaw.length);
+    featuredRaw = [...featuredRaw, ...candidates];
+  }
 
   // Load translations for the active locale for these featured rows.
   const bundle = await loadTranslations(
@@ -129,10 +145,10 @@ export async function getStopsTeaser(): Promise<StopsTeaser> {
     locale,
   );
 
-  // Re-order to match FEATURED_SLUGS so the homepage card grid stays in the
-  // curated order regardless of DB return order.
+  // Re-order: preferred slugs first (in their listed order), then any
+  // self-healing fallbacks after. Keeps the grid stable when slugs match.
   const orderIndex = new Map<string, number>(
-    FEATURED_SLUGS.map((slug, i) => [slug, i]),
+    FEATURED_SLUGS_PREFERRED.map((slug, i) => [slug, i]),
   );
   featuredRaw.sort(
     (a, b) =>

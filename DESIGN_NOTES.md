@@ -36,6 +36,7 @@ on scroll, shimmer on price). The brand PDF doesn't address this — without
 spec, motion ends up inconsistent across pages. Define 4 motion tokens in
 `tailwind.config.ts`: `fade-in-up`, `tour-card-hover`, `price-shimmer`,
 `cta-pulse`.
+**✅ `6ec0441`** — `tailwind.config.ts` extended with `animation` + `keyframes`: `fade-in-up`, `price-shimmer`, `cta-pulse`. Tour card hover is CSS transition (no token needed).
 
 ### B4. Spec empty / error / loading states
 **Phase**: 7c onwards · **Priority**: MEDIUM
@@ -53,6 +54,7 @@ Wireframe 01 has 8 sections above the CTA. Mobile users mid-flight have
 ~3 seconds before they bounce. Above-the-fold should be: logo + flight
 form + 1 trust signal ("Insured · 4.9★ · 100% on-time"). Push social proof,
 how-it-works, tours, map, reviews, CTA all below.
+**✅ `a7733b9`** — New homepage: eyebrow + H1 + subtitle + `HeroFlightForm` + trust strip above the fold. All other sections below.
 
 ### W2. Add scarcity / urgency to tour cards
 **Phase**: 7c or 8 · **Priority**: HIGH
@@ -60,6 +62,7 @@ Tourism converts on FOMO. GetYourGuide, Tiqets, Viator all show "3 spots
 left for tomorrow's 9am" or "Booked 12 times this week." Wireframe 01
 doesn't. Add `availability_today`, `bookings_this_week` columns to tours
 table; show as badges.
+**Partial ✅ `6ec0441`** — "Limited spots available" static badge in `TourCard.tsx`. Live inventory columns (`availability_today`, `bookings_this_week`) still needed on `tours` table — slot into Phase 8 with booking flow.
 
 ### W3. Demote "Save for later" in Tour Builder
 **Phase**: 8 · **Priority**: MEDIUM

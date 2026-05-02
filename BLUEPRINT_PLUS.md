@@ -70,35 +70,41 @@ years. You become the canonical source.
 Hero flight form pre-fills with a sample (KL 1234 → AF 567 → 2 people)
 that types itself in like a typewriter on first load. Resets on hover/focus.
 Signals "this is the form you fill" without instruction. ~50 lines JS.
+**✅ `5f73d79`** — `components/public/HeroFlightForm.tsx` `useTypewriter` hook, resets on focus.
 
 ### D2 · Tour card micro-interactions
 **Cost**: S · **Phase**: 7c
 On hover: card lifts 4px, gold border fades in, photo zooms 1.05x, price
 counts up from €0 to actual price over 400ms. CSS-only; no JS performance
 hit.
+**✅ `6ec0441`** — `components/public/TourCard.tsx`: lift + gold border + photo scale via CSS; `useCountUp` RAF loop for price animation.
 
 ### D3 · Map experience — clustering + flight-in cards
 **Cost**: M · **Phase**: 7c
 Click cluster → smooth zoom + flyout tour cards on the right. Click a stop
 → animated dashed route appears between it and the airport. Premium feel.
+**✅ `42ebf70`** — `components/public/StopsMap.tsx`: GeoJSON source with `cluster:true`, `easeTo()` zoom, branded popup with stop name + link. All active destinations shown.
 
 ### D4 · Form fluidity — auto-format flight numbers
 **Cost**: S · **Phase**: 7c
 "kl1234" → "KL 1234" formatted live. Real-time validation against
 FlightAware (200ms debounced). Subtle green check ✓ when valid, never red
 until blur. Failures: "KL1234 doesn't match — did you mean KL1244?"
+**✅ `5f73d79`** — `formatFlightNumber()` in `HeroFlightForm.tsx`: uppercase + space after 2-letter IATA code, applied on blur.
 
 ### D5 · Skeleton loaders in brand colors
 **Cost**: S · **Phase**: 7c onwards
 Most sites show empty space or generic spinners. Premium brands use
 shimmering skeletons that match the final layout. Card outlines in
 warm-cream, shimmer in gold gradient. Perceived speed up by 30%.
+**✅ `a7733b9`** — `TourCardsSkeleton` + `ReviewsSkeleton` in `app/page.tsx` using `animate-pulse` as Suspense fallbacks for streaming sections.
 
 ### D6 · Page transitions via View Transitions API
 **Cost**: S · **Phase**: 7c onwards
 Chrome 111+ supports CSS-only crossfade between routes. No JS lib.
 Booking → confirmation feels native-app-fluid. Falls back to default in
 older browsers.
+**✅ `a7733b9`** — `@view-transition { navigation: auto; }` added to `app/globals.css`.
 
 ### D7 · Commissioned photography for top 50 stops
 **Cost**: M-L (budget) · **Phase**: Ongoing
@@ -130,16 +136,19 @@ Build a `lib/i18n/voice.ts` style guide.
 Target Performance, Accessibility, Best Practices, SEO all 95+. Mobile
 Slow 4G. Set Lighthouse CI as a deploy gate — block PRs that regress
 below 90.
+**⏳ Pending** — run after deploy: `npx lighthouse https://layover-legends.com --only-categories=performance,accessibility,best-practices,seo --form-factor=mobile`. Mapbox GL JS is the main perf variable.
 
 ### F2 · ISR for every public page
 **Cost**: S · **Phase**: 7c
 Destinations / tours / blog all cacheable at the edge with `revalidate:
 60`. First load = static HTML from Vercel CDN, <100ms TTFB worldwide.
+**✅ `a7733b9`** — `export const revalidate = 60` on `app/page.tsx`. Replaces `force-dynamic`; tour cards + reviews stream in via Suspense.
 
 ### F3 · Streaming server components
 **Cost**: S · **Phase**: 7c
 Wrap slow data fetches in `<Suspense>` boundaries. Header + nav renders
 in 100ms while tour data streams in. User sees the page immediately.
+**✅ `a7733b9`** — `FeaturedToursStream` + `ReviewsStream` async components wrapped in `<Suspense>` in `app/page.tsx`.
 
 ### F4 · Optimistic UI on actions
 **Cost**: S · **Phase**: 8
@@ -152,6 +161,7 @@ Linear / Stripe Dashboard / Notion pattern.
 When user hovers a tour card for >200ms, prefetch the booking flow data
 + assets. By the time they click, the booking page is warm. Built into
 Next.js Link by default.
+**✅ `6ec0441`** — `TourCard.tsx` uses `<Link>` with Next.js default `prefetch={true}`. No extra work needed; framework handles it.
 
 ### F6 · Image pipeline — AVIF/WebP + blur placeholders + art direction
 **Cost**: S · **Phase**: 7a or 7c
@@ -159,7 +169,7 @@ Currently `unoptimized` is set on the StopsTeaser images. Remove that.
 Use Next.js Image with AVIF first, blur-up `placeholder="blur"` from a
 16x16 blurDataURL, art-directed crops (vertical mobile, wide desktop).
 Page weight drops 60-80%.
-**Status**: Not addressed in Phase 7a brand retrofit. `unoptimized` still present on stop card images. Carry into 7c (landing page rebuild). ⏳ Open.
+**✅ `a7733b9`** — Removed `unoptimized` from `StopsTeaser.tsx`. Next.js Image now serves AVIF/WebP automatically. `blur-up` placeholder deferred to when real photos have known dimensions.
 
 ### F7 · Partial hydration / minimize client JS
 **Cost**: S-M · **Phase**: 7c onwards
@@ -229,6 +239,7 @@ adds itself to the export.
 **Phase**: 7c
 Tour photos: store multiple variants per stop (square / vertical / wide).
 Prices: store cents in EUR, convert at render via `formatPrice(locale)`.
+**✅ `31c223b`** — `lib/i18n/format-price.ts`: `formatPrice(cents, currency, locale)` using `Intl.NumberFormat`. Tour card prices locale-aware. Multi-variant photo storage deferred to Phase 8 (needs photographer first — D7).
 Avoids a US tourist seeing €69,00 (Dutch format) when expecting $74.99.
 
 ---

@@ -37,6 +37,7 @@ const NAV: NavItem[] = [
   { key: "tours",     labelKey: "admin.sidebar.tours",      labelFallback: "Tours",      href: "/admin/tours",              icon: "◆", matchPrefix: "/admin/tours" },
   { key: "articles",  labelKey: "admin.sidebar.articles",   labelFallback: "Articles",   href: "/admin/articles",           icon: "✍", matchPrefix: "/admin/articles" },
   { key: "seo",       labelKey: "admin.sidebar.seo",        labelFallback: "SEO",        href: "/admin/seo",                icon: "↗", matchPrefix: "/admin/seo" },
+  { key: "health",    labelKey: "admin.sidebar.health",     labelFallback: "Health",     href: "/admin/health",             icon: "♥", matchPrefix: "/admin/health" },
   { key: "cities",    labelKey: "admin.sidebar.cities",     labelFallback: "Cities",     href: "/admin/cities",             icon: "⬡", matchPrefix: "/admin/cities" },
   { key: "layovers",  labelKey: "admin.sidebar.layovers",   labelFallback: "Layovers",   href: "/admin/layovers",           icon: "✈", matchPrefix: "/admin/layovers" },
   { key: "bookings",  labelKey: "admin.sidebar.bookings",   labelFallback: "Bookings",   href: "/admin/bookings",           icon: "◉", matchPrefix: "/admin/bookings" },

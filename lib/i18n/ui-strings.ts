@@ -221,6 +221,7 @@ export const UI_STRINGS = {
   "admin.sidebar.overview":               "Overview",
   "admin.sidebar.paid_stops":             "Paid stops",
   "admin.sidebar.seo":                     "SEO",
+  "admin.sidebar.health":                  "Health",
   "admin.sidebar.signout":                 "Sign out",
   "admin.sidebar.tours":                   "Tours",
   "admin.sidebar.users":                   "Users",

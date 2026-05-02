@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { autoTranslateEntity } from "@/lib/i18n/auto-translate";
 
 const MAX_TITLE = 200;
 const MAX_EXCERPT = 280;
@@ -66,7 +67,7 @@ function parseArticle(
 }
 
 export async function createArticle(formData: FormData) {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const parsed = parseArticle(formData);
   if (!parsed.ok) redirect(`/admin/articles/new?error=${encodeURIComponent(parsed.error)}`);
 
@@ -88,13 +89,25 @@ export async function createArticle(formData: FormData) {
   if (error || !inserted)
     redirect(`/admin/articles/new?error=${encodeURIComponent(error?.message ?? "Could not create article.")}`);
 
+  // Auto-translate the new article into all non-EN locales via DeepL.
+  let translateStatus = "ok";
+  try {
+    const r = await autoTranslateEntity("article", inserted.id, {
+      triggeredBy: admin.id,
+      triggerSource: "admin_save",
+    });
+    if (!r.ok) translateStatus = "partial";
+  } catch {
+    translateStatus = "failed";
+  }
+
   revalidatePath("/admin/articles");
   revalidatePath("/blog");
-  redirect(`/admin/articles/${inserted.id}?saved=1`);
+  redirect(`/admin/articles/${inserted.id}?saved=1&i18n=${translateStatus}`);
 }
 
 export async function updateArticle(id: string, formData: FormData) {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const parsed = parseArticle(formData);
   if (!parsed.ok) redirect(`/admin/articles/${id}?error=${encodeURIComponent(parsed.error)}`);
 
@@ -129,11 +142,24 @@ export async function updateArticle(id: string, formData: FormData) {
   if (error)
     redirect(`/admin/articles/${id}?error=${encodeURIComponent("Save failed: " + error.message)}`);
 
+  // Re-translate any fields whose source actually changed (source_hash check
+  // inside autoTranslateEntity skips fresh AI rows automatically).
+  let translateStatus = "ok";
+  try {
+    const r = await autoTranslateEntity("article", id, {
+      triggeredBy: admin.id,
+      triggerSource: "admin_save",
+    });
+    if (!r.ok) translateStatus = "partial";
+  } catch {
+    translateStatus = "failed";
+  }
+
   revalidatePath("/admin/articles");
   revalidatePath(`/admin/articles/${id}`);
   revalidatePath("/blog");
   revalidatePath(`/blog/${parsed.data.slug}`);
-  redirect(`/admin/articles/${id}?saved=1`);
+  redirect(`/admin/articles/${id}?saved=1&i18n=${translateStatus}`);
 }
 
 export async function deleteArticle(id: string) {

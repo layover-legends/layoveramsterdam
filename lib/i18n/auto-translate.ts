@@ -31,7 +31,9 @@ const FIELDS_BY_KIND: Record<EntityKind, readonly string[]> = {
   article: ["title", "excerpt", "body_md"] as const,
 };
 
-const DEFAULT_TARGET_LOCALES: Locale[] = ["nl", "de", "es", "it", "pt", "zh"];
+// Includes 'fr' — historically excluded because seed content was already in
+// French, but post source-flip the source is EN so FR also needs translation.
+const DEFAULT_TARGET_LOCALES: Locale[] = ["fr", "nl", "de", "es", "it", "pt", "zh"];
 
 export type AutoTranslateOptions = {
   /** Override target locales. Default: nl/de/es/it/pt/zh. */

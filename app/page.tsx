@@ -74,6 +74,25 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const adminOnly = searchParams?.admin_only === "1";
   const year = String(new Date().getFullYear());
 
+  // Build GDPR notice with inline links (server-rendered, no client JS needed).
+  const gdprNotice = (
+    <>
+      {t(strings, "auth.gdpr_notice", "By signing in, you agree to our {privacy} and {terms}.")
+        .split("{privacy}")[0]}
+      <Link href="/legal/privacy" className="underline underline-offset-2 hover:text-brand-cream/70">
+        {t(strings, "auth.gdpr_privacy", "Privacy Policy")}
+      </Link>
+      {t(strings, "auth.gdpr_notice", "By signing in, you agree to our {privacy} and {terms}.")
+        .split("{privacy}")[1]
+        ?.split("{terms}")[0]}
+      <Link href="/legal/terms" className="underline underline-offset-2 hover:text-brand-cream/70">
+        {t(strings, "auth.gdpr_terms", "Terms of Service")}
+      </Link>
+      {t(strings, "auth.gdpr_notice", "By signing in, you agree to our {privacy} and {terms}.")
+        .split("{terms}")[1]}
+    </>
+  );
+
   return (
     <>
     <StructuredData data={[organizationLd(), websiteLd()]} />
@@ -118,6 +137,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             <SignInWithGoogle
               label={t(strings, "auth.signin_google", "Sign in with Google for early access")}
               loadingLabel={t(strings, "auth.redirecting", "Redirecting…")}
+              gdprNotice={gdprNotice}
             />
           )}
           <p className="text-xs text-brand-cream/60 max-w-sm">
@@ -150,12 +170,27 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
       <StopsTeaser data={stopsTeaser} strings={strings} />
 
-      <div className="text-xs text-brand-cream/50 pt-12 pb-2 text-center">
-        {tpl(
-          t(strings, "footer.copyright", "© {year} Layover Amsterdam. All rights reserved."),
-          { year },
-        )}
-      </div>
+      <footer className="text-xs text-brand-cream/50 pt-12 pb-4 text-center space-y-2">
+        <div>
+          {tpl(
+            t(strings, "footer.copyright", "© {year} Layover Amsterdam. All rights reserved."),
+            { year },
+          )}
+        </div>
+        <nav className="flex items-center justify-center gap-4">
+          <Link href="/legal/privacy" className="hover:text-brand-cream/80 transition-colors">
+            {t(strings, "footer.privacy", "Privacy policy")}
+          </Link>
+          <span aria-hidden="true">·</span>
+          <Link href="/legal/terms" className="hover:text-brand-cream/80 transition-colors">
+            {t(strings, "footer.terms", "Terms of service")}
+          </Link>
+          <span aria-hidden="true">·</span>
+          <Link href="/legal/cancellation" className="hover:text-brand-cream/80 transition-colors">
+            {t(strings, "footer.cancellation", "Cancellation policy")}
+          </Link>
+        </nav>
+      </footer>
     </main>
     </>
   );

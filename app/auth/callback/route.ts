@@ -10,8 +10,18 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { error, data } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      // Stamp GDPR consent on first login (GDPR Art. 7).
+      // The privacy notice is shown on the homepage before the user clicks
+      // "Sign in with Google", so proceeding constitutes informed consent.
+      if (data.user) {
+        await supabase
+          .from("users")
+          .update({ gdpr_accepted_at: new Date().toISOString() })
+          .eq("id", data.user.id)
+          .is("gdpr_accepted_at", null); // only stamp on first login
+      }
       return NextResponse.redirect(`${origin}${next}`);
     }
   }

@@ -7,11 +7,14 @@ type Props = {
   /** Resolved server-side and passed down; falls back to English. */
   label?: string;
   loadingLabel?: string;
+  /** GDPR notice rendered below the button. Built server-side with links. */
+  gdprNotice?: React.ReactNode;
 };
 
 export default function SignInWithGoogle({
   label = "Sign in with Google for early access",
   loadingLabel = "Redirecting…",
+  gdprNotice,
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,6 +52,11 @@ export default function SignInWithGoogle({
         <GoogleLogo />
         <span>{loading ? loadingLabel : label}</span>
       </button>
+      {gdprNotice && (
+        <p className="text-[11px] text-brand-cream/45 max-w-xs text-center">
+          {gdprNotice}
+        </p>
+      )}
       {error && (
         <p className="text-xs text-red-300" role="alert">
           {error}

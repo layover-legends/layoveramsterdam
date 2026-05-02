@@ -31,7 +31,7 @@ export async function getBookingForUser(
 
   if (error || !data) return null;
 
-  const tour = data.tours as { name: string; slug: string } | null;
+  const tour = data.tours as unknown as { name: string; slug: string } | null;
 
   return {
     id: data.id,

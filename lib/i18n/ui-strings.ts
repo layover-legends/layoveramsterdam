@@ -451,6 +451,66 @@ export const UI_STRINGS = {
   "admin.tourStopsEditor.saving":          "Saving…",
   "admin.tourStopsEditor.searching":       "Searching…",
   "admin.tourStopsEditor.search_placeholder": "Search destinations to add…",
+
+  // ── Admin — sidebar Phase 7b entries ──────────────────────────────────────
+  "admin.sidebar.bookings":                "Bookings",
+  "admin.sidebar.cities":                  "Cities",
+  "admin.sidebar.layovers":               "Layovers",
+  "admin.sidebar.partners":               "Partners",
+  "admin.sidebar.souvenirs":               "Souvenirs",
+  "admin.sidebar.staff":                   "Staff",
+
+  // ── Admin — cities ────────────────────────────────────────────────────────
+  "admin.cities.col_airport":              "Airport",
+  "admin.cities.col_country":             "Country",
+  "admin.cities.col_currency":            "Currency",
+  "admin.cities.col_name":                "City",
+  "admin.cities.col_status":              "Status",
+  "admin.cities.empty_default":            "No cities yet.",
+  "admin.cities.title":                    "Cities",
+
+  // ── Admin — layovers ─────────────────────────────────────────────────────
+  "admin.layovers.col_created":            "Created",
+  "admin.layovers.col_flights":            "Flights",
+  "admin.layovers.col_party":             "Party",
+  "admin.layovers.col_status":            "Status",
+  "admin.layovers.col_user":              "User",
+  "admin.layovers.empty_default":          "No layovers yet.",
+  "admin.layovers.title":                  "Layovers",
+
+  // ── Admin — bookings ─────────────────────────────────────────────────────
+  "admin.bookings.col_party":             "Party",
+  "admin.bookings.col_pickup":            "Pickup",
+  "admin.bookings.col_status":            "Status",
+  "admin.bookings.col_total":             "Total",
+  "admin.bookings.col_tour":              "Tour",
+  "admin.bookings.empty_default":          "No bookings yet.",
+  "admin.bookings.revenue_label":          "Revenue (shown)",
+  "admin.bookings.title":                  "Bookings",
+
+  // ── Admin — staff ─────────────────────────────────────────────────────────
+  "admin.staff.col_certified":             "Certified",
+  "admin.staff.col_person":               "Person",
+  "admin.staff.col_role":                 "Role",
+  "admin.staff.col_status":               "Status",
+  "admin.staff.empty_default":             "No staff yet.",
+  "admin.staff.title":                     "Staff",
+
+  // ── Admin — partners ─────────────────────────────────────────────────────
+  "admin.partners.col_commission":         "Commission",
+  "admin.partners.col_name":              "Partner",
+  "admin.partners.col_status":            "Status",
+  "admin.partners.col_type":              "Type",
+  "admin.partners.empty_default":          "No partners yet.",
+  "admin.partners.title":                  "Partners",
+
+  // ── Admin — souvenirs ────────────────────────────────────────────────────
+  "admin.souvenirs.col_booking":           "Booking",
+  "admin.souvenirs.col_has_ai":            "AI text",
+  "admin.souvenirs.col_pdf":              "PDF",
+  "admin.souvenirs.col_photos":            "Photos",
+  "admin.souvenirs.empty_default":         "No souvenirs yet.",
+  "admin.souvenirs.title":                 "Souvenirs",
 } as const;
 
 export type UIStringKey = keyof typeof UI_STRINGS;

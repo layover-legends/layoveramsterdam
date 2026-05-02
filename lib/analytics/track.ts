@@ -26,7 +26,7 @@ export function track(
   const h = headers();
   const supabase = createAdminClient();
 
-  supabase
+  void supabase
     .from("analytics_events")
     .insert({
       event_name,
@@ -40,6 +40,5 @@ export function track(
       user_agent: h.get("user-agent") ?? null,
       ip_country: h.get("x-vercel-ip-country") ?? null,
     })
-    .then(() => {})
-    .catch(() => {});
+    .then();
 }

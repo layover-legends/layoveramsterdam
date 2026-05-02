@@ -29,14 +29,20 @@ type NavItem = {
 };
 
 const NAV: NavItem[] = [
-  { key: "overview", labelKey: "admin.sidebar.overview",   labelFallback: "Overview",   href: "/admin",                    icon: "▦", matchPrefix: "/admin" },
-  { key: "users",    labelKey: "admin.sidebar.users",      labelFallback: "Users",      href: "/admin/users",              icon: "◇", matchPrefix: "/admin/users" },
-  { key: "stops",    labelKey: "admin.sidebar.free_stops", labelFallback: "Free stops", href: "/admin/stops?filter=free",  icon: "✦", matchPrefix: "/admin/stops", filterKey: "filter", filterValue: "free" },
-  { key: "paid",     labelKey: "admin.sidebar.paid_stops", labelFallback: "Paid stops", href: "/admin/stops?filter=paid",  icon: "€", matchPrefix: "/admin/stops", filterKey: "filter", filterValue: "paid" },
-  { key: "adult",    labelKey: "admin.sidebar.after_dark", labelFallback: "After Dark", href: "/admin/stops?filter=adult", icon: "🌙", matchPrefix: "/admin/stops", filterKey: "filter", filterValue: "adult" },
-  { key: "tours",    labelKey: "admin.sidebar.tours",      labelFallback: "Tours",      href: "/admin/tours",              icon: "◆", matchPrefix: "/admin/tours" },
-  { key: "articles", labelKey: "admin.sidebar.articles",   labelFallback: "Articles",   href: "/admin/articles",           icon: "✍", matchPrefix: "/admin/articles" },
-  { key: "seo",      labelKey: "admin.sidebar.seo",        labelFallback: "SEO",        href: "/admin/seo",                icon: "↗", matchPrefix: "/admin/seo" },
+  { key: "overview",  labelKey: "admin.sidebar.overview",   labelFallback: "Overview",   href: "/admin",                    icon: "▦", matchPrefix: "/admin" },
+  { key: "users",     labelKey: "admin.sidebar.users",      labelFallback: "Users",      href: "/admin/users",              icon: "◇", matchPrefix: "/admin/users" },
+  { key: "stops",     labelKey: "admin.sidebar.free_stops", labelFallback: "Free stops", href: "/admin/stops?filter=free",  icon: "✦", matchPrefix: "/admin/stops", filterKey: "filter", filterValue: "free" },
+  { key: "paid",      labelKey: "admin.sidebar.paid_stops", labelFallback: "Paid stops", href: "/admin/stops?filter=paid",  icon: "€", matchPrefix: "/admin/stops", filterKey: "filter", filterValue: "paid" },
+  { key: "adult",     labelKey: "admin.sidebar.after_dark", labelFallback: "After Dark", href: "/admin/stops?filter=adult", icon: "🌙", matchPrefix: "/admin/stops", filterKey: "filter", filterValue: "adult" },
+  { key: "tours",     labelKey: "admin.sidebar.tours",      labelFallback: "Tours",      href: "/admin/tours",              icon: "◆", matchPrefix: "/admin/tours" },
+  { key: "articles",  labelKey: "admin.sidebar.articles",   labelFallback: "Articles",   href: "/admin/articles",           icon: "✍", matchPrefix: "/admin/articles" },
+  { key: "seo",       labelKey: "admin.sidebar.seo",        labelFallback: "SEO",        href: "/admin/seo",                icon: "↗", matchPrefix: "/admin/seo" },
+  { key: "cities",    labelKey: "admin.sidebar.cities",     labelFallback: "Cities",     href: "/admin/cities",             icon: "⬡", matchPrefix: "/admin/cities" },
+  { key: "layovers",  labelKey: "admin.sidebar.layovers",   labelFallback: "Layovers",   href: "/admin/layovers",           icon: "✈", matchPrefix: "/admin/layovers" },
+  { key: "bookings",  labelKey: "admin.sidebar.bookings",   labelFallback: "Bookings",   href: "/admin/bookings",           icon: "◉", matchPrefix: "/admin/bookings" },
+  { key: "staff",     labelKey: "admin.sidebar.staff",      labelFallback: "Staff",      href: "/admin/staff",              icon: "◑", matchPrefix: "/admin/staff" },
+  { key: "partners",  labelKey: "admin.sidebar.partners",   labelFallback: "Partners",   href: "/admin/partners",           icon: "◈", matchPrefix: "/admin/partners" },
+  { key: "souvenirs", labelKey: "admin.sidebar.souvenirs",  labelFallback: "Souvenirs",  href: "/admin/souvenirs",          icon: "◎", matchPrefix: "/admin/souvenirs" },
 ];
 
 export default function AdminSidebar({ email, fullName, avatarUrl, labels }: Props) {

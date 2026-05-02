@@ -74,6 +74,15 @@ function postprocess(text: string, restorations: Restoration[]): string {
   for (const r of restorations) out = out.split(r.token).join(r.replacement);
   // Strip any leftover wrapper spans DeepL may have left behind.
   out = out.replace(/<\/?span[^>]*>/g, "");
+  // Decode HTML entities DeepL emits in tag_handling=html mode.
+  // &amp; MUST be last — decoding it first would double-decode e.g. &amp;#x27; → &#x27; → '
+  out = out
+    .replace(/&#x27;/gi, "'")
+    .replace(/&#39;/g,   "'")
+    .replace(/&quot;/g,  '"')
+    .replace(/&lt;/g,    "<")
+    .replace(/&gt;/g,    ">")
+    .replace(/&amp;/g,   "&");
   return out;
 }
 

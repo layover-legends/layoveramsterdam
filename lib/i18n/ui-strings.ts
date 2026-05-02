@@ -46,8 +46,31 @@ export const UI_STRINGS = {
   "stops_teaser.free_count":               "{count} free stops, hand-picked.",
   "stops_teaser.signup_cta":               "Sign up above to be the first to plan your tour when bookings open.",
 
+  // ── Public stops list ─────────────────────────────────────────────────────
+  "public.stops.adult_cancel":             "Cancel",
+  "public.stops.adult_confirm":            "Are you 18 or older?",
+  "public.stops.adult_yes":               "Yes, show 18+ content",
+  "public.stops.back":                     "← Back to home",
+  "public.stops.card.free":               "Free",
+  "public.stops.card.paid":               "Paid",
+  "public.stops.card.view":               "View →",
+  "public.stops.filter.all":              "All",
+  "public.stops.filter.free":             "Free",
+  "public.stops.filter.paid":             "Paid",
+  "public.stops.filters_label":           "Filters",
+  "public.stops.meta.description":        "Browse {count} hand-picked Amsterdam stops — canals, markets, museums, and hidden gems. All free to explore on your Schiphol layover.",
+  "public.stops.meta.title":              "Things to do in Amsterdam",
+  "public.stops.no_results":              "No destinations match your search.",
+  "public.stops.search_placeholder":      "Search destinations…",
+  "public.stops.show_adult":              "Show 18+ destinations",
+  "public.stops.subtitle":               "Browse all {count} Amsterdam stops — free to explore on your layover.",
+  "public.stops.title":                   "Destinations",
+  "public.stops.view_grid":               "Grid",
+  "public.stops.view_map":               "Map",
+
   // ── Tours ─────────────────────────────────────────────────────────────────
   "tours.index.back":                      "← Back to home",
+
   "tours.index.empty":                     "No tours available yet. Check back soon.",
   "tours.index.subtitle":                  "Premium layover experiences between your flights at Amsterdam Schiphol.",
   "tours.index.title":                     "All Tours",

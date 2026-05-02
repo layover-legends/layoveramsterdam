@@ -3,8 +3,6 @@ import { Cormorant_Garamond, Outfit, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { SITE } from "@/lib/seo/site";
 import { resolveLocale } from "@/lib/i18n/resolve";
-import { getUiStrings, t } from "@/lib/i18n/ui";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -41,11 +39,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [locale, s] = await Promise.all([
-    Promise.resolve(resolveLocale()),
-    getUiStrings(),
-  ]);
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = resolveLocale();
 
   return (
     <html
@@ -53,13 +48,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={`${cormorant.variable} ${outfit.variable} ${jetbrains.variable}`}
     >
       <body className="font-sans bg-ink-black text-warm-cream">
-        {/* Public language switcher — top-right on all pages */}
-        <div className="fixed top-3 right-4 z-50">
-          <LanguageSwitcher
-            currentLocale={locale}
-            ariaLabel={t(s, "auth.select_language", "Select language")}
-          />
-        </div>
         {children}
       </body>
     </html>

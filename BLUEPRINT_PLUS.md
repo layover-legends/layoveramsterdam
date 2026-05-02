@@ -192,6 +192,7 @@ Defer only if master plan demands native.
 Souvenirs table: `booking_id`, `gps_trace JSONB`, `photo_refs[]`,
 `audio_ref`, `ai_text`, `pdf_url`, `weather_at_time`. Generate the PDF on
 demand, not at tour end. Unlocks M1 (AI travelogue) and M2 (live streaming).
+**✅ `a049b04`** — `public.souvenirs` table in `supabase/migrations/booking-primitives.sql`. Admin list at `/admin/souvenirs`.
 
 ### A2 · Build the public API as the partner API
 **Phase**: 7b onwards
@@ -200,6 +201,7 @@ Every endpoint Claude Code builds passes two checks:
 - Stable + documented response shape?
 +10% effort per endpoint, saves a 6-month rebuild when M4 (airline
 partnership) lands.
+**✅ `e438d75`** — `/api/v1/layovers`, `/api/v1/bookings`, `/api/v1/bookings/[id]` + `docs/API.md` contract stub.
 
 ### A3 · Capture every event with rich props
 **Phase**: 7c onwards
@@ -214,13 +216,14 @@ track("tour_booked", {
 });
 ```
 Without rich props, smart pricing and segmentation are blind.
+**✅ `c2dcbf9`** — `public.analytics_events` table + `lib/analytics/track.ts` helper (server-only, fire-and-forget). Wired into layover_submitted, booking_created, booking_cancelled.
 
 ### A4 · Bake GDPR data export into every entity
 **Phase**: 7b
 Add `/account/export` endpoint that ships user data as JSON (GDPR Art. 20).
 Stub it now with all current entities. Each new entity in future phases
 adds itself to the export.
-**Partial ✅ `a4fa636`**: GDPR consent flow shipped (auth callback stamps `gdpr_accepted_at`; privacy policy page live at `/legal/privacy`). Data export endpoint (`/account/export`) still needed for full Art. 20 compliance — slot into Phase 7b with booking primitives.
+**✅ `e72b69e`** — `/account/export` route returns full JSON bundle: profile, bookings, layovers, reviews, souvenirs, account_events. `Content-Disposition: attachment`. Add new entities to the export as they ship in future phases.
 
 ### A5 · Internationalize images and currency from day one
 **Phase**: 7c

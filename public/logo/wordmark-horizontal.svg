@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 72" fill="none">
+  <!-- Hex mark — 40×40, vertically centered -->
+  <g transform="translate(0,16)">
+    <polygon
+      points="20,3 34,11 34,29 20,37 6,29 6,11"
+      stroke="#C9963A"
+      stroke-width="1.5"
+      stroke-linejoin="round"
+      fill="none"
+    />
+    <g transform="translate(20,20) rotate(-35) scale(0.45)">
+      <rect x="-1.5" y="-14" width="3" height="28" rx="1.5" fill="#C9963A"/>
+      <polygon points="-1.5,-4 -13,6 -1.5,4" fill="#C9963A"/>
+      <polygon points="1.5,-4 13,6 1.5,4" fill="#C9963A"/>
+      <polygon points="-1.5,10 -7,14 -1.5,12" fill="#C9963A"/>
+      <polygon points="1.5,10 7,14 1.5,12" fill="#C9963A"/>
+    </g>
+  </g>
+
+  <!-- Wordmark text — Cormorant Garamond approximated with system serif -->
+  <!-- "LAYOVER" line -->
+  <text
+    x="52"
+    y="30"
+    font-family="Garamond, 'Cormorant Garamond', Georgia, serif"
+    font-size="22"
+    font-weight="600"
+    letter-spacing="5"
+    fill="#F7F3EC"
+  >LAYOVER</text>
+
+  <!-- "LEGENDS" line -->
+  <text
+    x="52"
+    y="56"
+    font-family="Garamond, 'Cormorant Garamond', Georgia, serif"
+    font-size="22"
+    font-weight="600"
+    letter-spacing="5"
+    fill="#F7F3EC"
+  >LEGENDS</text>
+</svg>

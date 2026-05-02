@@ -34,7 +34,11 @@ export const metadata: Metadata = {
     template: `%s · ${SITE.name}`,
   },
   description: "Premium layover tours at Amsterdam Schiphol. Don't waste your layover.",
-  icons: { icon: "/logo/favicon-set/favicon.ico" },
+  icons: {
+    icon: [
+      { url: "/logo/favicon-set/favicon.svg", type: "image/svg+xml" },
+    ],
+  },
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

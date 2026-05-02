@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" fill="none">
+  <!-- Hexagon outline — 6 sides at 60°, flat-top orientation -->
+  <polygon
+    points="40,6 68,22 68,58 40,74 12,58 12,22"
+    stroke="#C9963A"
+    stroke-width="2.5"
+    stroke-linejoin="round"
+    fill="none"
+  />
+  <!-- Airplane glyph — centered, pointing top-right, gold -->
+  <g transform="translate(40,40) rotate(-35) scale(0.85)">
+    <!-- Fuselage -->
+    <rect x="-1.5" y="-14" width="3" height="28" rx="1.5" fill="#C9963A"/>
+    <!-- Wings -->
+    <polygon points="-1.5,-4 -13,6 -1.5,4" fill="#C9963A"/>
+    <polygon points="1.5,-4 13,6 1.5,4" fill="#C9963A"/>
+    <!-- Tail fins -->
+    <polygon points="-1.5,10 -7,14 -1.5,12" fill="#C9963A"/>
+    <polygon points="1.5,10 7,14 1.5,12" fill="#C9963A"/>
+  </g>
+</svg>

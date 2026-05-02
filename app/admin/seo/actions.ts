@@ -20,7 +20,7 @@ function isKind(v: unknown): v is Kind {
  * overwriteHuman=true via a different action (not exposed here for safety).
  */
 export async function retranslateEntity(formData: FormData) {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const kind = formData.get("kind");
   const id = (formData.get("id") || "").toString();
   if (!isKind(kind) || !id) {
@@ -30,7 +30,10 @@ export async function retranslateEntity(formData: FormData) {
   let status = "ok";
   let detail = "";
   try {
-    const r = await autoTranslateEntity(kind, id);
+    const r = await autoTranslateEntity(kind, id, {
+      triggeredBy: admin.id,
+      triggerSource: "admin_button",
+    });
     if (!r.ok) {
       status = "partial";
       detail = r.errors.slice(0, 1).join("; ").slice(0, 100);

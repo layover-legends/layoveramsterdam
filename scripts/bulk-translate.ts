@@ -391,24 +391,57 @@ async function main() {
     byLocale.set(it.target_lang, arr);
   }
 
+  const startMs = Date.now();
   const remainingChars = { value: args.maxChars };
   let totalWritten = 0;
   let totalBilled = 0;
+  const perLocale: Record<string, "done" | "skipped" | "error"> = {};
+  const errors: string[] = [];
+
   for (const [target, items] of byLocale) {
     console.log(`🌍 ${target} — ${items.length} items`);
     const glossary = await loadGlossary(target, supabase as never);
     if (glossary.length > 0) {
       console.log(`  glossary: ${glossary.length} entries loaded`);
     }
-    const outcome = await executeForLocale(
-      supabase,
-      items,
-      glossary,
-      target,
-      remainingChars,
-    );
-    totalWritten += outcome.written;
-    totalBilled += outcome.charsBilled;
+    try {
+      const outcome = await executeForLocale(
+        supabase,
+        items,
+        glossary,
+        target,
+        remainingChars,
+      );
+      totalWritten += outcome.written;
+      totalBilled += outcome.charsBilled;
+      perLocale[target] = "done";
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      errors.push(`${target}: ${msg}`);
+      perLocale[target] = "error";
+    }
+  }
+
+  const duration_ms = Date.now() - startMs;
+
+  // Write a single translation_jobs row summarising the full bulk run.
+  if (!args.dryRun) {
+    try {
+      await supabase.from("translation_jobs").insert({
+        entity_type:    "destination",   // bulk covers all entity types; use sentinel
+        entity_id:      "00000000-0000-0000-0000-000000000000",
+        triggered_by:   null,
+        trigger_source: "cli_bulk",
+        written:        totalWritten,
+        skipped:        0,
+        errors,
+        per_locale:     perLocale,
+        duration_ms,
+        deepl_chars:    totalBilled,
+      });
+    } catch (e) {
+      console.warn("⚠️  Could not write translation_jobs row:", e instanceof Error ? e.message : e);
+    }
   }
 
   console.log();
@@ -418,6 +451,7 @@ async function main() {
   console.log(
     `  est. cost:      €${((totalBilled / 1_000_000) * 20).toFixed(2)} (Pro tier)`,
   );
+  if (errors.length > 0) console.error("  errors:", errors);
 }
 
 main().catch((e) => {

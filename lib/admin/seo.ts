@@ -113,7 +113,30 @@ type NonDefaultLocale = (typeof NON_DEFAULT_LOCALES)[number];
 export async function getSeoHealth(): Promise<SeoHealth> {
   const supabase = createClient();
 
-  const [{ data: dRows }, { data: tRows }, { data: aRows }, { data: trRows }] = await Promise.all([
+  // Paginated translation fetch — PostgREST default page is 1000, and we
+  // can easily exceed that with 219 destinations × 7 locales (= 1533 just
+  // for destination 'name' rows). Without pagination the dashboard tags
+  // entities as "missing translation" when they really have one.
+  async function fetchAllNameTranslations() {
+    const PAGE = 1000;
+    type Row = { entity_type: string; entity_id: string; language: string };
+    const out: Row[] = [];
+    for (let from = 0; ; from += PAGE) {
+      const { data, error } = await supabase
+        .from("translations")
+        .select("entity_type, entity_id, language")
+        .eq("field", "name")
+        .in("language", NON_DEFAULT_LOCALES as unknown as string[])
+        .range(from, from + PAGE - 1);
+      if (error) throw new Error(`seo health translations: ${error.message}`);
+      const batch = (data ?? []) as Row[];
+      out.push(...batch);
+      if (batch.length < PAGE) break;
+    }
+    return out;
+  }
+
+  const [{ data: dRows }, { data: tRows }, { data: aRows }, trRows] = await Promise.all([
     supabase
       .from("destinations")
       .select(
@@ -128,12 +151,7 @@ export async function getSeoHealth(): Promise<SeoHealth> {
       .from("articles")
       .select("id, title, slug, is_published, excerpt, cover_url, body_md, meta_title, meta_description")
       .order("title", { ascending: true }),
-    // Fetch which (entity_id, language) combos have at least one 'name' translation.
-    supabase
-      .from("translations")
-      .select("entity_type, entity_id, language")
-      .eq("field", "name")
-      .in("language", NON_DEFAULT_LOCALES as unknown as string[]),
+    fetchAllNameTranslations(),
   ]);
 
   const dests = (dRows ?? []) as unknown as DestRow[];
@@ -275,21 +293,45 @@ export async function getSeoHealth(): Promise<SeoHealth> {
 export async function getTranslationCoverage(): Promise<TranslationCoverage> {
   const supabase = createClient();
 
-  // Pull entity counts (denominators) and all translation rows for non-EN
-  // locales (numerators) in parallel.
+  // PostgREST default page size is 1000 rows. With ~4,500 non-EN translation
+  // rows we MUST paginate or the dashboard silently under-reports.
+  type TranslationRow = {
+    entity_type: string;
+    entity_id: string;
+    field: string;
+    language: string;
+    translated_by: string | null;
+    is_stale: boolean | null;
+  };
+
+  async function fetchAllTranslationRows(): Promise<TranslationRow[]> {
+    const PAGE = 1000;
+    const out: TranslationRow[] = [];
+    for (let from = 0; ; from += PAGE) {
+      const { data, error } = await supabase
+        .from("translations")
+        .select("entity_type, entity_id, field, language, translated_by, is_stale")
+        .in("language", TRANSLATION_LOCALES as unknown as string[])
+        .range(from, from + PAGE - 1);
+      if (error) throw new Error(`translation coverage: ${error.message}`);
+      const batch = (data ?? []) as TranslationRow[];
+      out.push(...batch);
+      if (batch.length < PAGE) break;
+    }
+    return out;
+  }
+
+  // Pull entity counts (denominators) and all translation rows (paginated).
   const [
     { count: destCount },
     { count: tourCount },
     { count: articleCount },
-    { data: rows },
+    rows,
   ] = await Promise.all([
     supabase.from("destinations").select("id", { count: "exact", head: true }),
     supabase.from("tours").select("id", { count: "exact", head: true }),
     supabase.from("articles").select("id", { count: "exact", head: true }),
-    supabase
-      .from("translations")
-      .select("entity_type, entity_id, field, language, translated_by, is_stale")
-      .in("language", TRANSLATION_LOCALES as unknown as string[]),
+    fetchAllTranslationRows(),
   ]);
 
   const entityTotals: Record<EntityKind, number> = {
@@ -310,16 +352,7 @@ export async function getTranslationCoverage(): Promise<TranslationCoverage> {
   let staleCount = 0;
   let totalRows = 0;
 
-  type Row = {
-    entity_type: string;
-    entity_id: string;
-    field: string;
-    language: string;
-    translated_by: string | null;
-    is_stale: boolean | null;
-  };
-
-  for (const r of (rows ?? []) as Row[]) {
+  for (const r of rows) {
     if (!(r.entity_type === "destination" || r.entity_type === "tour" || r.entity_type === "article")) continue;
     const kind = r.entity_type as EntityKind;
     if (!fieldsAllowed[kind].has(r.field)) continue;

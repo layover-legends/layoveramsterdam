@@ -18,6 +18,7 @@ Cormorant Garamond at small sizes on cheap Android screens renders fuzzy.
 Spec says display only (24px+) — verify on a real $200 Android device
 before any production build. If anti-aliasing fails, restrict Cormorant
 to 32px+ and use Outfit for everything below.
+**Status**: Font shipped in `fee3024` — restricted to `font-display` only (headings, h1/h2). Body defaults to Outfit (`font-sans`). Manual device test still needed to validate antialiasing. ⏳ Pending user test.
 
 ### B2. WCAG AA contrast audit on Gold-on-Cream combinations
 **Phase**: 7a · **Priority**: HIGH
@@ -26,6 +27,7 @@ to 32px+ and use Outfit for everything below.
 text/pressed states. Failing AA blocks public-sector tourism partnerships
 and creates EU legal exposure. Run https://webaim.org/resources/contrastchecker/
 on every text/bg pair from the brand PDF.
+**Status**: Palette shipped (`0ff94e4`) but contrast audit not yet run. Gold (`#C9963A`) is used for accents/CTAs, not body text — `warm-cream` on `ink-black` (white-on-black, 19.6:1) is the primary text combination. Audit needed before public launch. ⏳ Pending audit.
 
 ### B3. Define motion language
 **Phase**: 7a or 7c · **Priority**: MEDIUM

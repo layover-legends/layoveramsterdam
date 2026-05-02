@@ -136,13 +136,15 @@ table when an existing one fits. When in doubt, query
 
 ### Styling
 
-- Tailwind only. Brand tokens (in `tailwind.config.ts`):
-  - `brand.navy` `#0F172A` (page background)
-  - `brand.cream` `#FFF7ED` (text)
-  - `brand.orange` `#F97316` (accent)
+- Tailwind only. Brand tokens (in `tailwind.config.ts`) — **Phase 7a updated**:
+  - `ink-black` `#0D0D0D` (page background) — replaces old `brand-navy`
+  - `warm-cream` `#F7F3EC` (text on dark) — replaces old `brand-cream`
+  - `legend-gold` `#C9963A` (accent, CTAs, logo) — replaces old `brand-orange`
+  - `gold-light` `#E0AA45` / `gold-dark` `#A07828` / `canal-blue` `#1B4F72` / `canal-light` `#2E86C1` / `muted` `#888888`
+  - Full reference: see **Brand identity** section at the bottom of this file.
 - Tailwind `content` array **must include** `./app`, `./components`, `./lib`.
 - For native `<select>` options on dark backgrounds, set inline styles
-  (`backgroundColor: "#0F172A"`, `color: "#FFF7ED"`) — Tailwind classes on
+  (`backgroundColor: "#0D0D0D"`, `color: "#F7F3EC"`) — Tailwind classes on
   `<option>` are unreliable across browsers.
 
 ### Database

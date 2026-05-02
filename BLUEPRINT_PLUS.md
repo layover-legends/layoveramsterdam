@@ -159,6 +159,7 @@ Currently `unoptimized` is set on the StopsTeaser images. Remove that.
 Use Next.js Image with AVIF first, blur-up `placeholder="blur"` from a
 16x16 blurDataURL, art-directed crops (vertical mobile, wide desktop).
 Page weight drops 60-80%.
+**Status**: Not addressed in Phase 7a brand retrofit. `unoptimized` still present on stop card images. Carry into 7c (landing page rebuild). ⏳ Open.
 
 ### F7 · Partial hydration / minimize client JS
 **Cost**: S-M · **Phase**: 7c onwards
@@ -219,6 +220,7 @@ Without rich props, smart pricing and segmentation are blind.
 Add `/account/export` endpoint that ships user data as JSON (GDPR Art. 20).
 Stub it now with all current entities. Each new entity in future phases
 adds itself to the export.
+**Partial ✅ `a4fa636`**: GDPR consent flow shipped (auth callback stamps `gdpr_accepted_at`; privacy policy page live at `/legal/privacy`). Data export endpoint (`/account/export`) still needed for full Art. 20 compliance — slot into Phase 7b with booking primitives.
 
 ### A5 · Internationalize images and currency from day one
 **Phase**: 7c

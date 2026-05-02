@@ -264,6 +264,101 @@ If a job shows ❌ failed, check:
 
 ---
 
+## Extending the i18n system — checklist
+
+The translation pipeline is automatic for the four existing surfaces
+(stops, tours, articles, UI strings). When you add new things, follow
+the matching recipe so translations stay current without manual SQL.
+
+### Adding a new admin form / page
+
+1. Server page: `const s = await getUiStrings();`
+2. Wrap every visible string with `t(s, "key", "English fallback")`.
+3. For client components, pass `labels: Record<string, string>` as a prop.
+4. Add the new keys to `lib/i18n/ui-strings.ts` under the right prefix block.
+5. Run `npm run seed:ui`. Done.
+
+### Adding a new server action that creates an entity
+
+If the entity has translatable fields:
+
+```ts
+import { autoTranslateEntity } from "@/lib/i18n/auto-translate";
+const admin = await requireAdmin();
+// …insert/update DB row…
+let translateStatus = "ok";
+try {
+  const r = await autoTranslateEntity("destination", id, {
+    triggeredBy: admin.id,
+    triggerSource: "admin_save",
+  });
+  if (!r.ok) translateStatus = "partial";
+} catch { translateStatus = "failed"; }
+redirect(`/admin/.../${id}?saved=1&i18n=${translateStatus}`);
+```
+
+That's the canonical pattern — same shape in
+`app/admin/{stops,tours,articles}/actions.ts`.
+
+### Adding a new translatable field to an existing entity
+
+E.g. adding `subtitle` to `articles`:
+
+1. DB migration to add the column.
+2. `lib/i18n/auto-translate.ts` — add `"subtitle"` to
+   `FIELDS_BY_KIND.article`.
+3. `scripts/bulk-translate.ts` — add to `FIELDS_BY_ENTITY.article`.
+4. `lib/admin/seo-types.ts` — extend `TRANSLATION_FIELDS.article`.
+5. Run `npx tsx scripts/bulk-translate.ts` to backfill existing rows.
+
+### Adding a brand-new translatable entity type
+
+E.g. Phase 7's `partners`:
+
+1. DB migration creating the table.
+2. Extend the `entity_type` CHECK constraint on `translations` to allow
+   the new value (one-line SQL: `ALTER TABLE translations DROP CONSTRAINT
+   translations_entity_type_check, ADD CONSTRAINT … CHECK (entity_type IN
+   ('destination','tour','article','ui','partner', …))`).
+3. `lib/i18n/auto-translate.ts` — add to `EntityKind`, `SOURCE_TABLE`,
+   `FIELDS_BY_KIND`.
+4. `lib/admin/seo-types.ts` — extend `TRANSLATION_FIELDS` and `EntityKind`.
+5. `scripts/bulk-translate.ts` — extend `EntityType` + `FIELDS_BY_ENTITY` +
+   `SOURCE_TABLE`.
+6. Wire `autoTranslateEntity("partner", id)` into the create/update server
+   actions (same pattern as above).
+7. Run bulk-translate to backfill any existing rows.
+
+### Adding a new target locale
+
+E.g. Japanese:
+
+1. `lib/i18n/locales.ts` — add `{ code: "ja", label: "日本語", flag: "🇯🇵" }`
+   to `LOCALES`, plus an entry in `FALLBACK_CHAIN` and `OG_LOCALE`.
+2. `lib/i18n/providers/deepl.ts` — add `ja: "JA"` to `LOCALE_TO_DEEPL`.
+3. `lib/admin/seo-types.ts` — add `"ja"` to `TRANSLATION_LOCALES`.
+4. `lib/admin/seo.ts` — add `missing_translation_ja` to issue counts.
+5. Update glossary entries via the admin (or seed via SQL) for any brand
+   terms that need locale-specific handling.
+6. Run `npx tsx scripts/bulk-translate.ts` to backfill all destinations,
+   tours, articles into JA. Run `npm run seed:ui` for the UI strings.
+7. Add JA reviewer to the high-priority review queue.
+
+### Don't do this — common mistakes
+
+- **Don't** hardcode strings in JSX — even one-off labels. Add a key.
+- **Don't** call `autoTranslateEntity` from inside a tight loop or a
+  middleware — it makes 6 DeepL API calls per entity.
+- **Don't** import `loadGlossary` or `loadUiStrings` into a CLI script
+  without passing a service-role supabase client (it'll fail with
+  "cookies was called outside a request scope").
+- **Don't** edit `package.json` while another process (Claude Code,
+  another editor) might be writing to it — it's a known race-condition
+  source for truncated lockfile corruption. After any package change,
+  read the file back and verify it ends with `}`.
+
+---
+
 ## Active tasks & near-term roadmap
 
 - Mapbox preview: env var fixed, but homepage uses the legacy image. Bring it

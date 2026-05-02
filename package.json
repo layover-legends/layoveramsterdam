@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "seed:ui": "tsx scripts/seed-ui-strings.ts",
+    "seed:ui:en": "tsx scripts/seed-ui-strings.ts --en-only",
+    "seed:ui:dry": "tsx scripts/seed-ui-strings.ts --dry-run"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

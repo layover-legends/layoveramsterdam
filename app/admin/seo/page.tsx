@@ -1,8 +1,53 @@
 import Link from "next/link";
-import { getSeoHealth } from "@/lib/admin/seo";
-import type { SeoIssue } from "@/lib/admin/seo-types";
+import { getSeoHealth, getTranslationCoverage } from "@/lib/admin/seo";
+import type {
+  EntityKind,
+  LocaleEntityCoverage,
+  SeoIssue,
+  TranslationLocale,
+} from "@/lib/admin/seo-types";
+import { TRANSLATION_LOCALES } from "@/lib/admin/seo-types";
 
 export const dynamic = "force-dynamic";
+
+const LOCALE_LABEL: Record<TranslationLocale, string> = {
+  fr: "Français",
+  nl: "Nederlands",
+  de: "Deutsch",
+  es: "Español",
+  it: "Italiano",
+  pt: "Português",
+  zh: "中文",
+};
+
+const ENTITY_LABEL: Record<EntityKind, string> = {
+  destination: "Destinations",
+  tour: "Tours",
+  article: "Articles",
+};
+
+function coverageColor(ratio: number): string {
+  if (ratio >= 0.95) return "bg-emerald-400/15 text-emerald-200 border-emerald-400/30";
+  if (ratio >= 0.6) return "bg-amber-400/15 text-amber-200 border-amber-400/30";
+  return "bg-red-400/15 text-red-200 border-red-400/30";
+}
+
+function CoverageCell({ cov }: { cov: LocaleEntityCoverage }) {
+  if (cov.expected === 0) {
+    return <span className="text-brand-cream/35 text-xs">–</span>;
+  }
+  const pctVal = Math.round(cov.ratio * 100);
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span className={`inline-block px-2 py-0.5 rounded text-xs border w-fit ${coverageColor(cov.ratio)}`}>
+        {pctVal}%
+      </span>
+      <span className="text-[10px] text-brand-cream/45">
+        {cov.covered}/{cov.expected}
+      </span>
+    </div>
+  );
+}
 
 function pct(num: number, denom: number): string {
   if (denom === 0) return "–";
@@ -33,7 +78,10 @@ function IssuePill({ issue }: { issue: SeoIssue }) {
 }
 
 export default async function AdminSeoPage() {
-  const health = await getSeoHealth();
+  const [health, translation] = await Promise.all([
+    getSeoHealth(),
+    getTranslationCoverage(),
+  ]);
   const dest = health.destinations;
   const tours = health.tours;
 
@@ -89,6 +137,72 @@ export default async function AdminSeoPage() {
             <li>{tours.counts.description_too_short} description &lt; 50 chars</li>
             <li>{tours.counts.description_too_long} description &gt; 160 chars</li>
           </ul>
+        </div>
+      </section>
+
+      {/* Translation coverage matrix */}
+      <section className="space-y-3">
+        <div className="flex items-baseline justify-between flex-wrap gap-2">
+          <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">
+            Translation coverage
+          </h2>
+          <div className="flex flex-wrap gap-3 text-xs text-brand-cream/65">
+            <span>👤 {translation.bySource.human.toLocaleString()} human</span>
+            <span>🤖 {translation.bySource.ai.toLocaleString()} AI</span>
+            {translation.bySource.imported > 0 && (
+              <span>📥 {translation.bySource.imported.toLocaleString()} imported</span>
+            )}
+            {translation.stale > 0 && (
+              <span className="text-amber-200">
+                ⚠️ {translation.stale.toLocaleString()} stale
+              </span>
+            )}
+            <span className="text-brand-cream/45">·</span>
+            <span>{translation.total.toLocaleString()} total rows</span>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-brand-cream/10 bg-brand-cream/5 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead className="bg-brand-cream/[0.04] text-xs uppercase tracking-wide text-brand-cream/55">
+                <tr>
+                  <th className="px-4 py-3 text-left font-medium">Locale</th>
+                  {(["destination", "tour", "article"] as const).map((kind) => (
+                    <th key={kind} className="px-4 py-3 text-left font-medium">
+                      {ENTITY_LABEL[kind]}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-brand-cream/10">
+                {TRANSLATION_LOCALES.map((locale) => {
+                  const row = translation.byLocale[locale];
+                  return (
+                    <tr key={locale} className="hover:bg-brand-cream/[0.03]">
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="font-medium text-brand-cream">
+                          {LOCALE_LABEL[locale]}
+                        </div>
+                        <div className="text-[10px] uppercase tracking-wider text-brand-cream/45">
+                          {locale}
+                        </div>
+                      </td>
+                      {(["destination", "tour", "article"] as const).map((kind) => (
+                        <td key={kind} className="px-4 py-3">
+                          <CoverageCell cov={row[kind]} />
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <div className="px-4 py-2 border-t border-brand-cream/10 text-[11px] text-brand-cream/45">
+            Cell shows percentage of (entity × field) pairs translated for that locale. Green ≥ 95% · amber 60–94% · red &lt; 60%. Run{" "}
+            <code className="text-brand-orange">npx tsx scripts/bulk-translate.ts</code> to fill missing rows.
+          </div>
         </div>
       </section>
 

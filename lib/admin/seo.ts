@@ -2,22 +2,42 @@ import { createClient } from "@/lib/supabase/server";
 import type {
   ArticleHealth,
   DestinationHealth,
+  EntityKind,
+  LocaleEntityCoverage,
   SeoHealth,
   SeoIssue,
   SeoIssueKind,
   TourHealth,
+  TranslationCoverage,
+  TranslationLocale,
 } from "@/lib/admin/seo-types";
-import { DESC_MIN, DESC_MAX, ISSUE_LABELS } from "@/lib/admin/seo-types";
+import {
+  DESC_MIN,
+  DESC_MAX,
+  ISSUE_LABELS,
+  TRANSLATION_FIELDS,
+  TRANSLATION_LOCALES,
+} from "@/lib/admin/seo-types";
 
 export type {
   ArticleHealth,
   DestinationHealth,
+  EntityKind,
+  LocaleEntityCoverage,
   SeoHealth,
   SeoIssue,
   SeoIssueKind,
   TourHealth,
+  TranslationCoverage,
+  TranslationLocale,
 } from "@/lib/admin/seo-types";
-export { DESC_MIN, DESC_MAX, ISSUE_LABELS } from "@/lib/admin/seo-types";
+export {
+  DESC_MIN,
+  DESC_MAX,
+  ISSUE_LABELS,
+  TRANSLATION_FIELDS,
+  TRANSLATION_LOCALES,
+} from "@/lib/admin/seo-types";
 
 type DestRow = {
   id: string;
@@ -241,5 +261,101 @@ export async function getSeoHealth(): Promise<SeoHealth> {
       counts: aCounts,
       items: aItems,
     },
+  };
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Translation coverage monitoring
+//
+// Returns a per-(locale × entity_kind) matrix of how many distinct
+// (entity_id, field) translations exist vs how many are expected, plus an
+// overall AI-vs-human breakdown and stale count.
+// ───────────────────────────────────────────────────────────────────────────
+
+export async function getTranslationCoverage(): Promise<TranslationCoverage> {
+  const supabase = createClient();
+
+  // Pull entity counts (denominators) and all translation rows for non-EN
+  // locales (numerators) in parallel.
+  const [
+    { count: destCount },
+    { count: tourCount },
+    { count: articleCount },
+    { data: rows },
+  ] = await Promise.all([
+    supabase.from("destinations").select("id", { count: "exact", head: true }),
+    supabase.from("tours").select("id", { count: "exact", head: true }),
+    supabase.from("articles").select("id", { count: "exact", head: true }),
+    supabase
+      .from("translations")
+      .select("entity_type, entity_id, field, language, translated_by, is_stale")
+      .in("language", TRANSLATION_LOCALES as unknown as string[]),
+  ]);
+
+  const entityTotals: Record<EntityKind, number> = {
+    destination: destCount ?? 0,
+    tour: tourCount ?? 0,
+    article: articleCount ?? 0,
+  };
+
+  const fieldsAllowed: Record<EntityKind, ReadonlySet<string>> = {
+    destination: new Set(TRANSLATION_FIELDS.destination),
+    tour: new Set(TRANSLATION_FIELDS.tour),
+    article: new Set(TRANSLATION_FIELDS.article),
+  };
+
+  // Distinct (entity_id, field) pairs per (locale, entity_kind).
+  const seen = new Map<string, Set<string>>(); // key=`${locale}:${kind}` value=set of `${entity_id}:${field}`
+  const sourceCounts = { human: 0, ai: 0, imported: 0 };
+  let staleCount = 0;
+  let totalRows = 0;
+
+  type Row = {
+    entity_type: string;
+    entity_id: string;
+    field: string;
+    language: string;
+    translated_by: string | null;
+    is_stale: boolean | null;
+  };
+
+  for (const r of (rows ?? []) as Row[]) {
+    if (!(r.entity_type === "destination" || r.entity_type === "tour" || r.entity_type === "article")) continue;
+    const kind = r.entity_type as EntityKind;
+    if (!fieldsAllowed[kind].has(r.field)) continue;
+    if (!(TRANSLATION_LOCALES as readonly string[]).includes(r.language)) continue;
+
+    totalRows += 1;
+    const k = `${r.language}:${kind}`;
+    const set = seen.get(k) ?? new Set<string>();
+    set.add(`${r.entity_id}:${r.field}`);
+    seen.set(k, set);
+
+    const src = (r.translated_by ?? "human") as "human" | "ai" | "imported";
+    if (src in sourceCounts) sourceCounts[src] += 1;
+    if (r.is_stale === true) staleCount += 1;
+  }
+
+  // Build the byLocale matrix, computing expected as entities × applicable fields.
+  const byLocale = {} as Record<TranslationLocale, Record<EntityKind, LocaleEntityCoverage>>;
+  for (const locale of TRANSLATION_LOCALES) {
+    const perKind = {} as Record<EntityKind, LocaleEntityCoverage>;
+    for (const kind of ["destination", "tour", "article"] as const) {
+      const expected = entityTotals[kind] * fieldsAllowed[kind].size;
+      const covered = seen.get(`${locale}:${kind}`)?.size ?? 0;
+      perKind[kind] = {
+        covered,
+        expected,
+        ratio: expected === 0 ? 1 : covered / expected,
+      };
+    }
+    byLocale[locale] = perKind;
+  }
+
+  return {
+    byLocale,
+    bySource: sourceCounts,
+    stale: staleCount,
+    total: totalRows,
   };
 }

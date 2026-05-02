@@ -80,6 +80,51 @@ export type SeoHealth = {
   };
 };
 
+// ─── Translation coverage monitoring ──────────────────────────────────────
+
+export const TRANSLATION_LOCALES = [
+  "fr",
+  "nl",
+  "de",
+  "es",
+  "it",
+  "pt",
+  "zh",
+] as const;
+export type TranslationLocale = (typeof TRANSLATION_LOCALES)[number];
+
+export const TRANSLATION_FIELDS = {
+  destination: ["name", "description", "area"] as const,
+  tour: ["name", "description", "tagline"] as const,
+  article: ["title", "excerpt", "body_md"] as const,
+} as const;
+
+export type EntityKind = keyof typeof TRANSLATION_FIELDS;
+
+export type LocaleEntityCoverage = {
+  /** Distinct (entity_id, field) rows present for this (locale, entity). */
+  covered: number;
+  /** Total expected = entity_count × applicable_field_count. */
+  expected: number;
+  /** covered / expected, 0..1 (1 = fully covered). */
+  ratio: number;
+};
+
+export type TranslationCoverage = {
+  /** Per-locale, per-entity coverage. */
+  byLocale: Record<TranslationLocale, Record<EntityKind, LocaleEntityCoverage>>;
+  /** Aggregate breakdown by translation source. */
+  bySource: {
+    human: number;
+    ai: number;
+    imported: number;
+  };
+  /** Rows whose source has changed since they were translated. */
+  stale: number;
+  /** Total non-EN translation rows in the table. */
+  total: number;
+};
+
 // Description length thresholds. Google typically truncates meta descriptions
 // around 155–160 chars on desktop and 120 on mobile. Anything below ~50 chars
 // is too thin to communicate value.

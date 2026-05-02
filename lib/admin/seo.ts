@@ -392,3 +392,51 @@ export async function getTranslationCoverage(): Promise<TranslationCoverage> {
     total: totalRows,
   };
 }
+
+// ── Translation jobs ──────────────────────────────────────────────────────────
+
+export type TranslationJob = {
+  id: string;
+  entity_type: string;
+  entity_id: string;
+  triggered_by: string | null;
+  triggered_at: string;
+  trigger_source: string;
+  written: number;
+  skipped: number;
+  errors: string[];
+  per_locale: Record<string, "done" | "skipped" | "error">;
+  duration_ms: number | null;
+  deepl_chars: number;
+  /** Derived from errors + written — computed here so the component stays pure. */
+  status: "ok" | "partial" | "failed";
+};
+
+export async function getRecentTranslationJobs(limit = 20): Promise<TranslationJob[]> {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("translation_jobs")
+    .select(
+      "id, entity_type, entity_id, triggered_by, triggered_at, trigger_source, " +
+      "written, skipped, errors, per_locale, duration_ms, deepl_chars",
+    )
+    .order("triggered_at", { ascending: false })
+    .limit(limit);
+
+  type RawJob = {
+    id: string; entity_type: string; entity_id: string;
+    triggered_by: string | null; triggered_at: string; trigger_source: string;
+    written: number; skipped: number; errors: unknown; per_locale: unknown;
+    duration_ms: number | null; deepl_chars: number;
+  };
+
+  return ((data ?? []) as unknown as RawJob[]).map((row): TranslationJob => {
+    const errors = (row.errors as string[] | null) ?? [];
+    return {
+      ...row,
+      errors,
+      per_locale: (row.per_locale as Record<string, "done" | "skipped" | "error"> | null) ?? {},
+      status: errors.length === 0 ? "ok" : row.written > 0 ? "partial" : "failed",
+    };
+  });
+}

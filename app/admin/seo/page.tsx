@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getSeoHealth, getTranslationCoverage } from "@/lib/admin/seo";
+import { getSeoHealth, getTranslationCoverage, getRecentTranslationJobs } from "@/lib/admin/seo";
+import type { TranslationJob } from "@/lib/admin/seo";
 import type {
   EntityKind,
   LocaleEntityCoverage,
@@ -99,9 +100,10 @@ type PageProps = {
 };
 
 export default async function AdminSeoPage({ searchParams }: PageProps) {
-  const [health, translation] = await Promise.all([
+  const [health, translation, recentJobs] = await Promise.all([
     getSeoHealth(),
     getTranslationCoverage(),
+    getRecentTranslationJobs(20),
   ]);
   const dest = health.destinations;
   const tours = health.tours;
@@ -410,10 +412,93 @@ export default async function AdminSeoPage({ searchParams }: PageProps) {
         )}
       </section>
 
+      {/* ── Recent translation jobs ─────────────────────────────────── */}
+      <section className="space-y-3">
+        <h2 className="text-sm uppercase tracking-wide text-brand-cream/55">
+          Recent translation jobs
+        </h2>
+        {recentJobs.length === 0 ? (
+          <p className="text-sm text-brand-cream/50 py-4">
+            No jobs yet. Save or create a stop or tour to trigger the first run.
+          </p>
+        ) : (
+          <div className="rounded-2xl border border-brand-cream/10 bg-brand-cream/5 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-xs">
+                <thead className="bg-brand-cream/[0.04] text-[11px] uppercase tracking-wide text-brand-cream/55">
+                  <tr>
+                    <th className="px-4 py-2.5 text-left font-medium">Status</th>
+                    <th className="px-4 py-2.5 text-left font-medium">Entity</th>
+                    <th className="px-4 py-2.5 text-left font-medium">Surface</th>
+                    <th className="px-4 py-2.5 text-left font-medium">Written</th>
+                    <th className="px-4 py-2.5 text-left font-medium">Skipped</th>
+                    <th className="px-4 py-2.5 text-left font-medium">Chars</th>
+                    <th className="px-4 py-2.5 text-left font-medium">ms</th>
+                    <th className="px-4 py-2.5 text-left font-medium">When</th>
+                    <th className="px-4 py-2.5 text-left font-medium">Errors</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-brand-cream/10">
+                  {recentJobs.map((job: TranslationJob) => (
+                    <tr key={job.id} className="hover:bg-brand-cream/[0.03]">
+                      <td className="px-4 py-2.5 whitespace-nowrap">
+                        {job.status === "ok" ? (
+                          <span className="text-emerald-300">✅ ok</span>
+                        ) : job.status === "partial" ? (
+                          <span className="text-amber-300">⚠️ partial</span>
+                        ) : (
+                          <span className="text-red-300">❌ failed</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2.5 whitespace-nowrap">
+                        <Link
+                          href={`/admin/${job.entity_type === "destination" ? "stops" : job.entity_type + "s"}/${job.entity_id}`}
+                          className="text-brand-orange hover:underline"
+                        >
+                          {job.entity_type} ↗
+                        </Link>
+                      </td>
+                      <td className="px-4 py-2.5 whitespace-nowrap text-brand-cream/60">
+                        {job.trigger_source}
+                      </td>
+                      <td className="px-4 py-2.5 whitespace-nowrap tabular-nums text-emerald-300/80">
+                        {job.written}
+                      </td>
+                      <td className="px-4 py-2.5 whitespace-nowrap tabular-nums text-brand-cream/50">
+                        {job.skipped}
+                      </td>
+                      <td className="px-4 py-2.5 whitespace-nowrap tabular-nums text-brand-cream/60">
+                        {job.deepl_chars.toLocaleString()}
+                      </td>
+                      <td className="px-4 py-2.5 whitespace-nowrap tabular-nums text-brand-cream/50">
+                        {job.duration_ms ?? "—"}
+                      </td>
+                      <td className="px-4 py-2.5 whitespace-nowrap text-brand-cream/50">
+                        {new Date(job.triggered_at).toLocaleString("en-GB", {
+                          day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
+                        })}
+                      </td>
+                      <td className="px-4 py-2.5 max-w-[22rem]">
+                        {job.errors.length > 0 ? (
+                          <span className="text-red-300/80 truncate block" title={job.errors.join(" | ")}>
+                            {job.errors[0]}{job.errors.length > 1 ? ` +${job.errors.length - 1}` : ""}
+                          </span>
+                        ) : (
+                          <span className="text-brand-cream/30">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </section>
+
       <footer className="text-xs text-brand-cream/45 pt-4 border-t border-brand-cream/10">
-        Phase 2 will add per-stop meta_title/meta_description override fields and a content
-        editor for SEO articles. This dashboard surfaces what to fix; the next slices give you
-        the controls.
+        Translation jobs are written after every admin save. If a job shows ❌ failed, check
+        DEEPL_API_KEY in Vercel project settings and the error column for the exact cause.
       </footer>
     </div>
   );

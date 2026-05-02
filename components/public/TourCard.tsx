@@ -9,22 +9,22 @@ type Props = {
   recommended?: boolean;
 };
 
-// Blueprint+ D2 — price counts up from €0 to actual value over 400ms
-function useCountUp(target: number | null, active: boolean) {
-  const [displayed, setDisplayed] = useState(0);
+// Blueprint+ D2 — price counts up from €0 to actual on viewport entry, once, 400ms
+function useCountUp(target: number | null, active: boolean): number | null {
+  const [displayed, setDisplayed] = useState<number | null>(null);
+  const hasRun = useRef(false);
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!active || target === null) return;
+    if (!active || target === null || hasRun.current) return;
+    hasRun.current = true;
     const start = performance.now();
     const duration = 400;
-    const from = 0;
-    const to = target;
 
     const tick = (now: number) => {
       const elapsed = Math.min((now - start) / duration, 1);
       const eased = 1 - Math.pow(1 - elapsed, 3);
-      setDisplayed(Math.round(from + (to - from) * eased));
+      setDisplayed(Math.round(target * eased));
       if (elapsed < 1) rafRef.current = requestAnimationFrame(tick);
     };
 
@@ -37,16 +37,30 @@ function useCountUp(target: number | null, active: boolean) {
 
 export default function TourCard({ tour, recommended = false }: Props) {
   const [hovered, setHovered] = useState(false);
-  const price = useCountUp(tour.price_cents, hovered);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+  const animatedPrice = useCountUp(tour.price_cents, inView);
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setInView(true); observer.disconnect(); } },
+      { threshold: 0.3 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const formattedPrice = tour.price_cents !== null
     ? new Intl.NumberFormat("nl-NL", { style: "currency", currency: tour.currency, maximumFractionDigits: 0 }).format(
-        hovered ? price / 100 : tour.price_cents / 100,
+        (animatedPrice ?? tour.price_cents) / 100,
       )
     : "Free";
 
   return (
     <div
+      ref={cardRef}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className={`relative flex flex-col rounded-2xl border bg-warm-cream/[0.03] overflow-hidden transition-all duration-300 ${

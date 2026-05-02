@@ -28,9 +28,13 @@ function useTypewriter(
   arrFocused: boolean,
   depFocused: boolean,
 ) {
+  const hasAnimated = useRef(false);
+
   useEffect(() => {
+    if (hasAnimated.current) return;
     if (arrFocused || depFocused) return;
 
+    hasAnimated.current = true;
     let isCancelled = false;
     const delay = (ms: number) => new Promise<void>((res) => setTimeout(res, ms));
 
@@ -38,7 +42,6 @@ function useTypewriter(
       await delay(800);
       if (isCancelled) return;
 
-      // Type arrival flight
       for (let i = 1; i <= TYPEWRITER_STEPS[0].value.length; i++) {
         if (isCancelled) return;
         setArr(TYPEWRITER_STEPS[0].value.slice(0, i));
@@ -47,7 +50,6 @@ function useTypewriter(
       await delay(400);
       if (isCancelled) return;
 
-      // Type departure flight
       for (let i = 1; i <= TYPEWRITER_STEPS[1].value.length; i++) {
         if (isCancelled) return;
         setDep(TYPEWRITER_STEPS[1].value.slice(0, i));

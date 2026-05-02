@@ -171,14 +171,14 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
             <p className="text-xs text-warm-cream/30">
               Already planned your layover?{" "}
-              <Link href="/tours" className="text-legend-gold hover:text-gold-light underline underline-offset-2 transition-colors">
+              <Link href="/tours" prefetch={false} className="text-legend-gold hover:text-gold-light underline underline-offset-2 transition-colors">
                 Browse all tours →
               </Link>
             </p>
           </div>
 
           {/* Scroll indicator */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 text-warm-cream/20 animate-bounce">
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 text-warm-cream/20 animate-bounce [animation-iteration-count:3] [animation-fill-mode:forwards]">
             <div className="w-px h-8 bg-gradient-to-b from-warm-cream/20 to-transparent" />
             <svg width="10" height="6" fill="none" viewBox="0 0 10 6" aria-hidden>
               <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>

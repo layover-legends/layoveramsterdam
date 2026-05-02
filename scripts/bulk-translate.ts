@@ -61,8 +61,8 @@ interface Args {
   maxChars: number;
 }
 
-type EntityType = "destination" | "tour" | "article";
-const DEFAULT_ENTITIES: EntityType[] = ["destination", "tour", "article"];
+type EntityType = "destination" | "tour" | "article" | "addon";
+const DEFAULT_ENTITIES: EntityType[] = ["destination", "tour", "article", "addon"];
 const FIELDS_BY_ENTITY: Record<EntityType, string[]> = {
   // destinations.tagline does not exist; meta_title/meta_description live on
   // the destinations row but we leave them out of bulk-translate by default
@@ -70,11 +70,17 @@ const FIELDS_BY_ENTITY: Record<EntityType, string[]> = {
   destination: ["name", "description", "area"],
   tour: ["name", "description", "tagline"],
   article: ["title", "excerpt", "body_md", "meta_title", "meta_description"],
+  // addons table doesn't have these columns yet — name/description/short_blurb
+  // are stored entirely in the translations table (entity_type='addon', field=...).
+  // Source row for EN seed comes from the same table; this script reads
+  // existing EN translations and creates other-locale rows from them.
+  addon: ["name", "description", "short_blurb"],
 };
 const SOURCE_TABLE: Record<EntityType, string> = {
   destination: "destinations",
   tour: "tours",
   article: "articles",
+  addon: "addons",
 };
 
 function parseArgs(argv: string[]): Args {

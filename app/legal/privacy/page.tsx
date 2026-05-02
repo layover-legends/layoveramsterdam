@@ -42,7 +42,7 @@ export default async function PrivacyPage() {
       </header>
 
       <p className="text-warm-cream/80 leading-relaxed">
-        {t(s, "legal.privacy.intro", "LayoverAmsterdam (\"we\", \"us\") respects your privacy. This policy explains what data we collect, why, and what rights you have under GDPR.")}
+        {t(s, "legal.privacy.intro", "Layover Legends (\"we\", \"us\") respects your privacy. This policy explains what data we collect, why, and what rights you have under GDPR.")}
       </p>
 
       <section className="space-y-3">
@@ -86,7 +86,7 @@ export default async function PrivacyPage() {
           {t(s, "legal.privacy.controller_h2", "Data controller")}
         </h2>
         <p className="text-warm-cream/70 leading-relaxed">
-          {t(s, "legal.privacy.controller_body", "LayoverAmsterdam, Amsterdam, Netherlands. Contact: hello@layover-legends.com")}
+          {t(s, "legal.privacy.controller_body", "Layover Legends, Amsterdam, Netherlands. Contact: hello@layover-legends.com")}
         </p>
       </section>
 

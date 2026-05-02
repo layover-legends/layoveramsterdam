@@ -1,4 +1,4 @@
-import { SITE, canonicalFor } from "@/lib/seo/site";
+﻿import { SITE, canonicalFor } from "@/lib/seo/site";
 import type { PublicArticleFull } from "@/lib/public/articles";
 import type { StopDetail } from "@/lib/public/stop-detail";
 import type { TourDetail } from "@/lib/public/tour-detail";
@@ -18,8 +18,8 @@ export function organizationLd() {
     url: SITE.url,
     logo: `${SITE.url}/og`,
     sameAs: [
-      "https://www.instagram.com/layoveramsterdam",
-      "https://x.com/layoveramsterdam",
+      "https://www.instagram.com/Layover Legends",
+      "https://x.com/Layover Legends",
     ],
   };
 }

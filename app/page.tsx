@@ -101,7 +101,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         <div className="relative w-full aspect-square max-w-xl">
           <Image
             src={COMING_SOON_IMAGE}
-            alt={t(strings, "homepage.coming_soon", "Layover Amsterdam — Coming Soon")}
+            alt={t(strings, "homepage.coming_soon", "Layover Legends — Coming Soon")}
             fill
             priority
             sizes="(max-width: 768px) 90vw, 600px"
@@ -111,7 +111,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
         <div className="space-y-3">
           <h1 className="text-3xl sm:text-5xl font-bold tracking-tight">
-            Layover Amsterdam
+            Layover Legends
           </h1>
           <p className="text-lg sm:text-xl text-legend-gold font-semibold">
             {t(strings, "homepage.coming_soon", "Coming Soon")}
@@ -173,7 +173,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       <footer className="text-xs text-warm-cream/50 pt-12 pb-4 text-center space-y-2">
         <div>
           {tpl(
-            t(strings, "footer.copyright", "© {year} Layover Amsterdam. All rights reserved."),
+            t(strings, "footer.copyright", "© {year} Layover Legends. All rights reserved."),
             { year },
           )}
         </div>

@@ -1,11 +1,11 @@
-import { ImageResponse } from "@vercel/og";
+﻿import { ImageResponse } from "@vercel/og";
 import type { NextRequest } from "next/server";
 
 export const runtime = "edge";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const title = searchParams.get("title") || "LayoverAmsterdam";
+  const title = searchParams.get("title") || "Layover Legends";
   const subtitle = searchParams.get("subtitle") || "Curated Amsterdam layovers";
 
   return new ImageResponse(
@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
             textTransform: "uppercase",
           }}
         >
-          LayoverAmsterdam
+          Layover Legends
         </div>
 
         {/* Title */}

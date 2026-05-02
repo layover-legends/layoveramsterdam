@@ -99,7 +99,7 @@ function TourSeoFields({
 }) {
   const [title, setTitle] = useState(initialTitle ?? "");
   const [desc, setDesc] = useState(initialDescription ?? "");
-  const displayTitle = title || `${previewName} · LayoverAmsterdam`;
+  const displayTitle = title || `${previewName} · Layover Legends`;
   const displayDesc = desc || lbl(labels, "admin.tourForm.seo_hint", "Leave blank to use the description automatically.");
   return (
     <fieldset className="space-y-4">
@@ -131,7 +131,7 @@ function TourSeoFields({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           className={inputClass}
-          placeholder={`${previewName || "Tour name"} · LayoverAmsterdam`}
+          placeholder={`${previewName || "Tour name"} · Layover Legends`}
         />
       </div>
 

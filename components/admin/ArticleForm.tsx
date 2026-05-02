@@ -69,7 +69,7 @@ export default function ArticleForm({ article, action, mode, deleteAction, label
     }
   }
 
-  const previewTitle = metaTitle || `${title || "Article title"} · LayoverAmsterdam`;
+  const previewTitle = metaTitle || `${title || "Article title"} · Layover Legends`;
   const previewDesc = metaDesc || excerpt || "Leave blank to use excerpt automatically.";
 
   return (
@@ -141,7 +141,7 @@ export default function ArticleForm({ article, action, mode, deleteAction, label
           </div>
           <input id="meta_title" name="meta_title" type="text" maxLength={70}
             value={metaTitle} onChange={(e) => setMetaTitle(e.target.value)} className={inputClass}
-            placeholder={`${title || "Article title"} · LayoverAmsterdam`} />
+            placeholder={`${title || "Article title"} · Layover Legends`} />
         </div>
 
         <div>

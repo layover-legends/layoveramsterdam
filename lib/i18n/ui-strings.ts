@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Canonical catalog of every user-facing UI string in the app.
  *
  * Each entry becomes one translations row:
@@ -66,7 +66,7 @@ export const UI_STRINGS = {
   "account.field.newsletter_label":        "Email me at launch",
   "account.field.phone":                   "Phone",
   "account.field.select":                  "Select…",
-  "account.subtitle":                      "Your Layover Amsterdam account",
+  "account.subtitle":                      "Your Layover Legends account",
   "account.welcome":                       "Welcome, {name}",
 
   // ── Common / shared ───────────────────────────────────────────────────────
@@ -78,7 +78,7 @@ export const UI_STRINGS = {
   // ── Footer / site ─────────────────────────────────────────────────────────
   "footer.back_to_site":                   "← Back to site",
   "footer.cancellation":                   "Cancellation policy",
-  "footer.copyright":                      "© {year} Layover Amsterdam. All rights reserved.",
+  "footer.copyright":                      "© {year} Layover Legends. All rights reserved.",
   "footer.privacy":                        "Privacy policy",
   "footer.terms":                          "Terms of service",
   "site.tagline":                          "Curated Amsterdam layovers",
@@ -101,7 +101,7 @@ export const UI_STRINGS = {
   "legal.cancellation.contact_body":       "Email us at hello@layover-legends.com with your booking reference and we will process the cancellation within one business day.",
   "legal.privacy.h1":                      "Privacy Policy",
   "legal.privacy.updated":                 "Last updated: {date}",
-  "legal.privacy.intro":                   "LayoverAmsterdam (\"we\", \"us\") respects your privacy. This policy explains what data we collect, why, and what rights you have under GDPR.",
+  "legal.privacy.intro":                   "Layover Legends (\"we\", \"us\") respects your privacy. This policy explains what data we collect, why, and what rights you have under GDPR.",
   "legal.privacy.collect_h2":              "What we collect",
   "legal.privacy.collect_body":            "When you sign in with Google we receive your name, email address, and profile picture from your Google account. We also store your preferred language, nationality (if you choose to provide it), and whether you opted in to marketing emails. We log your consent timestamp as required by GDPR Art. 7.",
   "legal.privacy.use_h2":                  "How we use it",
@@ -111,16 +111,16 @@ export const UI_STRINGS = {
   "legal.privacy.retention_h2":            "Data retention",
   "legal.privacy.retention_body":          "We retain your account data for as long as your account is active. If you request deletion, we will erase your data within 30 days except where we are required by law to retain financial records.",
   "legal.privacy.controller_h2":           "Data controller",
-  "legal.privacy.controller_body":         "LayoverAmsterdam, Amsterdam, Netherlands. Contact: hello@layover-legends.com",
+  "legal.privacy.controller_body":         "Layover Legends, Amsterdam, Netherlands. Contact: hello@layover-legends.com",
   "legal.terms.h1":                        "Terms of Service",
   "legal.terms.updated":                   "Last updated: {date}",
-  "legal.terms.intro":                     "By using LayoverAmsterdam you agree to these terms. Please read them before booking.",
+  "legal.terms.intro":                     "By using Layover Legends you agree to these terms. Please read them before booking.",
   "legal.terms.service_h2":                "The service",
   "legal.terms.service_body":              "We organise curated layover tours in Amsterdam. Tours depart from and return to Amsterdam Schiphol Airport. It is your responsibility to allow sufficient time to clear security and board your onward flight.",
   "legal.terms.booking_h2":                "Bookings",
   "legal.terms.booking_body":              "A booking is confirmed only after full payment is received. Prices are in euros and include applicable taxes. We reserve the right to substitute stops or adjust timing due to closures, weather, or safety concerns.",
   "legal.terms.liability_h2":              "Liability",
-  "legal.terms.liability_body":            "LayoverAmsterdam is not liable for missed flights, flight delays, or any indirect loss arising from participation in a tour. Our maximum liability is limited to the amount you paid for the booking.",
+  "legal.terms.liability_body":            "Layover Legends is not liable for missed flights, flight delays, or any indirect loss arising from participation in a tour. Our maximum liability is limited to the amount you paid for the booking.",
   "legal.terms.law_h2":                    "Governing law",
   "legal.terms.law_body":                  "These terms are governed by the laws of the Netherlands. Any disputes are subject to the exclusive jurisdiction of the courts of Amsterdam.",
   "legal.terms.contact_h2":                "Contact",

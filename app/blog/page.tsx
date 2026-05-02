@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   const locale = resolveLocale();
   const s = await getUiStrings();
-  const title = t(s, "blog.index.title", "Layover Guides") + " · LayoverAmsterdam";
+  const title = t(s, "blog.index.title", "Layover Guides") + " · Layover Legends";
   const description = t(s, "blog.index.description", "Amsterdam layover tips, canal walk guides, and everything you need to turn a Schiphol stopover into an unforgettable experience.");
   const ogImage = ogImageFor({ title: t(s, "blog.index.title", "Layover Guides"), subtitle: "Amsterdam tips & itineraries" });
   return {

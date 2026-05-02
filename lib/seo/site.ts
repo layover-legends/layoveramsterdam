@@ -1,7 +1,7 @@
-export const SITE = {
+﻿export const SITE = {
   url: "https://layover-legends.com",
-  name: "LayoverAmsterdam",
-  twitter: "@layoveramsterdam",
+  name: "Layover Legends",
+  twitter: "@layoverlegends",
   locale: "en_US",
   /** Default OG image – served by the dynamic /og route */
   defaultOgImage: "https://layover-legends.com/og",

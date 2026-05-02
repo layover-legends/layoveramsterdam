@@ -97,7 +97,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
               {tpl(t(s, "account.welcome", "Welcome, {name}"), { name: firstName })}
             </h1>
             <p className="text-sm text-warm-cream/70">
-              {t(s, "account.subtitle", "Your Layover Amsterdam account")}
+              {t(s, "account.subtitle", "Your Layover Legends account")}
             </p>
           </div>
         </header>
@@ -147,7 +147,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
         </div>
 
         <div className="text-xs text-warm-cream/40 text-center pt-2">
-          {tpl(t(s, "footer.copyright", "© {year} Layover Amsterdam. All rights reserved."), { year })}
+          {tpl(t(s, "footer.copyright", "© {year} Layover Legends. All rights reserved."), { year })}
         </div>
       </section>
     </main>

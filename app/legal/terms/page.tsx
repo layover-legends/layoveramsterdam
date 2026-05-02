@@ -42,7 +42,7 @@ export default async function TermsPage() {
       </header>
 
       <p className="text-warm-cream/80 leading-relaxed">
-        {t(s, "legal.terms.intro", "By using LayoverAmsterdam you agree to these terms. Please read them before booking.")}
+        {t(s, "legal.terms.intro", "By using Layover Legends you agree to these terms. Please read them before booking.")}
       </p>
 
       <section className="space-y-3">
@@ -68,7 +68,7 @@ export default async function TermsPage() {
           {t(s, "legal.terms.liability_h2", "Liability")}
         </h2>
         <p className="text-warm-cream/70 leading-relaxed">
-          {t(s, "legal.terms.liability_body", "LayoverAmsterdam is not liable for missed flights, flight delays, or any indirect loss arising from participation in a tour. Our maximum liability is limited to the amount you paid for the booking.")}
+          {t(s, "legal.terms.liability_body", "Layover Legends is not liable for missed flights, flight delays, or any indirect loss arising from participation in a tour. Our maximum liability is limited to the amount you paid for the booking.")}
         </p>
       </section>
 

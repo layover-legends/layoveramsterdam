@@ -159,7 +159,7 @@ function SeoFields({
 }) {
   const [title, setTitle] = useState(initialTitle ?? "");
   const [desc, setDesc] = useState(initialDescription ?? "");
-  const displayTitle = title || `${previewName} · LayoverAmsterdam`;
+  const displayTitle = title || `${previewName} · Layover Legends`;
   const displayDesc = desc || lbl(labels, "admin.stopForm.seo_hint", "Leave blank to use the description automatically.");
   return (
     <fieldset className="space-y-4">
@@ -192,7 +192,7 @@ function SeoFields({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           className={inputClass}
-          placeholder={`${previewName} · LayoverAmsterdam`}
+          placeholder={`${previewName} · Layover Legends`}
         />
       </div>
 

@@ -1,29 +1,46 @@
-﻿import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 import type { Metadata } from "next";
-import SignInWithGoogle from "@/components/SignInWithGoogle";
-import StopsTeaser from "@/components/StopsTeaser";
-import { createClient } from "@/lib/supabase/server";
-import { getStopsTeaser } from "@/lib/public/stops";
-import { SITE, canonicalFor, ogImageFor, langAlternates } from "@/lib/seo/site";
 import { StructuredData } from "@/components/seo/StructuredData";
 import { organizationLd, websiteLd } from "@/lib/seo/jsonld";
-import { resolveLocale } from "@/lib/i18n/resolve";
+import { SITE, canonicalFor, ogImageFor, langAlternates } from "@/lib/seo/site";
 import { OG_LOCALE } from "@/lib/i18n/locales";
-import { loadUiStrings, t, tpl } from "@/lib/i18n/ui";
+import { resolveLocale } from "@/lib/i18n/resolve";
+import { getUiStrings, t } from "@/lib/i18n/ui";
+import { createLayover } from "@/app/layover/actions";
+import PublicNav from "@/components/public/PublicNav";
+import HeroFlightForm from "@/components/public/HeroFlightForm";
+import SocialProofStats from "@/components/public/SocialProofStats";
+import HowItWorks from "@/components/public/HowItWorks";
+import FeaturedTours from "@/components/public/FeaturedTours";
+import dynamic from "next/dynamic";
+const StopsMap = dynamic(() => import("@/components/public/StopsMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[480px] sm:h-[560px] rounded-2xl border border-warm-cream/10 bg-warm-cream/[0.03] animate-pulse" />
+  ),
+});
+import ReviewsSection from "@/components/public/ReviewsSection";
+import FinalCTA from "@/components/public/FinalCTA";
+import { getDefaultCityId } from "@/lib/public/city-helper";
+import { getHomepageStats } from "@/lib/public/homepage-stats";
+import { getFeaturedTours } from "@/lib/public/featured-tours";
+import { getMapStops } from "@/lib/public/map-stops";
+import { getHomepageReviews } from "@/lib/public/homepage-reviews";
 
-export const dynamic = "force-dynamic";
+// Blueprint+ F2 — ISR: revalidate homepage data every 60 seconds
+export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = resolveLocale();
-  const strings = await loadUiStrings(locale);
-  const title = `${SITE.name} — ${t(strings, "site.tagline", "Curated Amsterdam Layover Tours")}`;
+  const s = await getUiStrings();
+  const title = `${SITE.name} — Don't waste your layover.`;
   const description = t(
-    strings,
+    s,
     "homepage.tagline",
-    "Turn your Schiphol layover into a legend. Premium city tours between flights — launching soon.",
+    "Turn your Schiphol layover into a legend. Premium city tours between flights.",
   );
-  const ogImage = ogImageFor({ title: SITE.name, subtitle: t(strings, "site.tagline", "Curated Amsterdam layovers") });
+  const ogImage = ogImageFor({ title: SITE.name, subtitle: "Amsterdam Layover Tours" });
   return {
     title,
     description,
@@ -48,8 +65,41 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-const COMING_SOON_IMAGE =
-  "https://idgobxvhbhdymfsfmhae.supabase.co/storage/v1/object/public/assets/homepage/comingsoon.PNG";
+// Blueprint+ F3 — streaming server components: wrap slow sections in Suspense
+
+async function FeaturedToursStream() {
+  const tours = await getFeaturedTours();
+  return <FeaturedTours tours={tours} />;
+}
+
+async function ReviewsStream() {
+  const reviews = await getHomepageReviews();
+  return <ReviewsSection reviews={reviews} />;
+}
+
+function TourCardsSkeleton() {
+  return (
+    <section className="py-20 px-5 border-t border-warm-cream/8">
+      <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-5">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="rounded-2xl border border-warm-cream/8 bg-warm-cream/[0.03] h-80 animate-pulse" />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ReviewsSkeleton() {
+  return (
+    <section className="py-20 px-5 border-t border-warm-cream/8">
+      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-5">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="rounded-2xl border border-warm-cream/8 bg-warm-cream/[0.03] h-48 animate-pulse" />
+        ))}
+      </div>
+    </section>
+  );
+}
 
 type HomePageProps = {
   searchParams?: {
@@ -60,138 +110,143 @@ type HomePageProps = {
 };
 
 export default async function HomePage({ searchParams }: HomePageProps) {
-  const supabase = createClient();
   const locale = resolveLocale();
 
-  const [{ data: { user } }, stopsTeaser, strings] = await Promise.all([
-    supabase.auth.getUser(),
-    getStopsTeaser(),
-    loadUiStrings(locale),
+  // Fetch fast-path data in parallel; slow sections stream via Suspense
+  const [cityId, stats, mapStops, s] = await Promise.all([
+    getDefaultCityId(),
+    getHomepageStats(),
+    getMapStops(),
+    getUiStrings(),
   ]);
 
   const authError = searchParams?.auth_error === "1";
   const authRequired = searchParams?.auth_required === "1";
   const adminOnly = searchParams?.admin_only === "1";
-  const year = String(new Date().getFullYear());
-
-  // Build GDPR notice with inline links (server-rendered, no client JS needed).
-  const gdprNotice = (
-    <>
-      {t(strings, "auth.gdpr_notice", "By signing in, you agree to our {privacy} and {terms}.")
-        .split("{privacy}")[0]}
-      <Link href="/legal/privacy" className="underline underline-offset-2 hover:text-warm-cream/70">
-        {t(strings, "auth.gdpr_privacy", "Privacy Policy")}
-      </Link>
-      {t(strings, "auth.gdpr_notice", "By signing in, you agree to our {privacy} and {terms}.")
-        .split("{privacy}")[1]
-        ?.split("{terms}")[0]}
-      <Link href="/legal/terms" className="underline underline-offset-2 hover:text-warm-cream/70">
-        {t(strings, "auth.gdpr_terms", "Terms of Service")}
-      </Link>
-      {t(strings, "auth.gdpr_notice", "By signing in, you agree to our {privacy} and {terms}.")
-        .split("{terms}")[1]}
-    </>
-  );
 
   return (
     <>
-    <StructuredData data={[organizationLd(), websiteLd()]} />
-    <main className="min-h-screen flex flex-col items-center px-6 py-12 bg-ink-black text-warm-cream">
-      <section className="w-full max-w-3xl flex flex-col items-center text-center gap-8 pt-8 sm:pt-16">
-        <div className="relative w-full aspect-square max-w-xl">
-          <Image
-            src={COMING_SOON_IMAGE}
-            alt={t(strings, "homepage.coming_soon", "Layover Legends — Coming Soon")}
-            fill
-            priority
-            sizes="(max-width: 768px) 90vw, 600px"
-            className="object-contain drop-shadow-2xl"
+      <StructuredData data={[organizationLd(), websiteLd()]} />
+      <PublicNav locale={locale} langLabel={t(s, "auth.select_language", "Select language")} />
+
+      <main id="main">
+        {/* ── Hero ──────────────────────────────────────────────────────── */}
+        <section
+          id="hero"
+          className="relative min-h-[100dvh] flex flex-col justify-center px-5 pt-24 pb-12 overflow-hidden"
+          style={{
+            background:
+              "radial-gradient(ellipse at 20% 50%, rgba(27,79,114,0.12) 0%, transparent 60%), " +
+              "radial-gradient(ellipse at 80% 20%, rgba(201,150,58,0.06) 0%, transparent 50%), " +
+              "#0D0D0D",
+          }}
+        >
+          {/* Subtle grid texture */}
+          <div
+            className="pointer-events-none absolute inset-0 opacity-[0.03]"
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(247,243,236,1) 1px, transparent 1px), linear-gradient(90deg, rgba(247,243,236,1) 1px, transparent 1px)",
+              backgroundSize: "40px 40px",
+            }}
           />
-        </div>
 
-        <div className="space-y-3">
-          <h1 className="font-display text-4xl sm:text-6xl font-semibold tracking-wider">
-            Layover Legends
-          </h1>
-          <p className="text-base sm:text-lg text-legend-gold font-medium tracking-wide uppercase">
-            {t(strings, "homepage.coming_soon", "Coming Soon")}
-          </p>
-          <p className="text-sm sm:text-base text-warm-cream/80 max-w-xl mx-auto">
-            {t(
-              strings,
-              "homepage.tagline",
-              "Turn your Schiphol layover into a legend. Premium city tours between flights — launching soon.",
+          <div className="relative z-10 max-w-2xl mx-auto w-full space-y-8 text-center">
+            {/* Auth error notices */}
+            {(authError || authRequired || adminOnly) && (
+              <div className="rounded-xl border border-legend-gold/20 bg-legend-gold/5 px-4 py-3 text-sm text-warm-cream/80 text-center">
+                {authError && t(s, "homepage.auth_error", "Sign-in didn't complete. Please try again.")}
+                {authRequired && !authError && t(s, "homepage.auth_required", "Please sign in to view your account.")}
+                {adminOnly && !authError && !authRequired && t(s, "homepage.admin_only", "That area is for admins only.")}
+              </div>
             )}
+
+            <div className="space-y-4">
+              <p className="text-xs uppercase tracking-[0.35em] text-legend-gold font-semibold">
+                Amsterdam Layover Tours
+              </p>
+              <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.05]">
+                Don&apos;t waste<br className="hidden sm:block" /> your layover.
+              </h1>
+              <p className="text-lg text-warm-cream/65 leading-relaxed">
+                Tell us your flights. We&rsquo;ll show you what fits.
+              </p>
+            </div>
+
+            <HeroFlightForm cityId={cityId} formAction={createLayover} />
+
+            <p className="text-xs text-warm-cream/30">
+              Already planned your layover?{" "}
+              <Link href="/tours" className="text-legend-gold hover:text-gold-light underline underline-offset-2 transition-colors">
+                Browse all tours →
+              </Link>
+            </p>
+          </div>
+
+          {/* Scroll indicator */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 text-warm-cream/20 animate-bounce">
+            <div className="w-px h-8 bg-gradient-to-b from-warm-cream/20 to-transparent" />
+            <svg width="10" height="6" fill="none" viewBox="0 0 10 6" aria-hidden>
+              <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+        </section>
+
+        {/* ── Social proof ───────────────────────────────────────────────── */}
+        <SocialProofStats completedBookings={stats.completedBookings} />
+
+        {/* ── How it works ───────────────────────────────────────────────── */}
+        <HowItWorks />
+
+        {/* ── Featured tours — Blueprint+ F3 streaming ───────────────────── */}
+        <Suspense fallback={<TourCardsSkeleton />}>
+          <FeaturedToursStream />
+        </Suspense>
+
+        {/* ── Map ────────────────────────────────────────────────────────── */}
+        <section className="py-20 px-5 border-t border-warm-cream/8">
+          <div className="max-w-5xl mx-auto space-y-8">
+            <div className="text-center space-y-3">
+              <p className="text-xs uppercase tracking-[0.25em] text-legend-gold font-semibold">
+                {mapStops.length > 0 ? `${mapStops.length} stops across the city` : "The city is yours"}
+              </p>
+              <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight">
+                Every layover, packed with the best of Amsterdam
+              </h2>
+              <p className="text-sm text-warm-cream/55 max-w-lg mx-auto">
+                Filter by category — and every one of them is free if you&apos;re not on a paid tour.
+              </p>
+            </div>
+            <StopsMap stops={mapStops} />
+          </div>
+        </section>
+
+        {/* ── Reviews — Blueprint+ F3 streaming ─────────────────────────── */}
+        <Suspense fallback={<ReviewsSkeleton />}>
+          <ReviewsStream />
+        </Suspense>
+
+        {/* ── Final CTA ──────────────────────────────────────────────────── */}
+        <FinalCTA />
+      </main>
+
+      {/* ── Footer ─────────────────────────────────────────────────────── */}
+      <footer className="px-5 py-10 border-t border-warm-cream/8 text-xs text-warm-cream/40">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p>
+            {`© ${new Date().getFullYear()} Layover Legends. All rights reserved.`}
           </p>
+          <nav className="flex items-center gap-4">
+            <Link href="/legal/privacy" className="hover:text-warm-cream/70 transition-colors">Privacy</Link>
+            <span aria-hidden>·</span>
+            <Link href="/legal/terms" className="hover:text-warm-cream/70 transition-colors">Terms</Link>
+            <span aria-hidden>·</span>
+            <Link href="/legal/cancellation" className="hover:text-warm-cream/70 transition-colors">Cancellations</Link>
+            <span aria-hidden>·</span>
+            <Link href="/account" className="hover:text-warm-cream/70 transition-colors">Account</Link>
+          </nav>
         </div>
-
-        <div className="flex flex-col items-center gap-3 pt-2">
-          {user ? (
-            <Link
-              href="/account"
-              className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-legend-gold text-ink-black font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
-            >
-              {t(strings, "homepage.go_to_account", "Go to your account")}
-            </Link>
-          ) : (
-            <SignInWithGoogle
-              label={t(strings, "auth.signin_google", "Sign in with Google for early access")}
-              loadingLabel={t(strings, "auth.redirecting", "Redirecting…")}
-              gdprNotice={gdprNotice}
-            />
-          )}
-          <p className="text-xs text-warm-cream/60 max-w-sm">
-            {user
-              ? tpl(t(strings, "homepage.signed_in_as", "Signed in as {email}."), { email: user.email ?? "" })
-              : t(
-                  strings,
-                  "homepage.early_access",
-                  "Join the early-access list. We'll only email you once — when tours open.",
-                )}
-          </p>
-          {authError && (
-            <p className="text-xs text-red-300" role="alert">
-              {t(strings, "homepage.auth_error", "Sign-in didn't complete. Please try again.")}
-            </p>
-          )}
-          {authRequired && !user && (
-            <p className="text-xs text-legend-gold" role="status">
-              {t(strings, "homepage.auth_required", "Please sign in to view your account.")}
-            </p>
-          )}
-          {adminOnly && (
-            <p className="text-xs text-legend-gold/80" role="status">
-              {t(strings, "homepage.admin_only", "That area is for admins only.")}
-            </p>
-          )}
-        </div>
-
-      </section>
-
-      <StopsTeaser data={stopsTeaser} strings={strings} />
-
-      <footer className="text-xs text-warm-cream/50 pt-12 pb-4 text-center space-y-2">
-        <div>
-          {tpl(
-            t(strings, "footer.copyright", "© {year} Layover Legends. All rights reserved."),
-            { year },
-          )}
-        </div>
-        <nav className="flex items-center justify-center gap-4">
-          <Link href="/legal/privacy" className="hover:text-warm-cream/80 transition-colors">
-            {t(strings, "footer.privacy", "Privacy policy")}
-          </Link>
-          <span aria-hidden="true">·</span>
-          <Link href="/legal/terms" className="hover:text-warm-cream/80 transition-colors">
-            {t(strings, "footer.terms", "Terms of service")}
-          </Link>
-          <span aria-hidden="true">·</span>
-          <Link href="/legal/cancellation" className="hover:text-warm-cream/80 transition-colors">
-            {t(strings, "footer.cancellation", "Cancellation policy")}
-          </Link>
-        </nav>
       </footer>
-    </main>
     </>
   );
 }

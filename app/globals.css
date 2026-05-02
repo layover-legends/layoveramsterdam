@@ -4,6 +4,12 @@
 
 @import "mapbox-gl/dist/mapbox-gl.css";
 
+/* Blueprint+ D6 — CSS View Transitions API for route changes.
+   Chrome 111+ crossfades between pages natively. Older browsers: no-op. */
+@view-transition {
+  navigation: auto;
+}
+
 html,
 body {
   height: 100%;

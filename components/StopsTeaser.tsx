@@ -21,7 +21,7 @@ export default function StopsTeaser({ data, strings }: Props) {
         </p>
         <h2
           id="stops-teaser-heading"
-          className="text-3xl sm:text-4xl font-bold tracking-tight"
+          className="font-display text-3xl sm:text-4xl font-semibold tracking-tight"
         >
           {tpl(
             t(strings, "stops_teaser.free_count", "{count} free stops, hand-picked."),

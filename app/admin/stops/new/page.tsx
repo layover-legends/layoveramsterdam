@@ -16,7 +16,7 @@ export default async function NewStopPage({ searchParams }: PageProps) {
   return (
     <div className="space-y-6">
       <header className="space-y-1">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+        <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight">
           {t(s, "admin.stop.new_title", "Add a new stop")}
         </h1>
         <p className="text-sm text-warm-cream/60">

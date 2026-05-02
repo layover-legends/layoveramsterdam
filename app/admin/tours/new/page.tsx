@@ -15,7 +15,7 @@ export default async function NewTourPage({ searchParams }: PageProps) {
   return (
     <div className="space-y-6">
       <header className="space-y-1">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t(s, "admin.tour.new_title", "Add a new tour")}</h1>
+        <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight">{t(s, "admin.tour.new_title", "Add a new tour")}</h1>
         <p className="text-sm text-warm-cream/60">
           {t(s, "admin.tour.new_subtitle", "Create the tour first, then add stops and details on the next screen.")}
         </p>

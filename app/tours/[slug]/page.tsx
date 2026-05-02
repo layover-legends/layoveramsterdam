@@ -72,7 +72,7 @@ export default async function TourPage({ params }: PageProps) {
       ]),
     ]} />
     <main className="min-h-screen bg-ink-black text-warm-cream px-5 py-12 max-w-3xl mx-auto space-y-6">
-      <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{tour.name}</h1>
+      <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight">{tour.name}</h1>
       {tour.tagline && (
         <p className="text-xl text-legend-gold">{tour.tagline}</p>
       )}

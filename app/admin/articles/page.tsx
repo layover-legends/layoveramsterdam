@@ -42,7 +42,7 @@ export default async function AdminArticlesPage({ searchParams }: PageProps) {
     <div className="space-y-6">
       <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t(s, "admin.articles.title", "Articles")}</h1>
+          <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight">{t(s, "admin.articles.title", "Articles")}</h1>
           <p className="text-sm text-warm-cream/60">
             {totalMatching} {filter === "published" ? "published" : filter === "draft" ? "draft" : "total"}
             {q ? ` ${tpl(t(s, "admin.articles.empty_search", "matching \"{q}\""), { q })}` : ""}

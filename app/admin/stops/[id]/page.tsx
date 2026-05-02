@@ -73,7 +73,7 @@ export default async function EditStopPage({ params, searchParams }: PageProps) 
         {stop.category_name && (
           <p className="text-xs uppercase tracking-wide text-warm-cream/55">{stop.category_name}</p>
         )}
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{stop.name}</h1>
+        <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight">{stop.name}</h1>
       </header>
 
       {saved && (

@@ -33,7 +33,7 @@ export default async function AdminOverviewPage() {
   return (
     <div className="space-y-8">
       <header className="space-y-1">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+        <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight">
           {t(s, "admin.overview.title", "Overview")}
         </h1>
         <p className="text-sm text-warm-cream/60">
@@ -42,7 +42,7 @@ export default async function AdminOverviewPage() {
       </header>
 
       <section className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <MetricCard label={t(s, "admin.overview.metric_signups", "Total signups")} value={m.totalUsers} accent="orange" />
+        <MetricCard label={t(s, "admin.overview.metric_signups", "Total signups")} value={m.totalUsers} accent="gold" />
         <MetricCard label={t(s, "admin.overview.metric_today", "Today")} value={m.signupsToday} />
         <MetricCard label={t(s, "admin.overview.metric_week", "Last 7 days")} value={m.signupsThisWeek} />
         <MetricCard label={t(s, "admin.overview.metric_month", "This month")} value={m.signupsThisMonth} />

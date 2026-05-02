@@ -61,7 +61,7 @@ export default async function EditTourPage({ params, searchParams }: PageProps) 
           {tour.is_active ? t(s, "admin.common.active", "Active") : t(s, "admin.common.draft", "Draft")}
           {tour.duration_hours !== null ? ` · ${tour.duration_hours}h` : ""}
         </p>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{tour.name}</h1>
+        <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight">{tour.name}</h1>
       </header>
 
       {saved && (

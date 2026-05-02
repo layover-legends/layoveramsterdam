@@ -24,7 +24,7 @@ export default async function EditArticlePage({ params, searchParams }: PageProp
         <p className="text-xs uppercase tracking-wide text-warm-cream/55">
           {article.is_published ? t(s, "admin.articles.status_published", "Published") : t(s, "admin.common.draft", "Draft")}
         </p>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight line-clamp-2">{article.title}</h1>
+        <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight line-clamp-2">{article.title}</h1>
       </header>
 
       {searchParams?.saved === "1" && (

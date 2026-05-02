@@ -93,7 +93,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
             </div>
           )}
           <div className="space-y-1">
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight">
               {tpl(t(s, "account.welcome", "Welcome, {name}"), { name: firstName })}
             </h1>
             <p className="text-sm text-warm-cream/70">

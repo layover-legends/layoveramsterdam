@@ -110,10 +110,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         </div>
 
         <div className="space-y-3">
-          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight">
+          <h1 className="font-display text-4xl sm:text-6xl font-semibold tracking-wider">
             Layover Legends
           </h1>
-          <p className="text-lg sm:text-xl text-legend-gold font-semibold">
+          <p className="text-base sm:text-lg text-legend-gold font-medium tracking-wide uppercase">
             {t(strings, "homepage.coming_soon", "Coming Soon")}
           </p>
           <p className="text-sm sm:text-base text-warm-cream/80 max-w-xl mx-auto">

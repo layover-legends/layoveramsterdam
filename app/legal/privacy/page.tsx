@@ -33,7 +33,7 @@ export default async function PrivacyPage() {
       </Link>
 
       <header className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">
+        <h1 className="font-display text-3xl font-semibold tracking-tight">
           {t(s, "legal.privacy.h1", "Privacy Policy")}
         </h1>
         <p className="text-xs text-warm-cream/50">

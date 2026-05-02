@@ -37,7 +37,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
     <div className="space-y-6">
       <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t(s, "admin.users.title", "Users")}</h1>
+          <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight">{t(s, "admin.users.title", "Users")}</h1>
           <p className="text-sm text-warm-cream/60">
             {totalMatching} total{q ? ` ${tpl(t(s, "admin.users.empty_search", "matching \"{q}\""), { q })}` : ""}
           </p>

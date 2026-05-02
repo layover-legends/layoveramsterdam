@@ -52,7 +52,7 @@ export default async function CancellationPage() {
       </Link>
 
       <header>
-        <h1 className="text-3xl font-bold tracking-tight">
+        <h1 className="font-display text-3xl font-semibold tracking-tight">
           {t(s, "legal.cancellation.h1", "Cancellation Policy")}
         </h1>
       </header>

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import LogoMark from "@/components/LogoMark";
 
 type Props = {
   email: string;
@@ -56,21 +57,28 @@ export default function AdminSidebar({ email, fullName, avatarUrl, labels }: Pro
 
   return (
     <aside className="w-full lg:w-64 lg:min-h-screen lg:sticky lg:top-0 border-b lg:border-b-0 lg:border-r border-warm-cream/10 bg-ink-black flex flex-col">
-      <div className="px-5 py-5 flex items-center gap-3 border-b border-warm-cream/10">
+      {/* Brand header */}
+      <div className="px-5 pt-5 pb-4 border-b border-warm-cream/10 flex items-center gap-3">
+        <LogoMark size={32} />
+        <div>
+          <p className="font-display text-xs tracking-[0.2em] text-legend-gold font-semibold uppercase leading-none">
+            Layover Legends
+          </p>
+          <p className="text-[10px] text-warm-cream/40 tracking-wide mt-0.5">Admin</p>
+        </div>
+      </div>
+
+      {/* User profile strip */}
+      <div className="px-5 py-3 flex items-center gap-3 border-b border-warm-cream/10">
         {avatarUrl ? (
-          <Image src={avatarUrl} alt={fullName || email} width={36} height={36}
-            className="rounded-full border border-legend-gold/60" unoptimized />
+          <Image src={avatarUrl} alt={fullName || email} width={32} height={32}
+            className="rounded-full border border-legend-gold/40" unoptimized />
         ) : (
-          <div className="w-9 h-9 rounded-full bg-legend-gold/20 border border-legend-gold/60 flex items-center justify-center text-sm font-bold">
+          <div className="w-8 h-8 rounded-full bg-legend-gold/20 border border-legend-gold/40 flex items-center justify-center text-xs font-bold">
             {initial}
           </div>
         )}
-        <div className="min-w-0">
-          <p className="text-xs uppercase tracking-wider text-legend-gold font-semibold">
-            {lbl(labels, "admin.sidebar.admin", "Admin")}
-          </p>
-          <p className="text-sm text-warm-cream truncate">{fullName || email}</p>
-        </div>
+        <p className="text-sm text-warm-cream/80 truncate">{fullName || email}</p>
       </div>
 
       <nav className="px-3 py-4 flex lg:flex-col gap-1">

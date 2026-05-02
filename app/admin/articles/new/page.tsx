@@ -11,7 +11,7 @@ export default async function NewArticlePage({ searchParams }: PageProps) {
   return (
     <div className="space-y-6">
       <header className="space-y-1">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t(s, "admin.article.new_title", "New article")}</h1>
+        <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight">{t(s, "admin.article.new_title", "New article")}</h1>
         <p className="text-sm text-warm-cream/60">{t(s, "admin.article.new_subtitle", "Write in Markdown. Publish when ready.")}</p>
       </header>
 

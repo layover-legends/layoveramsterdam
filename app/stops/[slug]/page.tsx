@@ -68,7 +68,7 @@ export default async function StopPage({ params }: PageProps) {
           {stop.category_name}
         </p>
       )}
-      <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{stop.name}</h1>
+      <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight">{stop.name}</h1>
       {stop.area && (
         <p className="text-warm-cream/60">{stop.area}</p>
       )}

@@ -120,7 +120,7 @@ export default async function AdminSeoPage({ searchParams }: PageProps) {
         <p className="text-xs uppercase tracking-wide text-warm-cream/55">
           {t(s, "admin.seo.eyebrow", "SEO health")}
         </p>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+        <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight">
           {t(s, "admin.seo.title", "SEO Dashboard")}
         </h1>
         <p className="text-sm text-warm-cream/60 max-w-2xl">
@@ -160,7 +160,7 @@ export default async function AdminSeoPage({ searchParams }: PageProps) {
               <p className="text-xs uppercase tracking-wide text-warm-cream/55">
                 {t(s, "admin.seo.entity_dests", "Destinations")}
               </p>
-              <p className="text-3xl font-bold tracking-tight mt-1">{dest.total}</p>
+              <p className="font-display text-3xl font-semibold tracking-tight mt-1">{dest.total}</p>
             </div>
             <HealthBadge healthy={dest.healthy} total={dest.total} />
           </div>
@@ -183,7 +183,7 @@ export default async function AdminSeoPage({ searchParams }: PageProps) {
               <p className="text-xs uppercase tracking-wide text-warm-cream/55">
                 {t(s, "admin.seo.entity_tours", "Tours")}
               </p>
-              <p className="text-3xl font-bold tracking-tight mt-1">{tours.total}</p>
+              <p className="font-display text-3xl font-semibold tracking-tight mt-1">{tours.total}</p>
             </div>
             <HealthBadge healthy={tours.healthy} total={tours.total} />
           </div>

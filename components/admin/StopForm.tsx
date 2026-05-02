@@ -4,6 +4,68 @@ import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import type { Category, Stop } from "@/lib/admin/stops-types";
 
+type StopType = "free" | "paid" | "after_dark";
+
+function deriveType(stop?: Stop | null): StopType {
+  if (stop?.is_adult_only) return "after_dark";
+  if (stop?.requires_booking) return "paid";
+  return "free";
+}
+
+function StopTypeRadio({ defaultValue }: { defaultValue: StopType }) {
+  const [type, setType] = useState<StopType>(defaultValue);
+
+  // Map the radio choice back to the two underlying DB flags.
+  const requiresBooking = type === "paid";
+  const isAdultOnly = type === "after_dark";
+
+  const opts: Array<{ value: StopType; emoji: string; title: string; hint: string }> = [
+    { value: "free",       emoji: "🆓", title: "Free",       hint: "Open to everyone, no booking required." },
+    { value: "paid",       emoji: "€",  title: "Paid",       hint: "Bookable / paid entry. Shows in the paid catalog." },
+    { value: "after_dark", emoji: "🌙", title: "After dark", hint: "18+. Shows in the after-dark catalog only." },
+  ];
+
+  return (
+    <fieldset className="space-y-2">
+      <legend className={labelClass}>Stop type — pick one</legend>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {opts.map((o) => {
+          const active = type === o.value;
+          return (
+            <label
+              key={o.value}
+              className={
+                "flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all border " +
+                (active
+                  ? "bg-brand-orange/15 border-brand-orange/60 ring-1 ring-brand-orange/40"
+                  : "bg-brand-cream/5 border-brand-cream/10 hover:bg-brand-cream/[0.07]")
+              }
+            >
+              <input
+                type="radio"
+                name="stop_type_radio"
+                value={o.value}
+                checked={active}
+                onChange={() => setType(o.value)}
+                className="mt-0.5 h-4 w-4 text-brand-orange focus:ring-brand-orange/60"
+              />
+              <span className="text-sm text-brand-cream/85">
+                <span className="font-medium text-brand-cream">
+                  {o.emoji} {o.title}
+                </span>
+                <span className="block text-xs text-brand-cream/55 mt-0.5">{o.hint}</span>
+              </span>
+            </label>
+          );
+        })}
+      </div>
+      {/* Hidden inputs are what the server action actually reads. */}
+      <input type="hidden" name="requires_booking" value={requiresBooking ? "on" : ""} />
+      <input type="hidden" name="is_adult_only"    value={isAdultOnly    ? "on" : ""} />
+    </fieldset>
+  );
+}
+
 type Props = {
   stop?: Stop | null;
   categories: Category[];
@@ -221,20 +283,16 @@ export default function StopForm({ stop, categories, action, mode, deleteAction 
         </p>
       </div>
 
-      <fieldset className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        <legend className={labelClass + " sm:col-span-2 lg:col-span-3"}>Flags</legend>
+      <StopTypeRadio defaultValue={deriveType(stop)} />
+
+      <fieldset className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <legend className={labelClass + " sm:col-span-3"}>Other flags</legend>
         <CheckboxField name="is_active" label="Active"
           hint="Visible on the public site."
           defaultChecked={stop ? stop.is_active : true} />
-        <CheckboxField name="requires_booking" label="Requires booking"
-          hint="Paid/bookable destinations are excluded from the free catalog."
-          defaultChecked={!!stop?.requires_booking} />
         <CheckboxField name="is_seasonal" label="Seasonal"
           hint="Only available during certain months."
           defaultChecked={!!stop?.is_seasonal} />
-        <CheckboxField name="is_adult_only" label="Adult only (18+)"
-          hint="After-dark / age-restricted."
-          defaultChecked={!!stop?.is_adult_only} />
         <CheckboxField name="wheelchair_accessible" label="Wheelchair accessible"
           hint="Confirmed accessible entrance / interior."
           defaultChecked={!!stop?.wheelchair_accessible} />

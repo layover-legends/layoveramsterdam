@@ -7,8 +7,25 @@ import type {
   TranslationLocale,
 } from "@/lib/admin/seo-types";
 import { TRANSLATION_LOCALES } from "@/lib/admin/seo-types";
+import { retranslateEntity } from "@/app/admin/seo/actions";
 
 export const dynamic = "force-dynamic";
+
+function RetranslateButton({ kind, id }: { kind: "destination" | "tour"; id: string }) {
+  return (
+    <form action={retranslateEntity} className="inline">
+      <input type="hidden" name="kind" value={kind} />
+      <input type="hidden" name="id" value={id} />
+      <button
+        type="submit"
+        className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] uppercase tracking-wider bg-brand-orange/15 text-brand-orange border border-brand-orange/30 hover:bg-brand-orange/25 transition-colors"
+        title="Re-run DeepL for any locales missing this entity (skips human-edited rows)"
+      >
+        🤖 Translate
+      </button>
+    </form>
+  );
+}
 
 const LOCALE_LABEL: Record<TranslationLocale, string> = {
   fr: "Français",
@@ -77,13 +94,20 @@ function IssuePill({ issue }: { issue: SeoIssue }) {
   );
 }
 
-export default async function AdminSeoPage() {
+type PageProps = {
+  searchParams?: { retranslated?: string; status?: string; detail?: string };
+};
+
+export default async function AdminSeoPage({ searchParams }: PageProps) {
   const [health, translation] = await Promise.all([
     getSeoHealth(),
     getTranslationCoverage(),
   ]);
   const dest = health.destinations;
   const tours = health.tours;
+  const retranslated = searchParams?.retranslated;
+  const status = searchParams?.status;
+  const detail = searchParams?.detail;
 
   return (
     <div className="space-y-8">
@@ -96,9 +120,30 @@ export default async function AdminSeoPage() {
           <code className="text-brand-orange">primary photo</code>,{" "}
           <code className="text-brand-orange">alt text</code>,{" "}
           <code className="text-brand-orange">coordinates</code>, and slug uniqueness. Click any
-          row to fix it.
+          row to fix it. Click <span className="px-1 py-0.5 rounded bg-brand-orange/15 text-brand-orange text-[10px]">🤖 TRANSLATE</span> to re-run DeepL for any row missing translations.
         </p>
       </header>
+
+      {retranslated && status && (
+        <div
+          role="alert"
+          className={
+            "rounded-xl border px-4 py-3 text-sm " +
+            (status === "ok"
+              ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-100"
+              : status === "noop"
+              ? "border-brand-cream/20 bg-brand-cream/5 text-brand-cream/70"
+              : status === "partial"
+              ? "border-amber-400/40 bg-amber-400/10 text-amber-100"
+              : "border-red-400/40 bg-red-400/10 text-red-100")
+          }
+        >
+          {status === "ok" && <>✅ Re-translated <code className="text-brand-orange">{retranslated}</code> across all missing locales.</>}
+          {status === "noop" && <>ℹ️ Nothing to do for <code>{retranslated}</code> — every locale already has a current translation.</>}
+          {status === "partial" && <>⚠️ Partial translation for <code>{retranslated}</code>{detail ? `: ${detail}` : "."}</>}
+          {status === "failed" && <>❌ Failed to translate <code>{retranslated}</code>{detail ? `: ${detail}` : "."}</>}
+        </div>
+      )}
 
       {/* Headline cards */}
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -227,52 +272,63 @@ export default async function AdminSeoPage() {
                     <th className="px-4 py-3 text-left font-medium">Stop</th>
                     <th className="px-4 py-3 text-left font-medium">Issues</th>
                     <th className="px-4 py-3 text-left font-medium">Status</th>
+                    <th className="px-4 py-3 text-left font-medium">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-brand-cream/10">
-                  {dest.items.slice(0, 100).map((d) => (
-                    <tr key={d.id} className="hover:bg-brand-cream/[0.03]">
-                      <td className="px-4 py-3 max-w-[20rem]">
-                        <Link
-                          href={`/admin/stops/${d.id}`}
-                          className="text-brand-cream font-medium hover:text-brand-orange transition-colors"
-                        >
-                          {d.name}
-                        </Link>
-                        <div className="text-xs text-brand-cream/45 truncate">{d.slug}</div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex flex-wrap gap-1">
-                          {d.issues.map((i) => (
-                            <IssuePill key={i.kind} issue={i} />
-                          ))}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="flex gap-1">
-                          {d.is_active ? (
-                            <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-emerald-400/15 text-emerald-200">
-                              Active
-                            </span>
-                          ) : (
-                            <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-brand-cream/10 text-brand-cream/60">
-                              Hidden
-                            </span>
+                  {dest.items.slice(0, 100).map((d) => {
+                    const hasMissingTranslation = d.issues.some((i) =>
+                      i.kind.startsWith("missing_translation_"),
+                    );
+                    return (
+                      <tr key={d.id} className="hover:bg-brand-cream/[0.03]">
+                        <td className="px-4 py-3 max-w-[20rem]">
+                          <Link
+                            href={`/admin/stops/${d.id}`}
+                            className="text-brand-cream font-medium hover:text-brand-orange transition-colors"
+                          >
+                            {d.name}
+                          </Link>
+                          <div className="text-xs text-brand-cream/45 truncate">{d.slug}</div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex flex-wrap gap-1">
+                            {d.issues.map((i) => (
+                              <IssuePill key={i.kind} issue={i} />
+                            ))}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="flex gap-1">
+                            {d.is_active ? (
+                              <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-emerald-400/15 text-emerald-200">
+                                Active
+                              </span>
+                            ) : (
+                              <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-brand-cream/10 text-brand-cream/60">
+                                Hidden
+                              </span>
+                            )}
+                            {d.is_adult_only && (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider bg-red-400/20 text-red-200">
+                                18+
+                              </span>
+                            )}
+                            {d.requires_booking && (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider bg-brand-orange/20 text-brand-orange">
+                                €
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          {hasMissingTranslation && (
+                            <RetranslateButton kind="destination" id={d.id} />
                           )}
-                          {d.is_adult_only && (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider bg-red-400/20 text-red-200">
-                              18+
-                            </span>
-                          )}
-                          {d.requires_booking && (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider bg-brand-orange/20 text-brand-orange">
-                              €
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -303,40 +359,51 @@ export default async function AdminSeoPage() {
                   <th className="px-4 py-3 text-left font-medium">Tour</th>
                   <th className="px-4 py-3 text-left font-medium">Issues</th>
                   <th className="px-4 py-3 text-left font-medium">Status</th>
+                  <th className="px-4 py-3 text-left font-medium">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-cream/10">
-                {tours.items.map((t) => (
-                  <tr key={t.id} className="hover:bg-brand-cream/[0.03]">
-                    <td className="px-4 py-3">
-                      <Link
-                        href={`/admin/tours/${t.id}`}
-                        className="text-brand-cream font-medium hover:text-brand-orange transition-colors"
-                      >
-                        {t.name}
-                      </Link>
-                      <div className="text-xs text-brand-cream/45">{t.slug}</div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-1">
-                        {t.issues.map((i) => (
-                          <IssuePill key={i.kind} issue={i} />
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      {t.is_active ? (
-                        <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-emerald-400/15 text-emerald-200">
-                          Active
-                        </span>
-                      ) : (
-                        <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-brand-cream/10 text-brand-cream/60">
-                          Draft
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                {tours.items.map((t) => {
+                  const hasMissingTranslation = t.issues.some((i) =>
+                    i.kind.startsWith("missing_translation_"),
+                  );
+                  return (
+                    <tr key={t.id} className="hover:bg-brand-cream/[0.03]">
+                      <td className="px-4 py-3">
+                        <Link
+                          href={`/admin/tours/${t.id}`}
+                          className="text-brand-cream font-medium hover:text-brand-orange transition-colors"
+                        >
+                          {t.name}
+                        </Link>
+                        <div className="text-xs text-brand-cream/45">{t.slug}</div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-wrap gap-1">
+                          {t.issues.map((i) => (
+                            <IssuePill key={i.kind} issue={i} />
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {t.is_active ? (
+                          <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-emerald-400/15 text-emerald-200">
+                            Active
+                          </span>
+                        ) : (
+                          <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-brand-cream/10 text-brand-cream/60">
+                            Draft
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {hasMissingTranslation && (
+                          <RetranslateButton kind="tour" id={t.id} />
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

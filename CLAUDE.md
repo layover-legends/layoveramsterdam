@@ -1,4 +1,4 @@
-# LayoverAmsterdam
+# Layover Legends
 
 > Amsterdam Schiphol layover-tour platform. Building toward a multimillion-euro
 > business — every choice is for scale, never for a quick fix.
@@ -384,3 +384,59 @@ Whenever a choice presents itself, pick the option that makes the system
 - Idempotent migrations so re-running on staging never explodes.
 - Slugs derived in SQL via `public.slugify(text)` (defined in `schema-helpers.sql`) so admin and seed paths produce identical slugs.
 - One source of truth: free, paid, and adult stops all live in `destinations`, distinguished by `requires_booking` and `is_adult_only`. Never a parallel table.
+
+---
+
+## Brand identity
+
+Spec PDFs:
+- `C:\Users\steve\Desktop\compagny\Layover Legends\LayoverLegends BrandIdentity.pdf`
+- `C:\Users\steve\Desktop\compagny\Layover Legends\LayoverLegends Wireframes.pdf`
+
+Brand name: **Layover Legends** (capital L, capital L — never "layover legends" all lowercase).
+Tagline: **"Don't waste your layover."**
+
+### Color palette
+
+| Token | Hex | Role |
+|---|---|---|
+| `ink-black` | `#0D0D0D` | Primary background, dark text on light |
+| `legend-gold` | `#C9963A` | Accent, CTAs, logo, active nav |
+| `gold-light` | `#E0AA45` | Hover states, highlights |
+| `gold-dark` | `#A07828` | Pressed states, gold on light bg |
+| `warm-cream` | `#F7F3EC` | Light bg, text on dark |
+| `canal-blue` | `#1B4F72` | Secondary, Amsterdam identity |
+| `canal-light` | `#2E86C1` | Links, info states |
+| `muted` | `#888888` | Secondary text, labels |
+
+These replace the old `brand-navy / brand-orange / brand-cream` tokens. `grep brand-navy` must return 0 hits.
+
+### Typography
+
+| Family | Token | Google Font | Use |
+|---|---|---|---|
+| Cormorant Garamond | `font-display` | `var(--font-cormorant)` | All headings (h1/h2/h3), tour names, prices, destination names |
+| Outfit | `font-sans` | `var(--font-outfit)` | Body copy, UI labels, all default text |
+| JetBrains Mono | `font-mono` | `var(--font-jetbrains)` | Booking refs, flight numbers, IDs, coords |
+
+Fonts loaded via `next/font/google` in `app/layout.tsx`. CSS variables injected on `<html>`.
+
+### Logo assets
+
+`public/logo/`:
+- `mark.svg` — hexagonal symbol (6 sides, flat-top) + airplane glyph, gold stroke, transparent bg
+- `wordmark-horizontal.svg` — mark + "LAYOVER LEGENDS" side by side
+- `wordmark-vertical.svg` — mark stacked above wordmark + tagline
+- `favicon-set/favicon.svg` — 32px SVG favicon, ink-black bg
+
+React component: `components/LogoMark.tsx` — parametric size, renders programmatic SVG.
+
+### Component conventions (from brand spec)
+
+- **Primary CTA button**: `bg-legend-gold text-ink-black font-semibold` → uppercase tracking
+- **Ghost button**: `border border-warm-cream/30 text-warm-cream` → uppercase tracking
+- **Active nav item**: `bg-legend-gold/15 text-legend-gold font-medium`
+- **Headings**: always `font-display` — do not use `font-sans` for h1/h2
+- **Logo on dark bg**: hex `#C9963A` for outlines and fill
+- **Logo on light bg**: hex `#A07828` (gold-dark) for outlines and fill
+- **Never**: stretch the logo, change its colors, use on colored backgrounds, add shadows

@@ -13,13 +13,7 @@ import HeroFlightForm from "@/components/public/HeroFlightForm";
 import SocialProofStats from "@/components/public/SocialProofStats";
 import HowItWorks from "@/components/public/HowItWorks";
 import FeaturedTours from "@/components/public/FeaturedTours";
-import dynamic from "next/dynamic";
-const StopsMap = dynamic(() => import("@/components/public/StopsMap"), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-[480px] sm:h-[560px] rounded-2xl border border-warm-cream/10 bg-warm-cream/[0.03] animate-pulse" />
-  ),
-});
+import MapVisibilityGate from "@/components/public/MapVisibilityGate";
 import ReviewsSection from "@/components/public/ReviewsSection";
 import FinalCTA from "@/components/public/FinalCTA";
 import { getDefaultCityId } from "@/lib/public/city-helper";
@@ -217,7 +211,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 Filter by category — and every one of them is free if you&apos;re not on a paid tour.
               </p>
             </div>
-            <StopsMap stops={mapStops} />
+            <MapVisibilityGate stops={mapStops} />
           </div>
         </section>
 

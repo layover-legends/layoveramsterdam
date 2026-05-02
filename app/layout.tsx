@@ -47,6 +47,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang={locale}
       className={`${cormorant.variable} ${outfit.variable} ${jetbrains.variable}`}
     >
+      <head>
+        <link rel="preconnect" href="https://api.mapbox.com" />
+        <link rel="preconnect" href="https://idgobxvhbhdymfsfmhae.supabase.co" />
+      </head>
       <body className="font-sans bg-ink-black text-warm-cream">
         {children}
       </body>

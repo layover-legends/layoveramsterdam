@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { autoTranslateEntity } from "@/lib/i18n/auto-translate";
 
 const ALLOWED_CURRENCIES = new Set(["EUR", "USD", "GBP"]);
 const MAX_TAGLINE = 200;
@@ -148,8 +149,17 @@ export async function createTour(formData: FormData) {
     );
   }
 
+  // Auto-translate the new tour into all non-EN locales via DeepL.
+  let translateStatus = "ok";
+  try {
+    const r = await autoTranslateEntity("tour", inserted.id);
+    if (!r.ok) translateStatus = "partial";
+  } catch {
+    translateStatus = "failed";
+  }
+
   revalidatePath("/admin/tours");
-  redirect(`/admin/tours/${inserted.id}?saved=1`);
+  redirect(`/admin/tours/${inserted.id}?saved=1&i18n=${translateStatus}`);
 }
 
 export async function updateTour(id: string, formData: FormData) {
@@ -167,9 +177,19 @@ export async function updateTour(id: string, formData: FormData) {
     );
   }
 
+  // Re-translate any fields whose source actually changed (source_hash check
+  // inside autoTranslateEntity skips fresh AI rows automatically).
+  let translateStatus = "ok";
+  try {
+    const r = await autoTranslateEntity("tour", id);
+    if (!r.ok) translateStatus = "partial";
+  } catch {
+    translateStatus = "failed";
+  }
+
   revalidatePath("/admin/tours");
   revalidatePath(`/admin/tours/${id}`);
-  redirect(`/admin/tours/${id}?saved=1`);
+  redirect(`/admin/tours/${id}?saved=1&i18n=${translateStatus}`);
 }
 
 export async function deleteTour(id: string) {

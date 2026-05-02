@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { autoTranslateEntity } from "@/lib/i18n/auto-translate";
 
 const ALLOWED_IMAGE_TYPES = new Set([
   "image/jpeg",
@@ -164,9 +165,19 @@ export async function createStop(formData: FormData) {
     );
   }
 
+  // Auto-translate the new stop into all non-EN locales via DeepL.
+  // Wrapped in try/catch — never blocks the save if DeepL is down.
+  let translateStatus = "ok";
+  try {
+    const r = await autoTranslateEntity("destination", inserted.id);
+    if (!r.ok) translateStatus = "partial";
+  } catch {
+    translateStatus = "failed";
+  }
+
   revalidatePath("/admin/stops");
   revalidatePath("/");
-  redirect(`/admin/stops/${inserted.id}?saved=1`);
+  redirect(`/admin/stops/${inserted.id}?saved=1&i18n=${translateStatus}`);
 }
 
 export async function updateStop(id: string, formData: FormData) {
@@ -187,10 +198,20 @@ export async function updateStop(id: string, formData: FormData) {
     );
   }
 
+  // Re-translate any fields whose source changed. autoTranslateEntity skips
+  // unchanged AI rows (source_hash match) and never overwrites human rows.
+  let translateStatus = "ok";
+  try {
+    const r = await autoTranslateEntity("destination", id);
+    if (!r.ok) translateStatus = "partial";
+  } catch {
+    translateStatus = "failed";
+  }
+
   revalidatePath("/admin/stops");
   revalidatePath(`/admin/stops/${id}`);
   revalidatePath("/");
-  redirect(`/admin/stops/${id}?saved=1`);
+  redirect(`/admin/stops/${id}?saved=1&i18n=${translateStatus}`);
 }
 
 export async function deleteStop(id: string) {

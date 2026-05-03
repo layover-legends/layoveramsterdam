@@ -666,6 +666,16 @@ export const UI_STRINGS = {
   "admin.services.image.upload":               "Upload image",
   "admin.services.image.uploading":            "Uploading…",
 
+  // ── Admin — image watermark ───────────────────────────────────────────────
+  "admin.image.processing":                    "Processing image…",
+  "admin.image.watermark.label":               "Add Layover Legends watermark",
+  "admin.image.watermark.opacity":             "Opacity",
+  "admin.image.watermark.position":            "Position",
+  "admin.image.watermark.position.northeast":  "Top-right",
+  "admin.image.watermark.position.northwest":  "Top-left",
+  "admin.image.watermark.position.southeast":  "Bottom-right",
+  "admin.image.watermark.position.southwest":  "Bottom-left",
+
   // ── Public — Checkout ─────────────────────────────────────────────────────
   "checkout.cancelled.retry":              "Try again →",
   "checkout.cancelled.title":              "Payment cancelled",

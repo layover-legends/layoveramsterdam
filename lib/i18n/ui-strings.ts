@@ -650,6 +650,21 @@ export const UI_STRINGS = {
   "admin.services.sync.out_of_sync":       "Out of sync",
   "admin.services.sync.synced":            "Synced",
 
+  // ── Admin — services create ───────────────────────────────────────────────
+  "admin.services.action.add_new_addon":       "+ Add new add-on",
+  "admin.services.action.add_new_standalone":  "+ Add new standalone",
+  "admin.services.action.add_new_tour":        "+ Add new tour",
+  "admin.services.create.slug_exists":         "A service with this slug already exists",
+  "admin.services.create.success":             "Service created and synced to Stripe",
+
+  // ── Admin — services image ────────────────────────────────────────────────
+  "admin.services.image.dimensions_recommended": "Recommended: 1200×800px",
+  "admin.services.image.format":               "JPEG, PNG, or WebP",
+  "admin.services.image.remove":               "Remove image",
+  "admin.services.image.size_limit":           "Max 5MB",
+  "admin.services.image.upload":               "Upload image",
+  "admin.services.image.uploading":            "Uploading…",
+
   // ── Public — Checkout ─────────────────────────────────────────────────────
   "checkout.cancelled.retry":              "Try again →",
   "checkout.cancelled.title":              "Payment cancelled",

@@ -18,7 +18,7 @@ export async function syncOne(opts: {
   const { data: raw } = await admin
     .from(table)
     .select(
-      "id, name, description, price_cents, vat_rate, slug, stripe_product_id, stripe_price_id, updated_at, stripe_synced_at",
+      "id, name, description, price_cents, vat_rate, slug, image_url, stripe_product_id, stripe_price_id, updated_at, stripe_synced_at",
     )
     .eq("id", opts.id)
     .maybeSingle();
@@ -32,6 +32,7 @@ export async function syncOne(opts: {
     price_cents: number;
     vat_rate: number;
     slug: string;
+    image_url: string | null;
     stripe_product_id: string | null;
     stripe_price_id: string | null;
     updated_at: string | null;
@@ -57,8 +58,11 @@ export async function syncOne(opts: {
   }
 
   try {
+    // Always update Product (idempotent: name, description, images)
     const productId = await ensureProduct(row);
-    const { newPriceId, oldPriceId } = await rotatePrice(
+
+    // Only create a new Price if amount changed vs current active Price
+    const { newPriceId, oldPriceId, priceRotated } = await rotatePrice(
       productId,
       row.price_cents,
       Number(row.vat_rate),
@@ -83,7 +87,7 @@ export async function syncOne(opts: {
       product_id: productId,
       price_id: newPriceId,
       old_price_id: oldPriceId,
-      status: isCreated ? "created" : "updated",
+      status: isCreated ? "created" : priceRotated ? "updated" : "unchanged",
     };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -141,12 +145,16 @@ async function ensureProduct(row: {
   name: string | null;
   description: string | null;
   slug: string;
+  image_url: string | null;
 }): Promise<string> {
+  const images = row.image_url ? [row.image_url] : [];
+
   if (row.stripe_product_id) {
-    // Update description if it changed
+    // Products ARE mutable — update name, description, images
     await getStripe().products.update(row.stripe_product_id, {
       name: row.name ?? row.slug,
       description: row.description ?? undefined,
+      images,
     });
     return row.stripe_product_id;
   }
@@ -154,18 +162,34 @@ async function ensureProduct(row: {
   const product = await getStripe().products.create({
     name: row.name ?? row.slug,
     description: row.description ?? undefined,
+    images,
     metadata: { slug: row.slug },
   });
   return product.id;
 }
 
-/** Create a new Price and archive the old one. Prices are immutable in Stripe. */
+/**
+ * Create a new Price only if the current active Price has a different amount.
+ * Prices are immutable — if the amount matches, we reuse the existing Price.
+ */
 async function rotatePrice(
   productId: string,
   priceCents: number,
   vatRate: number,
   oldPriceId: string | null,
-): Promise<{ newPriceId: string; oldPriceId: string | null }> {
+): Promise<{ newPriceId: string; oldPriceId: string | null; priceRotated: boolean }> {
+  // Check if the current Price already matches to avoid unnecessary rotation
+  if (oldPriceId) {
+    try {
+      const existing = await getStripe().prices.retrieve(oldPriceId);
+      if (existing.unit_amount === priceCents && existing.active) {
+        return { newPriceId: oldPriceId, oldPriceId: null, priceRotated: false };
+      }
+    } catch {
+      // Price not found or unreachable — proceed to create a new one
+    }
+  }
+
   const newPrice = await getStripe().prices.create({
     product: productId,
     unit_amount: priceCents,
@@ -175,12 +199,10 @@ async function rotatePrice(
   });
 
   if (oldPriceId && oldPriceId !== newPrice.id) {
-    await getStripe().prices.update(oldPriceId, { active: false }).catch(() => {
-      // Don't fail the sync if archiving fails
-    });
+    await getStripe().prices.update(oldPriceId, { active: false }).catch(() => {});
   }
 
-  return { newPriceId: newPrice.id, oldPriceId };
+  return { newPriceId: newPrice.id, oldPriceId, priceRotated: true };
 }
 
 function fail(id: string, kind: ServiceKind, error: string): SyncResult {

@@ -12,6 +12,7 @@ export type TourDetail = {
   is_active: boolean;
   meta_title: string | null;
   meta_description: string | null;
+  image_url: string | null;
 };
 
 type Row = {
@@ -26,6 +27,7 @@ type Row = {
   is_active: boolean;
   meta_title: string | null;
   meta_description: string | null;
+  image_url: string | null;
 };
 
 export async function getTourBySlug(slug: string): Promise<TourDetail | null> {
@@ -33,7 +35,7 @@ export async function getTourBySlug(slug: string): Promise<TourDetail | null> {
   const { data } = await supabase
     .from("tours")
     .select(
-      "id, name, slug, tagline, description, duration_hours, price_cents, currency, is_active, meta_title, meta_description",
+      "id, name, slug, tagline, description, duration_hours, price_cents, currency, is_active, meta_title, meta_description, image_url",
     )
     .eq("slug", slug)
     .eq("is_active", true)
@@ -53,5 +55,6 @@ export async function getTourBySlug(slug: string): Promise<TourDetail | null> {
     is_active: r.is_active,
     meta_title: r.meta_title,
     meta_description: r.meta_description,
+    image_url: r.image_url,
   };
 }

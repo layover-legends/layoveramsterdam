@@ -8,7 +8,7 @@ import SyncAllButton from "@/components/admin/services/SyncAllButton";
 import ServiceTable from "@/components/admin/services/ServiceTable";
 import ServiceEditDrawer from "@/components/admin/services/ServiceEditDrawer";
 import type { ServiceRow } from "@/components/admin/services/ServiceTable";
-import type { TourEditRow } from "@/components/admin/services/ServiceEditDrawer";
+import type { TourEditRow, AddonEditRow } from "@/components/admin/services/ServiceEditDrawer";
 
 export type TourRow = {
   id: string;
@@ -27,6 +27,7 @@ export type TourRow = {
   duration_hours: number | null;
   is_adult_only: boolean;
   launch_mode: boolean;
+  image_url: string | null;
   stripe_product_id: string | null;
   stripe_synced_at: string | null;
   stripe_sync_error: string | null;
@@ -38,13 +39,63 @@ type Props = {
   outOfSyncCount: number;
   addons: ServiceRow[];
   standalones: ServiceRow[];
+  cityId: string;
 };
 
 type Tab = "tours" | "addons" | "standalones";
+type Creating = "tour" | "addon" | "standalone" | null;
 
-export default function ServicesClient({ tours, addons, standalones, outOfSyncCount }: Props) {
+function blankTour(cityId: string): TourEditRow {
+  return {
+    id: "__new__",
+    slug: "",
+    name: "",
+    description: null,
+    tagline: null,
+    is_active: false,
+    price_cents: 0,
+    vat_rate: 0.21,
+    pricing_model: "flat",
+    min_group_size: 1,
+    max_group_size: 6,
+    transport_mode: "van",
+    delivery_mode: "human_guide",
+    duration_hours: 4,
+    is_adult_only: false,
+    launch_mode: true,
+    image_url: null,
+  };
+}
+
+function blankAddon(serviceType: "addon" | "standalone"): AddonEditRow {
+  return {
+    id: "__new__",
+    slug: "",
+    name: "",
+    description: null,
+    price_cents: 0,
+    cogs_cents: null,
+    vat_rate: 0.21,
+    sort_order: 100,
+    pricing_model: "flat",
+    service_type: serviceType,
+    availability_status: "inactive",
+    category: "premium",
+    fulfillment: "digital",
+    image_url: null,
+  };
+}
+
+export default function ServicesClient({
+  tours,
+  addons,
+  standalones,
+  outOfSyncCount,
+  cityId,
+}: Props) {
   const [tab, setTab] = useState<Tab>("tours");
   const [editTour, setEditTour] = useState<TourRow | null>(null);
+  const [creating, setCreating] = useState<Creating>(null);
 
   const tabs: { key: Tab; label: string; count: number }[] = [
     { key: "tours", label: "Tours", count: tours.length },
@@ -52,10 +103,26 @@ export default function ServicesClient({ tours, addons, standalones, outOfSyncCo
     { key: "standalones", label: "Standalones", count: standalones.length },
   ];
 
+  const ADD_LABELS: Record<Tab, string> = {
+    tours: "+ Add new tour",
+    addons: "+ Add new add-on",
+    standalones: "+ Add new standalone",
+  };
+
+  function openCreate() {
+    setCreating(tab === "tours" ? "tour" : tab === "addons" ? "addon" : "standalone");
+  }
+
   return (
     <div className="space-y-6">
-      {/* Sync all button */}
-      <div className="flex justify-end">
+      {/* Sync all + Add new */}
+      <div className="flex items-center justify-between gap-4">
+        <button
+          onClick={openCreate}
+          className="px-4 py-2 rounded-lg bg-legend-gold text-ink-black text-xs font-semibold hover:bg-gold-light transition-colors"
+        >
+          {ADD_LABELS[tab]}
+        </button>
         <SyncAllButton outOfSyncCount={outOfSyncCount} />
       </div>
 
@@ -153,10 +220,11 @@ export default function ServicesClient({ tours, addons, standalones, outOfSyncCo
       {tab === "addons" && <ServiceTable rows={addons} />}
       {tab === "standalones" && <ServiceTable rows={standalones} />}
 
-      {/* Tour edit drawer */}
+      {/* Edit tour drawer */}
       {editTour && (
         <ServiceEditDrawer
           source="tour"
+          cityId={cityId}
           row={{
             id: editTour.id,
             slug: editTour.slug,
@@ -174,8 +242,27 @@ export default function ServicesClient({ tours, addons, standalones, outOfSyncCo
             duration_hours: editTour.duration_hours,
             is_adult_only: editTour.is_adult_only,
             launch_mode: editTour.launch_mode,
+            image_url: editTour.image_url,
           } satisfies TourEditRow}
           onClose={() => setEditTour(null)}
+        />
+      )}
+
+      {/* Create drawers */}
+      {creating === "tour" && (
+        <ServiceEditDrawer
+          source="tour"
+          cityId={cityId}
+          row={blankTour(cityId)}
+          onClose={() => setCreating(null)}
+        />
+      )}
+      {(creating === "addon" || creating === "standalone") && (
+        <ServiceEditDrawer
+          source="addon"
+          cityId={cityId}
+          row={blankAddon(creating === "addon" ? "addon" : "standalone")}
+          onClose={() => setCreating(null)}
         />
       )}
     </div>

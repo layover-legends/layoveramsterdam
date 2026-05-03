@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { syncOne } from "@/lib/stripe/sync";
 
 export type AvailabilityStatus = "active" | "coming_soon" | "inactive";
 
@@ -79,6 +80,7 @@ export type TourFieldsUpdate = {
   is_adult_only?: boolean;
   launch_mode?: boolean;
   is_active?: boolean;
+  image_url?: string | null;
 };
 
 export async function updateTourFields(
@@ -128,6 +130,7 @@ export async function updateAddonFields(
     availability_status?: string;
     category?: string;
     fulfillment?: string;
+    image_url?: string | null;
   },
   originalFields: { name?: string; description?: string | null },
 ): Promise<{ ok: boolean; error?: string }> {
@@ -156,6 +159,121 @@ export async function updateAddonFields(
   revalidatePath("/admin/services");
   revalidatePath("/shop");
   return { ok: true };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Create new services
+// ─────────────────────────────────────────────────────────────────────────────
+
+function normalizeSlug(raw: string): string {
+  return raw
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export type CreateTourFields = {
+  slug: string;
+  name: string;
+  description: string | null;
+  tagline: string | null;
+  price_cents: number;
+  vat_rate: number;
+  pricing_model: string;
+  min_group_size: number;
+  max_group_size: number | null;
+  transport_mode: string;
+  delivery_mode: string;
+  duration_hours: number | null;
+  is_adult_only: boolean;
+  launch_mode: boolean;
+  is_active: boolean;
+  image_url: string | null;
+  city_id: string;
+};
+
+export async function createTour(
+  fields: CreateTourFields,
+): Promise<{ id: string } | { error: string }> {
+  await requireAdmin();
+  const admin = createAdminClient();
+
+  const slug = normalizeSlug(fields.slug);
+  if (!slug) return { error: "Slug is required" };
+
+  const { data: existing } = await admin
+    .from("tours")
+    .select("id")
+    .eq("slug", slug)
+    .maybeSingle();
+  if (existing) return { error: `Slug "${slug}" already exists` };
+
+  const { data: row, error: insertErr } = await admin
+    .from("tours")
+    .insert({ ...fields, slug, currency: "EUR" })
+    .select("id")
+    .single();
+
+  if (insertErr || !row) return { error: insertErr?.message ?? "Insert failed" };
+
+  // Sync to Stripe immediately (creates Product + Price)
+  await syncOne({ kind: "tour", id: row.id }).catch(() => {});
+
+  revalidatePath("/admin/services");
+  revalidatePath("/tours");
+  return { id: row.id };
+}
+
+export type CreateAddonFields = {
+  slug: string;
+  name: string;
+  description: string | null;
+  price_cents: number;
+  cogs_cents: number | null;
+  vat_rate: number;
+  sort_order: number;
+  pricing_model: string;
+  service_type: string;
+  availability_status: string;
+  category: string;
+  fulfillment: string;
+  image_url: string | null;
+  city_id: string;
+};
+
+export async function createAddon(
+  fields: CreateAddonFields,
+): Promise<{ id: string } | { error: string }> {
+  await requireAdmin();
+  const admin = createAdminClient();
+
+  const slug = normalizeSlug(fields.slug);
+  if (!slug) return { error: "Slug is required" };
+
+  // addons has UNIQUE (city_id, slug)
+  const { data: existing } = await admin
+    .from("addons")
+    .select("id")
+    .eq("slug", slug)
+    .eq("city_id", fields.city_id)
+    .maybeSingle();
+  if (existing) return { error: `Slug "${slug}" already exists` };
+
+  const { data: row, error: insertErr } = await admin
+    .from("addons")
+    .insert({ ...fields, slug, is_active: true })
+    .select("id")
+    .single();
+
+  if (insertErr || !row) return { error: insertErr?.message ?? "Insert failed" };
+
+  // Sync to Stripe immediately
+  await syncOne({ kind: "addon", id: row.id }).catch(() => {});
+
+  revalidatePath("/admin/services");
+  revalidatePath("/shop");
+  return { id: row.id };
 }
 
 export async function loadWaitlistEmails(

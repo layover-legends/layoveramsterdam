@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { updateTourFields, updateAddonFields } from "@/app/admin/services/actions";
+import { useRouter } from "next/navigation";
+import { updateTourFields, updateAddonFields, createTour, createAddon } from "@/app/admin/services/actions";
 import { syncServiceToStripe } from "@/app/actions/sync-stripe";
 import { formatPrice } from "@/lib/i18n/format-price";
+import ImageUploadField from "./ImageUploadField";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Row types for each source (contains only what the drawer needs)
+// Row types (id === '__new__' means create mode)
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type TourEditRow = {
@@ -26,6 +28,7 @@ export type TourEditRow = {
   duration_hours: number | null;
   is_adult_only: boolean;
   launch_mode: boolean;
+  image_url: string | null;
 };
 
 export type AddonEditRow = {
@@ -42,11 +45,12 @@ export type AddonEditRow = {
   availability_status: string;
   category: string;
   fulfillment: string;
+  image_url: string | null;
 };
 
 type Props =
-  | { source: "tour"; row: TourEditRow; onClose: () => void }
-  | { source: "addon"; row: AddonEditRow; onClose: () => void };
+  | { source: "tour"; row: TourEditRow; cityId?: string; onClose: () => void }
+  | { source: "addon"; row: AddonEditRow; cityId?: string; onClose: () => void };
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -65,19 +69,23 @@ const PRICING_MODELS = ["flat", "per_person"] as const;
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function ServiceEditDrawer(props: Props) {
-  const { source, row, onClose } = props;
+  const { source, row, cityId, onClose } = props;
+  const isCreate = row.id === "__new__";
+  const router = useRouter();
 
   // Common state
+  const [slug, setSlug] = useState(row.slug);
   const [name, setName] = useState(row.name);
   const [description, setDescription] = useState(row.description ?? "");
   const [priceCents, setPriceCents] = useState(String(row.price_cents));
   const [vatRate, setVatRate] = useState(String(Math.round(row.vat_rate * 100)));
   const [pricingModel, setPricingModel] = useState(row.pricing_model);
+  const [imageUrl, setImageUrl] = useState<string | null>(row.image_url);
 
   // Tour-specific state
   const tourRow = source === "tour" ? (row as TourEditRow) : null;
   const [tagline, setTagline] = useState(tourRow?.tagline ?? "");
-  const [isActive, setIsActive] = useState(tourRow?.is_active ?? true);
+  const [isActive, setIsActive] = useState(tourRow?.is_active ?? false);
   const [minGroup, setMinGroup] = useState(String(tourRow?.min_group_size ?? 1));
   const [maxGroup, setMaxGroup] = useState(String(tourRow?.max_group_size ?? ""));
   const [transportMode, setTransportMode] = useState(tourRow?.transport_mode ?? "van");
@@ -90,13 +98,13 @@ export default function ServiceEditDrawer(props: Props) {
   const addonRow = source === "addon" ? (row as AddonEditRow) : null;
   const [cogsCents, setCogsCents] = useState(addonRow?.cogs_cents != null ? String(addonRow.cogs_cents) : "");
   const [sortOrder, setSortOrder] = useState(String(addonRow?.sort_order ?? 100));
-  const [serviceType, setServiceType] = useState(addonRow?.service_type ?? "addon");
-  const [availabilityStatus, setAvailabilityStatus] = useState(addonRow?.availability_status ?? "active");
-  const [category, setCategory] = useState(addonRow?.category ?? "photo");
+  const [serviceType, setServiceType] = useState(addonRow?.service_type ?? "standalone");
+  const [availabilityStatus, setAvailabilityStatus] = useState(addonRow?.availability_status ?? "inactive");
+  const [category, setCategory] = useState(addonRow?.category ?? "premium");
   const [fulfillment, setFulfillment] = useState(addonRow?.fulfillment ?? "digital");
 
-  const [saved, setSaved] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
   const [pending, startTransition] = useTransition();
 
   function handleSave() {
@@ -104,11 +112,71 @@ export default function ServiceEditDrawer(props: Props) {
     startTransition(async () => {
       const newPrice = parseInt(priceCents, 10) || row.price_cents;
       const priceChanged = newPrice !== row.price_cents;
+      const imageChanged = imageUrl !== row.image_url;
 
-      let result: { ok: boolean; error?: string };
+      if (isCreate) {
+        // ── Create mode ──────────────────────────────────────────────────────
+        if (!cityId) {
+          setErrorMsg("City ID missing — contact support");
+          return;
+        }
+
+        let result: { id: string } | { error: string };
+
+        if (source === "tour") {
+          result = await createTour({
+            slug,
+            name: name.trim() || "Untitled",
+            description: description.trim() || null,
+            tagline: tagline.trim() || null,
+            price_cents: newPrice,
+            vat_rate: (parseInt(vatRate, 10) || 21) / 100,
+            pricing_model: pricingModel,
+            min_group_size: parseInt(minGroup, 10) || 1,
+            max_group_size: maxGroup !== "" ? parseInt(maxGroup, 10) : null,
+            transport_mode: transportMode,
+            delivery_mode: deliveryMode,
+            duration_hours: durationHours !== "" ? parseFloat(durationHours) : null,
+            is_adult_only: isAdultOnly,
+            launch_mode: launchMode,
+            is_active: isActive,
+            image_url: imageUrl,
+            city_id: cityId,
+          });
+        } else {
+          result = await createAddon({
+            slug,
+            name: name.trim() || "Untitled",
+            description: description.trim() || null,
+            price_cents: newPrice,
+            cogs_cents: cogsCents !== "" ? parseInt(cogsCents, 10) : null,
+            vat_rate: (parseInt(vatRate, 10) || 21) / 100,
+            sort_order: parseInt(sortOrder, 10) || 100,
+            pricing_model: pricingModel,
+            service_type: serviceType,
+            availability_status: availabilityStatus,
+            category,
+            fulfillment,
+            image_url: imageUrl,
+            city_id: cityId,
+          });
+        }
+
+        if ("error" in result) {
+          setErrorMsg(result.error);
+          return;
+        }
+
+        router.refresh();
+        onClose();
+        return;
+      }
+
+      // ── Edit mode ──────────────────────────────────────────────────────────
+      let updateResult: { ok: boolean; error?: string };
 
       if (source === "tour") {
-        result = await updateTourFields(
+        updateResult = await updateTourFields(
           row.id,
           {
             name: name.trim() || row.name,
@@ -125,11 +193,12 @@ export default function ServiceEditDrawer(props: Props) {
             is_adult_only: isAdultOnly,
             launch_mode: launchMode,
             is_active: isActive,
+            image_url: imageUrl,
           },
           { name: row.name, description: row.description, tagline: (row as TourEditRow).tagline },
         );
       } else {
-        result = await updateAddonFields(
+        updateResult = await updateAddonFields(
           row.id,
           {
             name: name.trim() || row.name,
@@ -143,17 +212,19 @@ export default function ServiceEditDrawer(props: Props) {
             availability_status: availabilityStatus,
             category,
             fulfillment,
+            image_url: imageUrl,
           },
           { name: row.name, description: row.description },
         );
       }
 
-      if (!result.ok) {
-        setErrorMsg(result.error ?? "Save failed");
+      if (!updateResult.ok) {
+        setErrorMsg(updateResult.error ?? "Save failed");
         return;
       }
 
-      if (priceChanged) {
+      // Sync to Stripe: full sync if price changed; image-only update otherwise
+      if (priceChanged || imageChanged) {
         await syncServiceToStripe(source, row.id).catch(() => {});
       }
 
@@ -171,10 +242,14 @@ export default function ServiceEditDrawer(props: Props) {
         <div className="flex items-center justify-between px-5 py-4 border-b border-warm-cream/10">
           <div>
             <p className="text-[10px] uppercase tracking-widest text-warm-cream/40 mb-0.5">
-              Edit {source}
+              {isCreate ? `New ${source}` : `Edit ${source}`}
             </p>
-            <h2 className="font-semibold text-warm-cream text-sm">{row.name}</h2>
-            <p className="text-[10px] text-warm-cream/35 font-mono">{row.slug}</p>
+            <h2 className="font-semibold text-warm-cream text-sm">
+              {isCreate ? (name || `New ${source}`) : row.name}
+            </h2>
+            {!isCreate && (
+              <p className="text-[10px] text-warm-cream/35 font-mono">{row.slug}</p>
+            )}
           </div>
           <button
             onClick={onClose}
@@ -192,24 +267,45 @@ export default function ServiceEditDrawer(props: Props) {
             </p>
           )}
 
-          {/* ── Common ──────────────────────────────────────────────── */}
-          <Section label="Content" />
+          {/* Image */}
+          <Section label="Image" />
+          <ImageUploadField
+            source={source}
+            slug={slug || row.slug}
+            currentUrl={imageUrl}
+            onChange={setImageUrl}
+          />
+
+          {/* ── Identity ──────────────────────────────────────────────────── */}
+          <Section label="Identity" />
+
+          {/* Slug (always editable in create mode; read-only in edit) */}
+          {isCreate ? (
+            <Field label="Slug" hint="lowercase, hyphens only">
+              <input
+                value={slug}
+                onChange={(e) =>
+                  setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))
+                }
+                placeholder="my-new-tour"
+                className={INPUT}
+              />
+            </Field>
+          ) : (
+            <Field label="Slug">
+              <p className="text-sm text-warm-cream/40 font-mono px-3 py-2 rounded-lg bg-warm-cream/[0.03] border border-warm-cream/8">
+                {row.slug}
+              </p>
+            </Field>
+          )}
 
           <Field label="Name">
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className={INPUT}
-            />
+            <input value={name} onChange={(e) => setName(e.target.value)} className={INPUT} />
           </Field>
 
           {source === "tour" && (
             <Field label="Tagline">
-              <input
-                value={tagline}
-                onChange={(e) => setTagline(e.target.value)}
-                className={INPUT}
-              />
+              <input value={tagline} onChange={(e) => setTagline(e.target.value)} className={INPUT} />
             </Field>
           )}
 
@@ -222,6 +318,7 @@ export default function ServiceEditDrawer(props: Props) {
             />
           </Field>
 
+          {/* ── Pricing ───────────────────────────────────────────────────── */}
           <Section label="Pricing" />
 
           <Field label="Price (cents)">
@@ -276,7 +373,7 @@ export default function ServiceEditDrawer(props: Props) {
             </Field>
           )}
 
-          {/* ── Tour-specific ────────────────────────────────────────── */}
+          {/* ── Tour-specific ────────────────────────────────────────────── */}
           {source === "tour" && (
             <>
               <Section label="Capacity" />
@@ -291,7 +388,7 @@ export default function ServiceEditDrawer(props: Props) {
                     className={INPUT}
                   />
                 </Field>
-                <Field label="Max group" hint="blank = unlimited">
+                <Field label="Max group" hint="blank = ∞">
                   <input
                     type="number"
                     min="1"
@@ -335,7 +432,7 @@ export default function ServiceEditDrawer(props: Props) {
             </>
           )}
 
-          {/* ── Addon-specific ──────────────────────────────────────── */}
+          {/* ── Addon-specific ───────────────────────────────────────────── */}
           {source === "addon" && (
             <>
               <Section label="Catalog" />
@@ -366,7 +463,15 @@ export default function ServiceEditDrawer(props: Props) {
             disabled={pending}
             className="flex-1 py-2.5 rounded-full bg-legend-gold text-ink-black font-semibold text-sm hover:bg-gold-light transition-colors disabled:opacity-50"
           >
-            {saved ? "Saved ✓" : pending ? "Saving…" : "Save & sync to Stripe"}
+            {saved
+              ? "Saved ✓"
+              : pending
+                ? isCreate
+                  ? "Creating…"
+                  : "Saving…"
+                : isCreate
+                  ? "Create & sync to Stripe"
+                  : "Save & sync to Stripe"}
           </button>
           <button
             onClick={onClose}
@@ -381,7 +486,7 @@ export default function ServiceEditDrawer(props: Props) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Helper sub-components
+// Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
 const INPUT =
@@ -395,15 +500,7 @@ function Section({ label }: { label: string }) {
   );
 }
 
-function Field({
-  label,
-  hint,
-  children,
-}: {
-  label: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
+function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1">
       <label className="text-xs font-medium text-warm-cream/60 uppercase tracking-wider">
@@ -456,15 +553,11 @@ function Toggle({
   return (
     <label className="flex items-center gap-3 cursor-pointer group">
       <div
-        className={`relative w-9 h-5 rounded-full transition-colors ${
-          checked ? "bg-legend-gold" : "bg-warm-cream/15"
-        }`}
+        className={`relative w-9 h-5 rounded-full transition-colors ${checked ? "bg-legend-gold" : "bg-warm-cream/15"}`}
         onClick={() => onChange(!checked)}
       >
         <div
-          className={`absolute top-0.5 w-4 h-4 rounded-full bg-ink-black transition-transform ${
-            checked ? "translate-x-4" : "translate-x-0.5"
-          }`}
+          className={`absolute top-0.5 w-4 h-4 rounded-full bg-ink-black transition-transform ${checked ? "translate-x-4" : "translate-x-0.5"}`}
         />
       </div>
       <span className="text-sm text-warm-cream/70 group-hover:text-warm-cream transition-colors">

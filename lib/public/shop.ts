@@ -17,6 +17,7 @@ export type PublicService = {
   service_type: "standalone" | "both";
   availability_status: "active" | "coming_soon";
   is_recommended: boolean;
+  image_url: string | null;
 };
 
 type ServiceRow = {
@@ -28,6 +29,7 @@ type ServiceRow = {
   price_cents: number;
   vat_rate: number;
   sort_order: number;
+  image_url: string | null;
   service_type: string;
   availability_status: string;
 };
@@ -69,7 +71,7 @@ export async function getShopServices(locale: string): Promise<PublicService[]> 
 
   const { data: rows } = await supabase
     .from("addons")
-    .select("id, slug, category, fulfillment, pricing_model, price_cents, vat_rate, sort_order, service_type, availability_status")
+    .select("id, slug, category, fulfillment, pricing_model, price_cents, vat_rate, sort_order, service_type, availability_status, image_url")
     .in("service_type", ["standalone", "both"])
     .neq("availability_status", "inactive")
     .eq("is_active", true)
@@ -107,6 +109,7 @@ export async function getShopServices(locale: string): Promise<PublicService[]> 
     service_type: s.service_type as "standalone" | "both",
     availability_status: s.availability_status as "active" | "coming_soon",
     is_recommended: false,
+    image_url: s.image_url,
   }));
 }
 
@@ -118,7 +121,7 @@ export async function getShopServiceBySlug(
 
   const { data: row } = await supabase
     .from("addons")
-    .select("id, slug, category, fulfillment, pricing_model, price_cents, vat_rate, sort_order, service_type, availability_status")
+    .select("id, slug, category, fulfillment, pricing_model, price_cents, vat_rate, sort_order, service_type, availability_status, image_url")
     .eq("slug", slug)
     .in("service_type", ["standalone", "both"])
     .neq("availability_status", "inactive")
@@ -156,5 +159,6 @@ export async function getShopServiceBySlug(
     service_type: s.service_type as "standalone" | "both",
     availability_status: s.availability_status as "active" | "coming_soon",
     is_recommended: false,
+    image_url: s.image_url,
   };
 }

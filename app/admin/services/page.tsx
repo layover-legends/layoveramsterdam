@@ -9,17 +9,17 @@ export default async function AdminServicesPage() {
   await requireAdmin();
   const admin = createAdminClient();
 
-  const [toursRes, addonsRes, waitlistRes] = await Promise.all([
+  const [toursRes, addonsRes, waitlistRes, cityRes] = await Promise.all([
     admin
       .from("tours")
       .select(
-        "id, slug, name, description, tagline, is_active, price_cents, vat_rate, pricing_model, min_group_size, max_group_size, transport_mode, delivery_mode, duration_hours, is_adult_only, launch_mode, stripe_product_id, stripe_synced_at, stripe_sync_error, updated_at",
+        "id, slug, name, description, tagline, is_active, price_cents, vat_rate, pricing_model, min_group_size, max_group_size, transport_mode, delivery_mode, duration_hours, is_adult_only, launch_mode, image_url, stripe_product_id, stripe_synced_at, stripe_sync_error, updated_at",
       )
       .order("name"),
     admin
       .from("addons")
       .select(
-        "id, slug, name, description, category, fulfillment, service_type, availability_status, price_cents, cogs_cents, vat_rate, pricing_model, sort_order, stripe_product_id, stripe_synced_at, stripe_sync_error, updated_at",
+        "id, slug, name, description, category, fulfillment, service_type, availability_status, price_cents, cogs_cents, vat_rate, pricing_model, sort_order, image_url, stripe_product_id, stripe_synced_at, stripe_sync_error, updated_at",
       )
       .eq("is_active", true)
       .order("sort_order"),
@@ -33,6 +33,12 @@ export default async function AdminServicesPage() {
         }
         return counts;
       }),
+    admin
+      .from("cities")
+      .select("id")
+      .eq("slug", "amsterdam")
+      .maybeSingle()
+      .then((r) => (r.data as { id: string } | null)?.id ?? ""),
   ]);
 
   type TourRaw = {
@@ -52,6 +58,7 @@ export default async function AdminServicesPage() {
     duration_hours: number | null;
     is_adult_only: boolean;
     launch_mode: boolean;
+    image_url: string | null;
     stripe_product_id: string | null;
     stripe_synced_at: string | null;
     stripe_sync_error: string | null;
@@ -72,6 +79,7 @@ export default async function AdminServicesPage() {
     vat_rate: number;
     pricing_model: string;
     sort_order: number;
+    image_url: string | null;
     stripe_product_id: string | null;
     stripe_synced_at: string | null;
     stripe_sync_error: string | null;
@@ -81,6 +89,7 @@ export default async function AdminServicesPage() {
   const tours = (toursRes.data ?? []) as TourRaw[];
   const allAddons = (addonsRes.data ?? []) as AddonRaw[];
   const waitlistCounts = waitlistRes;
+  const cityId = cityRes;
 
   function toServiceRow(a: AddonRaw): ServiceRow {
     return {
@@ -99,6 +108,7 @@ export default async function AdminServicesPage() {
       pricing_model: a.pricing_model as ServiceRow["pricing_model"],
       sort_order: a.sort_order,
       waitlist_count: waitlistCounts.get(a.id) ?? 0,
+      image_url: a.image_url,
       stripe_product_id: a.stripe_product_id,
       stripe_synced_at: a.stripe_synced_at,
       stripe_sync_error: a.stripe_sync_error,
@@ -143,6 +153,7 @@ export default async function AdminServicesPage() {
         addons={addons}
         standalones={standalones}
         outOfSyncCount={outOfSyncCount}
+        cityId={cityId}
       />
     </main>
   );

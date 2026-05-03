@@ -28,6 +28,7 @@ export type ServiceRow = {
   pricing_model: "flat" | "per_person";
   sort_order: number;
   waitlist_count: number;
+  image_url: string | null;
   stripe_product_id: string | null;
   stripe_synced_at: string | null;
   stripe_sync_error: string | null;
@@ -176,6 +177,7 @@ export default function ServiceTable({ rows }: Props) {
             availability_status: editService.availability_status,
             category: editService.category,
             fulfillment: editService.fulfillment,
+            image_url: editService.image_url,
           } satisfies AddonEditRow}
           onClose={() => setEditService(null)}
         />

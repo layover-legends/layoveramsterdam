@@ -6,15 +6,27 @@ import MarginBadge from "@/components/admin/services/MarginBadge";
 import SyncStatusBadge from "@/components/admin/services/SyncStatusBadge";
 import SyncAllButton from "@/components/admin/services/SyncAllButton";
 import ServiceTable from "@/components/admin/services/ServiceTable";
+import ServiceEditDrawer from "@/components/admin/services/ServiceEditDrawer";
 import type { ServiceRow } from "@/components/admin/services/ServiceTable";
+import type { TourEditRow } from "@/components/admin/services/ServiceEditDrawer";
 
-type TourRow = {
+export type TourRow = {
   id: string;
   slug: string;
   name: string;
+  description: string | null;
+  tagline: string | null;
   is_active: boolean;
   price_cents: number | null;
   vat_rate: number;
+  pricing_model: string;
+  min_group_size: number;
+  max_group_size: number | null;
+  transport_mode: string;
+  delivery_mode: string;
+  duration_hours: number | null;
+  is_adult_only: boolean;
+  launch_mode: boolean;
   stripe_product_id: string | null;
   stripe_synced_at: string | null;
   stripe_sync_error: string | null;
@@ -32,6 +44,7 @@ type Tab = "tours" | "addons" | "standalones";
 
 export default function ServicesClient({ tours, addons, standalones, outOfSyncCount }: Props) {
   const [tab, setTab] = useState<Tab>("tours");
+  const [editTour, setEditTour] = useState<TourRow | null>(null);
 
   const tabs: { key: Tab; label: string; count: number }[] = [
     { key: "tours", label: "Tours", count: tours.length },
@@ -59,14 +72,20 @@ export default function ServicesClient({ tours, addons, standalones, outOfSyncCo
             }`}
           >
             {t.label}
-            <span className={`ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full ${tab === t.key ? "bg-legend-gold/20 text-legend-gold" : "bg-warm-cream/8 text-warm-cream/40"}`}>
+            <span
+              className={`ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full ${
+                tab === t.key
+                  ? "bg-legend-gold/20 text-legend-gold"
+                  : "bg-warm-cream/8 text-warm-cream/40"
+              }`}
+            >
               {t.count}
             </span>
           </button>
         ))}
       </div>
 
-      {/* Tours tab — simplified (no availability_status, no service_type) */}
+      {/* Tours tab */}
       {tab === "tours" && (
         <div className="overflow-x-auto rounded-2xl border border-warm-cream/10">
           <table className="w-full text-sm">
@@ -77,6 +96,7 @@ export default function ServicesClient({ tours, addons, standalones, outOfSyncCo
                 <th className="text-left px-4 py-3 hidden xl:table-cell">Stripe</th>
                 <th className="text-right px-4 py-3">Price</th>
                 <th className="text-right px-4 py-3">Margin</th>
+                <th className="text-right px-4 py-3"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-warm-cream/8">
@@ -87,11 +107,13 @@ export default function ServicesClient({ tours, addons, standalones, outOfSyncCo
                     <p className="text-[10px] text-warm-cream/35 font-mono">{tour.slug}</p>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
-                      tour.is_active
-                        ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/25"
-                        : "bg-warm-cream/8 text-warm-cream/40 border-warm-cream/15"
-                    }`}>
+                    <span
+                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
+                        tour.is_active
+                          ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/25"
+                          : "bg-warm-cream/8 text-warm-cream/40 border-warm-cream/15"
+                      }`}
+                    >
                       {tour.is_active ? "Active" : "Inactive"}
                     </span>
                   </td>
@@ -113,6 +135,14 @@ export default function ServicesClient({ tours, addons, standalones, outOfSyncCo
                       cogs_cents={null}
                     />
                   </td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      onClick={() => setEditTour(tour)}
+                      className="text-xs text-warm-cream/40 hover:text-warm-cream transition-colors"
+                    >
+                      Edit
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -122,6 +152,32 @@ export default function ServicesClient({ tours, addons, standalones, outOfSyncCo
 
       {tab === "addons" && <ServiceTable rows={addons} />}
       {tab === "standalones" && <ServiceTable rows={standalones} />}
+
+      {/* Tour edit drawer */}
+      {editTour && (
+        <ServiceEditDrawer
+          source="tour"
+          row={{
+            id: editTour.id,
+            slug: editTour.slug,
+            name: editTour.name,
+            description: editTour.description,
+            tagline: editTour.tagline,
+            is_active: editTour.is_active,
+            price_cents: editTour.price_cents ?? 0,
+            vat_rate: editTour.vat_rate,
+            pricing_model: editTour.pricing_model,
+            min_group_size: editTour.min_group_size,
+            max_group_size: editTour.max_group_size,
+            transport_mode: editTour.transport_mode,
+            delivery_mode: editTour.delivery_mode,
+            duration_hours: editTour.duration_hours,
+            is_adult_only: editTour.is_adult_only,
+            launch_mode: editTour.launch_mode,
+          } satisfies TourEditRow}
+          onClose={() => setEditTour(null)}
+        />
+      )}
     </div>
   );
 }

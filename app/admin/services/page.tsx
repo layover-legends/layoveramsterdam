@@ -13,13 +13,13 @@ export default async function AdminServicesPage() {
     admin
       .from("tours")
       .select(
-        "id, slug, name, is_active, price_cents, vat_rate, stripe_product_id, stripe_synced_at, stripe_sync_error, updated_at",
+        "id, slug, name, description, tagline, is_active, price_cents, vat_rate, pricing_model, min_group_size, max_group_size, transport_mode, delivery_mode, duration_hours, is_adult_only, launch_mode, stripe_product_id, stripe_synced_at, stripe_sync_error, updated_at",
       )
       .order("name"),
     admin
       .from("addons")
       .select(
-        "id, slug, name, service_type, availability_status, price_cents, cogs_cents, vat_rate, pricing_model, sort_order, stripe_product_id, stripe_synced_at, stripe_sync_error, updated_at",
+        "id, slug, name, description, category, fulfillment, service_type, availability_status, price_cents, cogs_cents, vat_rate, pricing_model, sort_order, stripe_product_id, stripe_synced_at, stripe_sync_error, updated_at",
       )
       .eq("is_active", true)
       .order("sort_order"),
@@ -39,9 +39,19 @@ export default async function AdminServicesPage() {
     id: string;
     slug: string;
     name: string;
+    description: string | null;
+    tagline: string | null;
     is_active: boolean;
     price_cents: number | null;
     vat_rate: number;
+    pricing_model: string;
+    min_group_size: number;
+    max_group_size: number | null;
+    transport_mode: string;
+    delivery_mode: string;
+    duration_hours: number | null;
+    is_adult_only: boolean;
+    launch_mode: boolean;
     stripe_product_id: string | null;
     stripe_synced_at: string | null;
     stripe_sync_error: string | null;
@@ -52,6 +62,9 @@ export default async function AdminServicesPage() {
     id: string;
     slug: string;
     name: string | null;
+    description: string | null;
+    category: string;
+    fulfillment: string;
     service_type: string;
     availability_status: string;
     price_cents: number;
@@ -70,13 +83,15 @@ export default async function AdminServicesPage() {
   const waitlistCounts = waitlistRes;
 
   function toServiceRow(a: AddonRaw): ServiceRow {
-    const isAddon = a.service_type === "addon";
     return {
       id: a.id,
       slug: a.slug,
       name: a.name ?? a.slug,
+      description: a.description,
+      category: a.category,
+      fulfillment: a.fulfillment,
       service_type: a.service_type as ServiceRow["service_type"],
-      service_kind: isAddon ? "addon" : "addon", // both use "addon" for sync kind
+      service_kind: "addon",
       availability_status: a.availability_status as ServiceRow["availability_status"],
       price_cents: a.price_cents,
       cogs_cents: a.cogs_cents,

@@ -10,11 +10,15 @@ import WaitlistDrawer from "./WaitlistDrawer";
 import { syncServiceToStripe } from "@/app/actions/sync-stripe";
 import type { AvailabilityStatus } from "@/app/admin/services/actions";
 import type { ServiceKind } from "@/lib/stripe/types";
+import type { AddonEditRow } from "./ServiceEditDrawer";
 
 export type ServiceRow = {
   id: string;
   slug: string;
   name: string;
+  description: string | null;
+  category: string;
+  fulfillment: string;
   service_type: "addon" | "standalone" | "both";
   service_kind: ServiceKind;
   availability_status: AvailabilityStatus;
@@ -156,7 +160,25 @@ export default function ServiceTable({ rows }: Props) {
       </div>
 
       {editService && (
-        <ServiceEditDrawer service={editService} onClose={() => setEditService(null)} />
+        <ServiceEditDrawer
+          source="addon"
+          row={{
+            id: editService.id,
+            slug: editService.slug,
+            name: editService.name,
+            description: editService.description,
+            price_cents: editService.price_cents,
+            cogs_cents: editService.cogs_cents,
+            vat_rate: editService.vat_rate,
+            sort_order: editService.sort_order,
+            pricing_model: editService.pricing_model,
+            service_type: editService.service_type,
+            availability_status: editService.availability_status,
+            category: editService.category,
+            fulfillment: editService.fulfillment,
+          } satisfies AddonEditRow}
+          onClose={() => setEditService(null)}
+        />
       )}
       {waitlistService && (
         <WaitlistDrawer

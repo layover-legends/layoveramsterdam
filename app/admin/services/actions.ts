@@ -66,6 +66,7 @@ export async function updateTourActive(
 }
 
 export type TourFieldsUpdate = {
+  slug?: string;
   name?: string;
   description?: string | null;
   tagline?: string | null;
@@ -87,9 +88,44 @@ export async function updateTourFields(
   tourId: string,
   fields: TourFieldsUpdate,
   originalFields: { name?: string; description?: string | null; tagline?: string | null },
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<{ ok: boolean; error?: string; newImageUrl?: string | null }> {
   await requireAdmin();
   const admin = createAdminClient();
+
+  let migratedImageUrl: string | null = null;
+
+  if (fields.slug !== undefined) {
+    const newSlug = normalizeSlug(fields.slug);
+    fields = { ...fields, slug: newSlug };
+
+    const { data: oldRow } = await admin
+      .from("tours")
+      .select("slug, image_url")
+      .eq("id", tourId)
+      .single();
+
+    if (oldRow && oldRow.slug !== newSlug) {
+      const { data: conflict } = await admin
+        .from("tours")
+        .select("id")
+        .eq("slug", newSlug)
+        .neq("id", tourId)
+        .maybeSingle();
+      if (conflict) return { ok: false, error: `Slug "${newSlug}" already exists` };
+
+      const userUploadedNewImage =
+        fields.image_url !== undefined && fields.image_url !== oldRow.image_url;
+      if (oldRow.image_url && !userUploadedNewImage) {
+        migratedImageUrl = await migrateImageOnSlugChange({
+          source: "tour",
+          oldSlug: oldRow.slug,
+          newSlug,
+          oldImageUrl: oldRow.image_url,
+        });
+        if (migratedImageUrl) fields = { ...fields, image_url: migratedImageUrl };
+      }
+    }
+  }
 
   const { error } = await admin.from("tours").update(fields).eq("id", tourId);
 
@@ -113,12 +149,13 @@ export async function updateTourFields(
 
   revalidatePath("/admin/services");
   revalidatePath("/tours");
-  return { ok: true };
+  return { ok: true, newImageUrl: migratedImageUrl };
 }
 
 export async function updateAddonFields(
   addonId: string,
   fields: {
+    slug?: string;
     name?: string;
     description?: string | null;
     price_cents?: number;
@@ -133,9 +170,45 @@ export async function updateAddonFields(
     image_url?: string | null;
   },
   originalFields: { name?: string; description?: string | null },
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<{ ok: boolean; error?: string; newImageUrl?: string | null }> {
   await requireAdmin();
   const admin = createAdminClient();
+
+  let migratedImageUrl: string | null = null;
+
+  if (fields.slug !== undefined) {
+    const newSlug = normalizeSlug(fields.slug);
+    fields = { ...fields, slug: newSlug };
+
+    const { data: oldRow } = await admin
+      .from("addons")
+      .select("slug, image_url, city_id")
+      .eq("id", addonId)
+      .single();
+
+    if (oldRow && oldRow.slug !== newSlug) {
+      const { data: conflict } = await admin
+        .from("addons")
+        .select("id")
+        .eq("slug", newSlug)
+        .eq("city_id", oldRow.city_id)
+        .neq("id", addonId)
+        .maybeSingle();
+      if (conflict) return { ok: false, error: `Slug "${newSlug}" already exists` };
+
+      const userUploadedNewImage =
+        fields.image_url !== undefined && fields.image_url !== oldRow.image_url;
+      if (oldRow.image_url && !userUploadedNewImage) {
+        migratedImageUrl = await migrateImageOnSlugChange({
+          source: "addon",
+          oldSlug: oldRow.slug,
+          newSlug,
+          oldImageUrl: oldRow.image_url,
+        });
+        if (migratedImageUrl) fields = { ...fields, image_url: migratedImageUrl };
+      }
+    }
+  }
 
   const { error } = await admin.from("addons").update(fields).eq("id", addonId);
 
@@ -158,7 +231,7 @@ export async function updateAddonFields(
 
   revalidatePath("/admin/services");
   revalidatePath("/shop");
-  return { ok: true };
+  return { ok: true, newImageUrl: migratedImageUrl };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -171,6 +244,43 @@ function normalizeSlug(raw: string): string {
     .trim()
     .replace(/[^a-z0-9-]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+async function migrateImageOnSlugChange(opts: {
+  source: "tour" | "addon";
+  oldSlug: string;
+  newSlug: string;
+  oldImageUrl: string | null;
+}): Promise<string | null> {
+  if (!opts.oldImageUrl || opts.oldSlug === opts.newSlug) return null;
+
+  const admin = createAdminClient();
+  const oldPath = `${opts.source}s/${opts.oldSlug}/${opts.oldSlug}-hero.webp`;
+  const newPath = `${opts.source}s/${opts.newSlug}/${opts.newSlug}-hero.webp`;
+
+  const { data: oldFile, error: dlError } = await admin.storage
+    .from("service-images")
+    .download(oldPath);
+
+  if (dlError || !oldFile) {
+    console.warn(`[migrateImage] not found at ${oldPath} during slug rename`);
+    return null;
+  }
+
+  await admin.storage.from("service-images").upload(newPath, oldFile, {
+    upsert: true,
+    contentType: "image/webp",
+    cacheControl: "31536000",
+  });
+
+  // Best-effort delete of old path
+  await admin.storage.from("service-images").remove([oldPath]);
+
+  const {
+    data: { publicUrl },
+  } = admin.storage.from("service-images").getPublicUrl(newPath);
+
+  return `${publicUrl}?v=${Date.now()}`;
 }
 
 export type CreateTourFields = {

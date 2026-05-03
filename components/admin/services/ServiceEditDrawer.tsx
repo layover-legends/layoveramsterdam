@@ -173,12 +173,14 @@ export default function ServiceEditDrawer(props: Props) {
       }
 
       // ── Edit mode ──────────────────────────────────────────────────────────
-      let updateResult: { ok: boolean; error?: string };
+      const slugChanged = slug !== row.slug;
+      let updateResult: { ok: boolean; error?: string; newImageUrl?: string | null };
 
       if (source === "tour") {
         updateResult = await updateTourFields(
           row.id,
           {
+            slug,
             name: name.trim() || row.name,
             description: description.trim() || null,
             tagline: tagline.trim() || null,
@@ -201,6 +203,7 @@ export default function ServiceEditDrawer(props: Props) {
         updateResult = await updateAddonFields(
           row.id,
           {
+            slug,
             name: name.trim() || row.name,
             description: description.trim() || null,
             price_cents: newPrice,
@@ -223,8 +226,13 @@ export default function ServiceEditDrawer(props: Props) {
         return;
       }
 
-      // Sync to Stripe: full sync if price changed; image-only update otherwise
-      if (priceChanged || imageChanged) {
+      // Update local image state if the server migrated it to a new path
+      if (updateResult.newImageUrl) {
+        setImageUrl(updateResult.newImageUrl);
+      }
+
+      // Sync to Stripe when price, image, or slug changed (slug rename = new image URL)
+      if (priceChanged || imageChanged || slugChanged) {
         await syncServiceToStripe(source, row.id).catch(() => {});
       }
 
@@ -248,7 +256,7 @@ export default function ServiceEditDrawer(props: Props) {
               {isCreate ? (name || `New ${source}`) : row.name}
             </h2>
             {!isCreate && (
-              <p className="text-[10px] text-warm-cream/35 font-mono">{row.slug}</p>
+              <p className="text-[10px] text-warm-cream/35 font-mono">{slug}</p>
             )}
           </div>
           <button
@@ -279,25 +287,17 @@ export default function ServiceEditDrawer(props: Props) {
           {/* ── Identity ──────────────────────────────────────────────────── */}
           <Section label="Identity" />
 
-          {/* Slug (always editable in create mode; read-only in edit) */}
-          {isCreate ? (
-            <Field label="Slug" hint="lowercase, hyphens only">
-              <input
-                value={slug}
-                onChange={(e) =>
-                  setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))
-                }
-                placeholder="my-new-tour"
-                className={INPUT}
-              />
-            </Field>
-          ) : (
-            <Field label="Slug">
-              <p className="text-sm text-warm-cream/40 font-mono px-3 py-2 rounded-lg bg-warm-cream/[0.03] border border-warm-cream/8">
-                {row.slug}
-              </p>
-            </Field>
-          )}
+          {/* Slug — editable in both create and edit mode; rename migrates storage image */}
+          <Field label="Slug" hint={isCreate ? "lowercase, hyphens only" : "rename migrates image"}>
+            <input
+              value={slug}
+              onChange={(e) =>
+                setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))
+              }
+              placeholder="my-new-tour"
+              className={INPUT}
+            />
+          </Field>
 
           <Field label="Name">
             <input value={name} onChange={(e) => setName(e.target.value)} className={INPUT} />

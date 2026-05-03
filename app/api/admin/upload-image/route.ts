@@ -117,7 +117,7 @@ export async function POST(req: NextRequest) {
 
   // ── Upload to Supabase Storage ──────────────────────────────────────────
   const dir = slug.trim() || `_new_${Date.now()}`;
-  const storagePath = `${source}s/${dir}/main.webp`;
+  const storagePath = `${source}s/${dir}/${dir}-hero.webp`;
 
   // Use admin client so upload bypasses RLS (anon key doesn't have storage insert)
   const admin = createAdminClient();

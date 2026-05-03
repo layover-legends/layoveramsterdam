@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { formatPrice } from "@/lib/i18n/format-price";
 import MarginBadge from "@/components/admin/services/MarginBadge";
 import SyncStatusBadge from "@/components/admin/services/SyncStatusBadge";
@@ -203,12 +204,20 @@ export default function ServicesClient({
                     />
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() => setEditTour(tour)}
-                      className="text-xs text-warm-cream/40 hover:text-warm-cream transition-colors"
-                    >
-                      Edit
-                    </button>
+                    <div className="flex flex-col items-end gap-1.5">
+                      <button
+                        onClick={() => setEditTour(tour)}
+                        className="text-xs text-warm-cream/40 hover:text-warm-cream transition-colors"
+                      >
+                        Edit
+                      </button>
+                      <Link
+                        href={`/admin/tours/${tour.id}`}
+                        className="text-[10px] text-legend-gold/70 hover:text-legend-gold transition-colors"
+                      >
+                        Stops →
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}

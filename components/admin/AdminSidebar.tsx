@@ -34,7 +34,6 @@ const NAV: NavItem[] = [
   { key: "stops",     labelKey: "admin.sidebar.free_stops", labelFallback: "Free stops", href: "/admin/stops?filter=free",  icon: "✦", matchPrefix: "/admin/stops", filterKey: "filter", filterValue: "free" },
   { key: "paid",      labelKey: "admin.sidebar.paid_stops", labelFallback: "Paid stops", href: "/admin/stops?filter=paid",  icon: "€", matchPrefix: "/admin/stops", filterKey: "filter", filterValue: "paid" },
   { key: "adult",     labelKey: "admin.sidebar.after_dark", labelFallback: "After Dark", href: "/admin/stops?filter=adult", icon: "🌙", matchPrefix: "/admin/stops", filterKey: "filter", filterValue: "adult" },
-  { key: "tours",     labelKey: "admin.sidebar.tours",      labelFallback: "Tours",      href: "/admin/tours",              icon: "◆", matchPrefix: "/admin/tours" },
   { key: "services",  labelKey: "admin.sidebar.services",   labelFallback: "Services",   href: "/admin/services",           icon: "◐", matchPrefix: "/admin/services" },
   { key: "articles",  labelKey: "admin.sidebar.articles",   labelFallback: "Articles",   href: "/admin/articles",           icon: "✍", matchPrefix: "/admin/articles" },
   { key: "seo",       labelKey: "admin.sidebar.seo",        labelFallback: "SEO",        href: "/admin/seo",                icon: "↗", matchPrefix: "/admin/seo" },

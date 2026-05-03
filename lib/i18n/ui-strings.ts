@@ -652,6 +652,7 @@ export const UI_STRINGS = {
 
   // ── Admin — services create ───────────────────────────────────────────────
   "admin.services.action.add_new_addon":       "+ Add new add-on",
+  "admin.services.action.edit_stops":          "Edit stops & destinations →",
   "admin.services.action.add_new_standalone":  "+ Add new standalone",
   "admin.services.action.add_new_tour":        "+ Add new tour",
   "admin.services.create.slug_exists":         "A service with this slug already exists",

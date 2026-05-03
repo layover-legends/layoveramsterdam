@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { syncOne } from "@/lib/stripe/sync";
+import { slugify, uniqueSlug } from "@/lib/slug";
 
 export type AvailabilityStatus = "active" | "coming_soon" | "inactive";
 
@@ -95,7 +96,7 @@ export async function updateTourFields(
   let migratedImageUrl: string | null = null;
 
   if (fields.slug !== undefined) {
-    const newSlug = normalizeSlug(fields.slug);
+    const newSlug = slugify(fields.slug);
     fields = { ...fields, slug: newSlug };
 
     const { data: oldRow } = await admin
@@ -177,7 +178,7 @@ export async function updateAddonFields(
   let migratedImageUrl: string | null = null;
 
   if (fields.slug !== undefined) {
-    const newSlug = normalizeSlug(fields.slug);
+    const newSlug = slugify(fields.slug);
     fields = { ...fields, slug: newSlug };
 
     const { data: oldRow } = await admin
@@ -237,14 +238,6 @@ export async function updateAddonFields(
 // ─────────────────────────────────────────────────────────────────────────────
 // Create new services
 // ─────────────────────────────────────────────────────────────────────────────
-
-function normalizeSlug(raw: string): string {
-  return raw
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9-]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
 
 async function migrateImageOnSlugChange(opts: {
   source: "tour" | "addon";
@@ -309,15 +302,8 @@ export async function createTour(
   await requireAdmin();
   const admin = createAdminClient();
 
-  const slug = normalizeSlug(fields.slug);
-  if (!slug) return { error: "Slug is required" };
-
-  const { data: existing } = await admin
-    .from("tours")
-    .select("id")
-    .eq("slug", slug)
-    .maybeSingle();
-  if (existing) return { error: `Slug "${slug}" already exists` };
+  if (!fields.slug?.trim()) return { error: "Slug is required" };
+  const slug = await uniqueSlug({ base: fields.slug, table: "tours", supabase: admin });
 
   const { data: row, error: insertErr } = await admin
     .from("tours")
@@ -358,17 +344,14 @@ export async function createAddon(
   await requireAdmin();
   const admin = createAdminClient();
 
-  const slug = normalizeSlug(fields.slug);
-  if (!slug) return { error: "Slug is required" };
-
-  // addons has UNIQUE (city_id, slug)
-  const { data: existing } = await admin
-    .from("addons")
-    .select("id")
-    .eq("slug", slug)
-    .eq("city_id", fields.city_id)
-    .maybeSingle();
-  if (existing) return { error: `Slug "${slug}" already exists` };
+  if (!fields.slug?.trim()) return { error: "Slug is required" };
+  // addons has UNIQUE (city_id, slug) — uniqueSlug handles collision by appending -2/-3
+  const slug = await uniqueSlug({
+    base: fields.slug,
+    table: "addons",
+    cityId: fields.city_id,
+    supabase: admin,
+  });
 
   const { data: row, error: insertErr } = await admin
     .from("addons")

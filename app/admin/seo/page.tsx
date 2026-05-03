@@ -1,6 +1,6 @@
 ﻿import Link from "next/link";
-import { getSeoHealth, getTranslationCoverage, getRecentTranslationJobs } from "@/lib/admin/seo";
-import type { TranslationJob } from "@/lib/admin/seo";
+import { getSeoHealth, getTranslationCoverage, getRecentTranslationJobs, getSlugStats } from "@/lib/admin/seo";
+import type { TranslationJob, SlugStats } from "@/lib/admin/seo";
 import type {
   EntityKind,
   LocaleEntityCoverage,
@@ -8,7 +8,7 @@ import type {
   TranslationLocale,
 } from "@/lib/admin/seo-types";
 import { TRANSLATION_LOCALES } from "@/lib/admin/seo-types";
-import { retranslateEntity } from "@/app/admin/seo/actions";
+import { retranslateEntity, suggestEnglishSlug, applyEnglishSlug, bulkAnglicize } from "@/app/admin/seo/actions";
 import { getUiStrings, t, tpl } from "@/lib/i18n/ui";
 
 export const dynamic = "force-dynamic";
@@ -87,22 +87,37 @@ function IssuePill({ issue }: { issue: SeoIssue }) {
 }
 
 type PageProps = {
-  searchParams?: { retranslated?: string; status?: string; detail?: string };
+  searchParams?: {
+    retranslated?: string; status?: string; detail?: string;
+    suggested_id?: string; suggested_slug?: string; suggest_error?: string;
+    applied_id?: string; applied_slug?: string;
+    bulk_result?: string; bulk_count?: string; bulk_error?: string;
+  };
 };
 
 export default async function AdminSeoPage({ searchParams }: PageProps) {
-  const [health, translation, recentJobs, s] = await Promise.all([
+  const [health, translation, recentJobs, slugStats, s] = await Promise.all([
     getSeoHealth(),
     getTranslationCoverage(),
     getRecentTranslationJobs(20),
+    getSlugStats(),
     getUiStrings(),
   ]);
 
   const dest  = health.destinations;
   const tours = health.tours;
-  const retranslated = searchParams?.retranslated;
-  const status       = searchParams?.status;
-  const detail       = searchParams?.detail;
+  const retranslated  = searchParams?.retranslated;
+  const status        = searchParams?.status;
+  const detail        = searchParams?.detail;
+  const suggestedId   = searchParams?.suggested_id;
+  const suggestedSlug = searchParams?.suggested_slug;
+  const suggestError  = searchParams?.suggest_error;
+  const appliedSlug   = searchParams?.applied_slug;
+  const bulkResult    = searchParams?.bulk_result;
+  const bulkCount     = Number(searchParams?.bulk_count ?? 0);
+  const bulkError     = searchParams?.bulk_error;
+
+  const frenchTotal = slugStats.reduce((n, st) => n + st.french_flavored, 0);
 
   const entityLabels: Record<EntityKind, string> = {
     destination: t(s, "admin.seo.entity_dests",    "Destinations"),
@@ -256,6 +271,137 @@ export default async function AdminSeoPage({ searchParams }: PageProps) {
             {" "}Run <code className="text-legend-gold">npx tsx scripts/bulk-translate.ts</code> to fill missing rows.
           </div>
         </div>
+      </section>
+
+      {/* ── Slug health ──────────────────────────────────────────────────────── */}
+      <section className="space-y-3">
+        <h2 className="text-sm uppercase tracking-wide text-warm-cream/55">
+          {t(s, "admin.seo.slug.heading", "Slug health")}
+        </h2>
+
+        {/* Bulk + individual result banners */}
+        {(bulkResult === "ok" || bulkError || appliedSlug || suggestError) && (
+          <div className={`rounded-xl border px-4 py-3 text-sm ${
+            bulkError || suggestError
+              ? "border-red-400/40 bg-red-400/10 text-red-100"
+              : "border-emerald-400/40 bg-emerald-400/10 text-emerald-100"
+          }`}>
+            {bulkError   && `DeepL error: ${bulkError}`}
+            {suggestError && `Suggestion error: ${suggestError}`}
+            {bulkResult === "ok" && !bulkError &&
+              tpl(t(s, "admin.seo.slug.bulk_success", "Anglicized {count} slugs."), { count: bulkCount })}
+            {appliedSlug && !bulkResult &&
+              tpl(t(s, "admin.seo.slug.applied_success", "Slug updated to {slug}."), { slug: appliedSlug })}
+          </div>
+        )}
+
+        {/* Slug stats table */}
+        <div className="rounded-2xl border border-warm-cream/10 bg-warm-cream/5 overflow-hidden">
+          <table className="min-w-full text-sm">
+            <thead className="bg-warm-cream/[0.04] text-xs uppercase tracking-wide text-warm-cream/55">
+              <tr>
+                <th className="px-4 py-3 text-left font-medium">{t(s, "admin.seo.slug.col.table",      "Table")}</th>
+                <th className="px-4 py-3 text-right font-medium">Total</th>
+                <th className="px-4 py-3 text-right font-medium">{t(s, "admin.seo.slug.col.missing",    "Missing")}</th>
+                <th className="px-4 py-3 text-right font-medium">{t(s, "admin.seo.slug.col.invalid",    "Invalid")}</th>
+                <th className="px-4 py-3 text-right font-medium">{t(s, "admin.seo.slug.col.duplicates", "Duplicates")}</th>
+                <th className="px-4 py-3 text-right font-medium">{t(s, "admin.seo.slug.col.french",     "FR")}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-warm-cream/10">
+              {(slugStats as SlugStats[]).map((row) => (
+                <tr key={row.table} className="hover:bg-warm-cream/[0.03]">
+                  <td className="px-4 py-3 font-mono text-warm-cream">{row.table}</td>
+                  <td className="px-4 py-3 text-right tabular-nums text-warm-cream/70">{row.total}</td>
+                  <td className={`px-4 py-3 text-right tabular-nums ${row.missing  > 0 ? "text-red-300" : "text-warm-cream/40"}`}>{row.missing}</td>
+                  <td className={`px-4 py-3 text-right tabular-nums ${row.invalid  > 0 ? "text-amber-300" : "text-warm-cream/40"}`}>{row.invalid}</td>
+                  <td className={`px-4 py-3 text-right tabular-nums ${row.duplicates > 0 ? "text-red-300" : "text-warm-cream/40"}`}>{row.duplicates}</td>
+                  <td className={`px-4 py-3 text-right tabular-nums ${row.french_flavored > 0 ? "text-amber-200 font-semibold" : "text-warm-cream/40"}`}>
+                    {row.french_flavored}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* French-flavored rows — expandable details */}
+        {frenchTotal > 0 && (
+          <details className="rounded-2xl border border-amber-400/20 bg-amber-400/5 overflow-hidden">
+            <summary className="flex items-center justify-between px-4 py-3 cursor-pointer text-sm font-medium text-amber-200 list-none">
+              <span>{t(s, "admin.seo.slug.french_section", "French-flavored slugs")} ({frenchTotal})</span>
+              <div className="flex items-center gap-3">
+                <form action={bulkAnglicize}>
+                  <button
+                    type="submit"
+                    className="text-xs px-3 py-1.5 rounded-full bg-legend-gold text-ink-black font-semibold hover:bg-gold-light transition-colors"
+                  >
+                    {t(s, "admin.seo.slug.bulk_anglicize", "Auto-anglicize all French slugs")}
+                  </button>
+                </form>
+              </div>
+            </summary>
+            <div className="border-t border-amber-400/15 overflow-x-auto">
+              <table className="min-w-full text-xs">
+                <thead className="bg-warm-cream/[0.03] text-[11px] uppercase tracking-wide text-warm-cream/40">
+                  <tr>
+                    <th className="px-4 py-2 text-left font-medium">Name</th>
+                    <th className="px-4 py-2 text-left font-medium">Current slug</th>
+                    <th className="px-4 py-2 text-left font-medium">Suggestion</th>
+                    <th className="px-4 py-2 text-left font-medium">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-warm-cream/8">
+                  {(slugStats as SlugStats[])
+                    .flatMap((st) => st.french_items.map((item) => ({ ...item, tableKind: st.table })))
+                    .map((item) => {
+                      const isSuggested = suggestedId === item.id;
+                      return (
+                        <tr key={item.id} className={`hover:bg-warm-cream/[0.02] ${isSuggested ? "bg-legend-gold/5" : ""}`}>
+                          <td className="px-4 py-2.5 text-warm-cream/80">{item.name}</td>
+                          <td className="px-4 py-2.5 font-mono text-warm-cream/60">{item.slug}</td>
+                          <td className="px-4 py-2.5">
+                            {isSuggested ? (
+                              <span className="font-mono text-legend-gold">{suggestedSlug}</span>
+                            ) : (
+                              <span className="text-warm-cream/35">—</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-2.5 whitespace-nowrap">
+                            <div className="flex gap-2 items-center">
+                              {/* Suggest button */}
+                              <form action={suggestEnglishSlug} className="inline">
+                                <input type="hidden" name="id" value={item.id} />
+                                <button
+                                  type="submit"
+                                  className="text-[10px] px-2 py-1 rounded bg-warm-cream/10 text-warm-cream/60 hover:bg-warm-cream/20 hover:text-warm-cream transition-colors"
+                                >
+                                  {t(s, "admin.seo.slug.suggest_english", "Suggest English slug")}
+                                </button>
+                              </form>
+                              {/* Apply button — only shown when this row has a suggestion */}
+                              {isSuggested && suggestedSlug && (
+                                <form action={applyEnglishSlug} className="inline">
+                                  <input type="hidden" name="id" value={item.id} />
+                                  <input type="hidden" name="slug" value={suggestedSlug} />
+                                  <button
+                                    type="submit"
+                                    className="text-[10px] px-2 py-1 rounded bg-legend-gold/20 text-legend-gold border border-legend-gold/30 hover:bg-legend-gold/30 transition-colors font-semibold"
+                                  >
+                                    {t(s, "admin.seo.slug.apply_english", "Apply")}
+                                  </button>
+                                </form>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </div>
+          </details>
+        )}
       </section>
 
       {/* Destinations punch list */}

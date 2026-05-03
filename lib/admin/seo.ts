@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type {
   ArticleHealth,
   DestinationHealth,
@@ -439,4 +440,72 @@ export async function getRecentTranslationJobs(limit = 20): Promise<TranslationJ
       status: errors.length === 0 ? "ok" : row.written > 0 ? "partial" : "failed",
     };
   });
+}
+
+// ── Slug health audit ─────────────────────────────────────────────────────────
+
+export type SlugStatItem = { id: string; name: string; slug: string };
+
+export type SlugStats = {
+  table: string;
+  total: number;
+  missing: number;
+  invalid: number;
+  duplicates: number;
+  french_flavored: number;
+  french_items: SlugStatItem[];
+};
+
+// Pattern based on common French/Dutch words that appear in Amsterdam stop slugs.
+const FRENCH_RE =
+  /(-de-|-la-|-les-|-du-|-d-|musee|maison|marche|chateau|moulin|tour-de|spui-la|foret)/;
+
+// Invalid: non-[a-z0-9-] chars OR consecutive hyphens.
+const INVALID_SLUG_RE = /[^a-z0-9-]|--/;
+
+export async function getSlugStats(): Promise<SlugStats[]> {
+  const admin = createAdminClient();
+  const results: SlugStats[] = [];
+
+  const tables = ["destinations", "tours", "addons"] as const;
+
+  for (const table of tables) {
+    const { data } = await admin.from(table).select("id, name, slug");
+    const rows = (data ?? []) as Array<{ id: string; name: string; slug: string | null }>;
+
+    // Count slug occurrences to detect duplicates.
+    const slugCount = new Map<string, number>();
+    for (const r of rows) {
+      if (r.slug) slugCount.set(r.slug, (slugCount.get(r.slug) ?? 0) + 1);
+    }
+
+    let missing = 0;
+    let invalid = 0;
+    let duplicates = 0;
+    const frenchItems: SlugStatItem[] = [];
+
+    for (const r of rows) {
+      if (!r.slug) {
+        missing++;
+        continue;
+      }
+      if (INVALID_SLUG_RE.test(r.slug)) invalid++;
+      if ((slugCount.get(r.slug) ?? 0) > 1) duplicates++;
+      if (FRENCH_RE.test(r.slug)) {
+        frenchItems.push({ id: r.id, name: r.name, slug: r.slug });
+      }
+    }
+
+    results.push({
+      table,
+      total: rows.length,
+      missing,
+      invalid,
+      duplicates,
+      french_flavored: frenchItems.length,
+      french_items: frenchItems,
+    });
+  }
+
+  return results;
 }

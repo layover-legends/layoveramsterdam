@@ -388,6 +388,23 @@ export const UI_STRINGS = {
   "admin.seo.job_partial":                "⚠️ partial",
   "admin.seo.job_failed":                 "❌ failed",
   "admin.seo.jobs_footer":                "Translation jobs are written after every admin save. If a job shows ❌ failed, check DEEPL_API_KEY in Vercel project settings and the error column.",
+  // ── Admin — SEO slug audit ────────────────────────────────────────────────
+  "admin.seo.slug.heading":              "Slug health",
+  "admin.seo.slug.col.table":            "Table",
+  "admin.seo.slug.col.missing":          "Missing",
+  "admin.seo.slug.col.invalid":          "Invalid",
+  "admin.seo.slug.col.duplicates":       "Duplicates",
+  "admin.seo.slug.col.french":           "French-flavored",
+  "admin.seo.slug.french_section":       "French-flavored slugs",
+  "admin.seo.slug.suggest_english":      "Suggest English slug",
+  "admin.seo.slug.apply_english":        "Apply",
+  "admin.seo.slug.bulk_anglicize":       "Auto-anglicize all French slugs",
+  "admin.seo.slug.bulk_success":         "Anglicized {count} slugs.",
+  "admin.seo.slug.applied_success":      "Slug updated to {slug}.",
+  "admin.seo.slug.suggestion_label":     "Suggested:",
+  // ── Admin — Services drawer ───────────────────────────────────────────────
+  "admin.services.drawer.slug.auto_button": "↻ Auto from name",
+  "admin.services.drawer.slug.preview":     "URL: /{source}s/{slug}",
 
   // ── Admin — StopForm ──────────────────────────────────────────────────────
   "admin.stopForm.active_hint":            "Visible on the public site.",

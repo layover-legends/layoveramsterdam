@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateTourFields, updateAddonFields, createTour, createAddon } from "@/app/admin/services/actions";
 import { syncServiceToStripe } from "@/app/actions/sync-stripe";
 import { formatPrice } from "@/lib/i18n/format-price";
+import { slugify } from "@/lib/slug";
 import ImageUploadField from "./ImageUploadField";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -75,12 +76,21 @@ export default function ServiceEditDrawer(props: Props) {
 
   // Common state
   const [slug, setSlug] = useState(row.slug);
+  // In create mode, slug is auto-filled from name until the user manually edits it.
+  const [slugTouched, setSlugTouched] = useState(!isCreate || !!row.slug);
   const [name, setName] = useState(row.name);
   const [description, setDescription] = useState(row.description ?? "");
   const [priceCents, setPriceCents] = useState(String(row.price_cents));
   const [vatRate, setVatRate] = useState(String(Math.round(row.vat_rate * 100)));
   const [pricingModel, setPricingModel] = useState(row.pricing_model);
   const [imageUrl, setImageUrl] = useState<string | null>(row.image_url);
+
+  // Auto-fill slug from name in create mode when slug hasn't been manually touched.
+  useEffect(() => {
+    if (isCreate && !slugTouched && name) {
+      setSlug(slugify(name));
+    }
+  }, [name, slugTouched, isCreate]);
 
   // Tour-specific state
   const tourRow = source === "tour" ? (row as TourEditRow) : null;
@@ -287,16 +297,32 @@ export default function ServiceEditDrawer(props: Props) {
           {/* ── Identity ──────────────────────────────────────────────────── */}
           <Section label="Identity" />
 
-          {/* Slug — editable in both create and edit mode; rename migrates storage image */}
-          <Field label="Slug" hint={isCreate ? "lowercase, hyphens only" : "rename migrates image"}>
-            <input
-              value={slug}
-              onChange={(e) =>
-                setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))
-              }
-              placeholder="my-new-tour"
-              className={INPUT}
-            />
+          {/* Slug — editable; auto-fills from name in create mode until manually touched */}
+          <Field label="Slug" hint={isCreate ? "auto-fills from name" : "rename migrates image"}>
+            <div className="flex gap-2 items-center">
+              <input
+                value={slug}
+                onChange={(e) => {
+                  setSlug(slugify(e.target.value) || e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"));
+                  setSlugTouched(true);
+                }}
+                placeholder="my-new-tour"
+                className={`${INPUT} flex-1`}
+              />
+              {isCreate && (
+                <button
+                  type="button"
+                  onClick={() => { setSlug(slugify(name)); setSlugTouched(false); }}
+                  className="shrink-0 text-[10px] text-legend-gold hover:text-gold-light transition-colors whitespace-nowrap"
+                  title="Re-generate from name"
+                >
+                  ↻ Auto
+                </button>
+              )}
+            </div>
+            <p className="text-[10px] text-warm-cream/40 mt-1">
+              URL: /{source === "tour" ? "tours" : "shop"}/{slug || "…"}
+            </p>
           </Field>
 
           <Field label="Name">

@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import type { PublicAddon } from "@/lib/public/tour-addons";
-import { t } from "@/lib/i18n/ui";
+import { t } from "@/lib/i18n/t";
 import { formatPrice } from "@/lib/i18n/format-price";
 
 type Props = {

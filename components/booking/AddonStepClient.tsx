@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { PublicAddon } from "@/lib/public/tour-addons";
 import { updateBookingAddons } from "@/app/actions/booking";
-import { t } from "@/lib/i18n/ui";
+import { t } from "@/lib/i18n/t";
 import { formatPrice } from "@/lib/i18n/format-price";
 import PriceSummary from "./PriceSummary";
 

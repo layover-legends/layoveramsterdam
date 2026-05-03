@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { t } from "@/lib/i18n/ui";
+import { t } from "@/lib/i18n/t";
 
 type Props = {
   serviceId: string;

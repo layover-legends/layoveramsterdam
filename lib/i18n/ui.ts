@@ -2,6 +2,10 @@ import { createClient } from "@/lib/supabase/server";
 import { FALLBACK_CHAIN, DEFAULT_LOCALE, type Locale } from "@/lib/i18n/locales";
 import { resolveLocale } from "@/lib/i18n/resolve";
 
+// Re-export pure helpers so server-component imports from ui.ts keep working.
+// Client components must import directly from @/lib/i18n/t instead.
+export { t, tpl } from "@/lib/i18n/t";
+
 /**
  * Load UI string translations for the given locale.
  * Falls back through the chain; falls back to DEFAULT_LOCALE values if
@@ -31,23 +35,6 @@ export async function loadUiStrings(locale: Locale): Promise<Record<string, stri
     }
   }
   return result;
-}
-
-/** Synchronous lookup against a pre-loaded UI string map; falls back to key. */
-export function t(strings: Record<string, string>, key: string, fallback?: string): string {
-  return strings[key] ?? fallback ?? key;
-}
-
-/**
- * Template interpolation — replace {placeholder} tokens in a translated string.
- * Example: tpl(t(s, "stops_teaser.free_count"), { count: 137 })
- *          → "137 free stops, hand-picked."
- */
-export function tpl(
-  str: string,
-  vars: Record<string, string | number>,
-): string {
-  return str.replace(/\{(\w+)\}/g, (_, key) => String(vars[key] ?? `{${key}}`));
 }
 
 /**

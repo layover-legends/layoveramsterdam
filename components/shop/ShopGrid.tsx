@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { PublicService } from "@/lib/public/shop";
-import { t } from "@/lib/i18n/ui";
+import { t } from "@/lib/i18n/t";
 import ServiceCard from "./ServiceCard";
 
 const CATEGORY_ORDER = [

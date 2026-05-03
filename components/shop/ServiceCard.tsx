@@ -1,7 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import type { PublicService } from "@/lib/public/shop";
 import { formatPrice } from "@/lib/i18n/format-price";
-import { t } from "@/lib/i18n/ui";
+import { t } from "@/lib/i18n/t";
 import ComingSoonForm from "./ComingSoonForm";
 import AddToCartButton from "./AddToCartButton";
 

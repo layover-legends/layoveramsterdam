@@ -3,7 +3,7 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { addToCart } from "@/app/actions/cart";
-import { t } from "@/lib/i18n/ui";
+import { t } from "@/lib/i18n/t";
 
 type Props = {
   addonSlug: string;

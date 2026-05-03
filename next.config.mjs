@@ -29,16 +29,34 @@ const SECURITY_HEADERS = [
   { key: "X-Frame-Options", value: "DENY" },
   // Enable built-in XSS auditor in older browsers (no-op in modern ones)
   { key: "X-XSS-Protection", value: "1; mode=block" },
-  // Strict HSTS (Vercel also sets this, but be explicit)
-  { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains; preload" },
+  // Strict HSTS — bumped to 2 years for HSTS preload list eligibility
+  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
   // Only send origin on cross-origin, no path
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   // Disable browser features we don't need
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
   { key: "Content-Security-Policy", value: CSP },
+
+  // ── Cross-origin isolation ────────────────────────────────────────────────
+  // COOP: prevent window.opener attacks from cross-origin pages
+  // (safe — we don't need cross-origin window communication)
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+  // CORP: control which origins can load our resources
+  // (cross-origin allows OG image fetchers, social previews, Stripe)
+  { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
+  // COEP intentionally NOT set — would break Stripe/Mapbox iframes
+
+  // ── Legacy / minor ────────────────────────────────────────────────────────
+  // Adobe Flash crossdomain.xml policy (Flash is dead; lock it anyway)
+  { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
+  // Allow browser to prefetch DNS for external resources (perf win)
+  { key: "X-DNS-Prefetch-Control", value: "on" },
 ];
 
 const nextConfig = {
+  // Hide Next.js version disclosure
+  poweredByHeader: false,
+
   images: {
     remotePatterns: [
       {

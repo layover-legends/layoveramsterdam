@@ -45,18 +45,26 @@ if (!url || !key) {
   process.exit(0);
 }
 
-const supabase = createClient(url, key);
-const { data, error } = await supabase
-  .from("slug_redirects")
-  .select("entity_type, old_slug, new_slug")
-  .order("created_at", { ascending: true });
+// Wrapped in async IIFE because tsx targets CJS and CJS doesn't support top-level await.
+(async () => {
+  const supabase = createClient(url, key);
+  const { data, error } = await supabase
+    .from("slug_redirects")
+    .select("entity_type, old_slug, new_slug")
+    .order("created_at", { ascending: true });
 
-if (error) {
-  console.error("[build-redirects] query failed:", error.message, "— writing empty redirects.json");
+  if (error) {
+    console.error("[build-redirects] query failed:", error.message, "— writing empty redirects.json");
+    writeEmpty();
+    process.exit(0);
+  }
+
+  mkdirSync(dirname(OUT_PATH), { recursive: true });
+  writeFileSync(OUT_PATH, JSON.stringify(data ?? [], null, 2) + "\n");
+  console.log(`[build-redirects] wrote ${(data ?? []).length} redirect(s) → lib/generated/redirects.json`);
+})().catch((err) => {
+  console.error("[build-redirects] fatal:", err);
+  // Write empty so build doesn't break on transient errors
   writeEmpty();
   process.exit(0);
-}
-
-mkdirSync(dirname(OUT_PATH), { recursive: true });
-writeFileSync(OUT_PATH, JSON.stringify(data ?? [], null, 2) + "\n");
-console.log(`[build-redirects] wrote ${(data ?? []).length} redirect(s) → lib/generated/redirects.json`);
+});

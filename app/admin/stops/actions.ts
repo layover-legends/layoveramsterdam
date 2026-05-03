@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { autoTranslateEntity } from "@/lib/i18n/auto-translate";
+import { insertSlugRedirect } from "@/lib/admin/redirects";
 
 const ALLOWED_IMAGE_TYPES = new Set([
   "image/jpeg",
@@ -189,6 +190,14 @@ export async function updateStop(id: string, formData: FormData) {
   }
 
   const supabase = createClient();
+
+  // Fetch old slug before overwriting so we can register a redirect if it changed.
+  const { data: oldRow } = await supabase
+    .from("destinations")
+    .select("slug")
+    .eq("id", id)
+    .single();
+
   const { error } = await supabase
     .from("destinations")
     .update(parsed.data)
@@ -197,6 +206,15 @@ export async function updateStop(id: string, formData: FormData) {
     redirect(
       `/admin/stops/${id}?error=${encodeURIComponent("Save failed: " + error.message)}`,
     );
+  }
+
+  // Register 301 redirect if the slug changed.
+  if (oldRow?.slug && oldRow.slug !== parsed.data.slug) {
+    await insertSlugRedirect({
+      entityType: "destination",
+      oldSlug: oldRow.slug,
+      newSlug: parsed.data.slug,
+    }).catch(() => {}); // best-effort — don't block the save
   }
 
   let translateStatus = "ok";

@@ -7,6 +7,7 @@ import { autoTranslateEntity } from "@/lib/i18n/auto-translate";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { slugify, uniqueSlug } from "@/lib/slug";
 import { getSlugStats } from "@/lib/admin/seo";
+import { insertSlugRedirect } from "@/lib/admin/redirects";
 
 type Kind = "destination" | "tour" | "article";
 
@@ -130,6 +131,14 @@ export async function applyEnglishSlug(formData: FormData) {
   if (!id || !slug) redirect("/admin/seo");
 
   const admin = createAdminClient();
+
+  // Fetch old slug for redirect registration.
+  const { data: oldRow } = await admin
+    .from("destinations")
+    .select("slug")
+    .eq("id", id)
+    .single();
+
   // Re-check uniqueness in case another admin applied a slug concurrently.
   const safeSlug = await uniqueSlug({
     base: slug,
@@ -139,6 +148,14 @@ export async function applyEnglishSlug(formData: FormData) {
   });
 
   await admin.from("destinations").update({ slug: safeSlug }).eq("id", id);
+
+  if (oldRow?.slug && oldRow.slug !== safeSlug) {
+    await insertSlugRedirect({
+      entityType: "destination",
+      oldSlug: oldRow.slug,
+      newSlug: safeSlug,
+    }).catch(() => {});
+  }
 
   revalidatePath("/admin/seo");
   revalidatePath("/admin/stops");
@@ -199,6 +216,7 @@ export async function bulkAnglicize() {
     });
     if (newSlug !== item.slug) {
       await admin.from("destinations").update({ slug: newSlug }).eq("id", item.id);
+      await insertSlugRedirect({ entityType: "destination", oldSlug: item.slug, newSlug }).catch(() => {});
       updated++;
     }
   }

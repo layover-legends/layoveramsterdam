@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { syncOne } from "@/lib/stripe/sync";
 import { slugify, uniqueSlug } from "@/lib/slug";
+import { insertSlugRedirect } from "@/lib/admin/redirects";
 
 export type AvailabilityStatus = "active" | "coming_soon" | "inactive";
 
@@ -125,6 +126,9 @@ export async function updateTourFields(
         });
         if (migratedImageUrl) fields = { ...fields, image_url: migratedImageUrl };
       }
+
+      // Register 301 redirect for the old slug (best-effort).
+      await insertSlugRedirect({ entityType: "tour", oldSlug: oldRow.slug, newSlug }).catch(() => {});
     }
   }
 
@@ -208,6 +212,9 @@ export async function updateAddonFields(
         });
         if (migratedImageUrl) fields = { ...fields, image_url: migratedImageUrl };
       }
+
+      // Register 301 redirect for the old slug (best-effort).
+      await insertSlugRedirect({ entityType: "addon", oldSlug: oldRow.slug, newSlug }).catch(() => {});
     }
   }
 

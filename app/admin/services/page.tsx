@@ -12,12 +12,14 @@ export default async function AdminServicesPage() {
   const [toursRes, addonsRes, waitlistRes] = await Promise.all([
     admin
       .from("tours")
-      .select("id, slug, name, is_active, price_cents, vat_rate, updated_at")
+      .select(
+        "id, slug, name, is_active, price_cents, vat_rate, stripe_product_id, stripe_synced_at, stripe_sync_error, updated_at",
+      )
       .order("name"),
     admin
       .from("addons")
       .select(
-        "id, slug, name, service_type, availability_status, price_cents, cogs_cents, vat_rate, pricing_model, sort_order, stripe_price_id, updated_at",
+        "id, slug, name, service_type, availability_status, price_cents, cogs_cents, vat_rate, pricing_model, sort_order, stripe_product_id, stripe_synced_at, stripe_sync_error, updated_at",
       )
       .eq("is_active", true)
       .order("sort_order"),
@@ -25,7 +27,6 @@ export default async function AdminServicesPage() {
       .from("service_interest")
       .select("service_id")
       .then((r) => {
-        // Count per service_id
         const counts = new Map<string, number>();
         for (const row of (r.data ?? []) as { service_id: string }[]) {
           counts.set(row.service_id, (counts.get(row.service_id) ?? 0) + 1);
@@ -34,13 +35,16 @@ export default async function AdminServicesPage() {
       }),
   ]);
 
-  type TourRow = {
+  type TourRaw = {
     id: string;
     slug: string;
     name: string;
     is_active: boolean;
     price_cents: number | null;
     vat_rate: number;
+    stripe_product_id: string | null;
+    stripe_synced_at: string | null;
+    stripe_sync_error: string | null;
     updated_at: string | null;
   };
 
@@ -55,21 +59,24 @@ export default async function AdminServicesPage() {
     vat_rate: number;
     pricing_model: string;
     sort_order: number;
-    stripe_price_id: string | null;
+    stripe_product_id: string | null;
+    stripe_synced_at: string | null;
+    stripe_sync_error: string | null;
     updated_at: string | null;
   };
 
-  const tours = (toursRes.data ?? []) as TourRow[];
-
+  const tours = (toursRes.data ?? []) as TourRaw[];
   const allAddons = (addonsRes.data ?? []) as AddonRaw[];
   const waitlistCounts = waitlistRes;
 
   function toServiceRow(a: AddonRaw): ServiceRow {
+    const isAddon = a.service_type === "addon";
     return {
       id: a.id,
       slug: a.slug,
       name: a.name ?? a.slug,
       service_type: a.service_type as ServiceRow["service_type"],
+      service_kind: isAddon ? "addon" : "addon", // both use "addon" for sync kind
       availability_status: a.availability_status as ServiceRow["availability_status"],
       price_cents: a.price_cents,
       cogs_cents: a.cogs_cents,
@@ -77,7 +84,9 @@ export default async function AdminServicesPage() {
       pricing_model: a.pricing_model as ServiceRow["pricing_model"],
       sort_order: a.sort_order,
       waitlist_count: waitlistCounts.get(a.id) ?? 0,
-      stripe_price_id: a.stripe_price_id,
+      stripe_product_id: a.stripe_product_id,
+      stripe_synced_at: a.stripe_synced_at,
+      stripe_sync_error: a.stripe_sync_error,
       updated_at: a.updated_at,
     };
   }
@@ -86,6 +95,24 @@ export default async function AdminServicesPage() {
   const standalones = allAddons
     .filter((a) => a.service_type === "standalone" || a.service_type === "both")
     .map(toServiceRow);
+
+  // Count out-of-sync items for SyncAllButton
+  function needsSync(row: {
+    stripe_product_id: string | null;
+    stripe_synced_at: string | null;
+    updated_at: string | null;
+  }) {
+    return (
+      !row.stripe_product_id ||
+      !row.stripe_synced_at ||
+      (row.updated_at && new Date(row.updated_at) > new Date(row.stripe_synced_at))
+    );
+  }
+
+  const outOfSyncCount =
+    tours.filter(needsSync).length +
+    addons.filter((r) => needsSync(r as { stripe_product_id: string | null; stripe_synced_at: string | null; updated_at: string | null })).length +
+    standalones.filter((r) => needsSync(r as { stripe_product_id: string | null; stripe_synced_at: string | null; updated_at: string | null })).length;
 
   return (
     <main className="p-6 max-w-6xl mx-auto space-y-6">
@@ -96,7 +123,12 @@ export default async function AdminServicesPage() {
         </p>
       </header>
 
-      <ServicesClient tours={tours} addons={addons} standalones={standalones} />
+      <ServicesClient
+        tours={tours}
+        addons={addons}
+        standalones={standalones}
+        outOfSyncCount={outOfSyncCount}
+      />
     </main>
   );
 }

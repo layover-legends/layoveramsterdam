@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { formatPrice } from "@/lib/i18n/format-price";
 import MarginBadge from "@/components/admin/services/MarginBadge";
+import SyncStatusBadge from "@/components/admin/services/SyncStatusBadge";
+import SyncAllButton from "@/components/admin/services/SyncAllButton";
 import ServiceTable from "@/components/admin/services/ServiceTable";
 import type { ServiceRow } from "@/components/admin/services/ServiceTable";
 
@@ -13,18 +15,22 @@ type TourRow = {
   is_active: boolean;
   price_cents: number | null;
   vat_rate: number;
+  stripe_product_id: string | null;
+  stripe_synced_at: string | null;
+  stripe_sync_error: string | null;
   updated_at: string | null;
 };
 
 type Props = {
   tours: TourRow[];
+  outOfSyncCount: number;
   addons: ServiceRow[];
   standalones: ServiceRow[];
 };
 
 type Tab = "tours" | "addons" | "standalones";
 
-export default function ServicesClient({ tours, addons, standalones }: Props) {
+export default function ServicesClient({ tours, addons, standalones, outOfSyncCount }: Props) {
   const [tab, setTab] = useState<Tab>("tours");
 
   const tabs: { key: Tab; label: string; count: number }[] = [
@@ -35,6 +41,11 @@ export default function ServicesClient({ tours, addons, standalones }: Props) {
 
   return (
     <div className="space-y-6">
+      {/* Sync all button */}
+      <div className="flex justify-end">
+        <SyncAllButton outOfSyncCount={outOfSyncCount} />
+      </div>
+
       {/* Tab bar */}
       <div className="flex gap-1 border-b border-warm-cream/10">
         {tabs.map((t) => (
@@ -63,6 +74,7 @@ export default function ServicesClient({ tours, addons, standalones }: Props) {
               <tr className="border-b border-warm-cream/10 text-[10px] uppercase tracking-wider text-warm-cream/40">
                 <th className="text-left px-4 py-3">Tour</th>
                 <th className="text-left px-4 py-3">Status</th>
+                <th className="text-left px-4 py-3 hidden xl:table-cell">Stripe</th>
                 <th className="text-right px-4 py-3">Price</th>
                 <th className="text-right px-4 py-3">Margin</th>
               </tr>
@@ -82,6 +94,14 @@ export default function ServicesClient({ tours, addons, standalones }: Props) {
                     }`}>
                       {tour.is_active ? "Active" : "Inactive"}
                     </span>
+                  </td>
+                  <td className="px-4 py-3 hidden xl:table-cell">
+                    <SyncStatusBadge
+                      stripeProductId={tour.stripe_product_id}
+                      stripeSyncedAt={tour.stripe_synced_at}
+                      stripeSyncError={tour.stripe_sync_error}
+                      updatedAt={tour.updated_at}
+                    />
                   </td>
                   <td className="px-4 py-3 text-right font-mono text-warm-cream">
                     {tour.price_cents != null ? formatPrice(tour.price_cents, "EUR") : "—"}

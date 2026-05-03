@@ -2,18 +2,18 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getUiStrings, t } from "@/lib/i18n/ui";
+import ReviewSummary from "@/components/booking/ReviewSummary";
+import CheckoutButton from "@/components/booking/CheckoutButton";
 
 export const dynamic = "force-dynamic";
 
 type PageProps = {
   params: { id: string };
+  searchParams?: { error?: string };
 };
 
-function formatMoney(cents: number, currency: string) {
-  return new Intl.NumberFormat("nl-NL", { style: "currency", currency }).format(cents / 100);
-}
-
-export default async function BookingReviewPage({ params }: PageProps) {
+export default async function BookingReviewPage({ params, searchParams }: PageProps) {
   const supabase = createClient();
   const {
     data: { user },
@@ -21,10 +21,11 @@ export default async function BookingReviewPage({ params }: PageProps) {
   if (!user) redirect("/?auth_required=1");
 
   const admin = createAdminClient();
+
   const { data: rawBooking } = await admin
     .from("bookings")
     .select(
-      "id, user_id, party_size, base_cents, addons_cents, total_cents, currency, tours(name, slug)",
+      "id, user_id, tour_id, party_size, base_cents, addons_cents, total_cents, currency, status, booking_addons(addon_id, qty, unit_price_cents, vat_rate)",
     )
     .eq("id", params.id)
     .maybeSingle();
@@ -33,77 +34,85 @@ export default async function BookingReviewPage({ params }: PageProps) {
     notFound();
   }
 
-  const b = rawBooking as unknown as {
+  type BookingRow = {
     id: string;
     user_id: string;
+    tour_id: string | null;
     party_size: number;
     base_cents: number;
     addons_cents: number;
     total_cents: number;
     currency: string;
-    tours: { name: string; slug: string } | null;
+    status: string;
+    booking_addons: Array<{ addon_id: string; qty: number; unit_price_cents: number; vat_rate: number }>;
   };
+
+  const booking = rawBooking as unknown as BookingRow;
+
+  // Get tour info
+  let tour: { name: string; slug: string } | null = null;
+  if (booking.tour_id) {
+    const { data } = await admin
+      .from("tours")
+      .select("name, slug")
+      .eq("id", booking.tour_id)
+      .maybeSingle();
+    tour = data as { name: string; slug: string } | null;
+  }
+
+  // Get addon names for the summary
+  type AddonInfo = { id: string; name: string | null };
+  let addonMap = new Map<string, string>();
+  if (booking.booking_addons.length > 0) {
+    const ids = booking.booking_addons.map((ba) => ba.addon_id);
+    const { data } = await admin.from("addons").select("id, name").in("id", ids);
+    addonMap = new Map(
+      ((data ?? []) as AddonInfo[]).map((a) => [a.id, a.name ?? "Add-on"]),
+    );
+  }
+
+  const labels = await getUiStrings();
+  const errorMsg = searchParams?.error;
 
   return (
     <main className="min-h-screen bg-ink-black text-warm-cream px-5 py-12">
-      <div className="max-w-xl mx-auto space-y-8">
-        <header className="space-y-2">
-          <Link
-            href={`/booking/${params.id}/addons`}
-            className="text-sm text-warm-cream/50 hover:text-warm-cream/80 transition-colors"
-          >
-            ← Back to add-ons
-          </Link>
-          <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight">
-            Almost there
-          </h1>
-        </header>
-
-        <div className="rounded-2xl border border-amber-400/30 bg-amber-400/5 px-5 py-4">
-          <p className="text-sm text-amber-200/80">
-            Payment integration is coming next week. Your booking is saved as a draft.
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-warm-cream/10 bg-warm-cream/5 p-6 space-y-4">
-          <dl className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <dt className="text-warm-cream/50">Tour</dt>
-              <dd className="font-medium text-warm-cream">{b.tours?.name ?? "—"}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-warm-cream/50">Party size</dt>
-              <dd className="font-medium text-warm-cream">{b.party_size}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-warm-cream/50">Tour price</dt>
-              <dd className="font-mono text-warm-cream">{formatMoney(b.base_cents, b.currency)}</dd>
-            </div>
-            {b.addons_cents > 0 && (
-              <div className="flex justify-between">
-                <dt className="text-warm-cream/50">Add-ons</dt>
-                <dd className="font-mono text-warm-cream">
-                  {formatMoney(b.addons_cents, b.currency)}
-                </dd>
-              </div>
-            )}
-            <div className="flex justify-between pt-3 border-t border-warm-cream/10">
-              <dt className="font-semibold text-warm-cream">Total</dt>
-              <dd className="font-display font-semibold text-legend-gold text-xl">
-                {formatMoney(b.total_cents, b.currency)}
-              </dd>
-            </div>
-          </dl>
-
-          <p className="text-xs text-warm-cream/30 font-mono pt-1">Booking ref: {b.id}</p>
-        </div>
-
+      <div className="max-w-xl mx-auto space-y-6">
         <Link
-          href="/account"
-          className="block text-center text-sm text-warm-cream/50 hover:text-warm-cream/80 transition-colors"
+          href={`/booking/${params.id}/addons`}
+          className="inline-flex items-center gap-1 text-xs text-warm-cream/60 hover:text-legend-gold transition-colors"
         >
-          View saved bookings →
+          ← {t(labels, "checkout.review.edit_addons", "Edit add-ons")}
         </Link>
+
+        <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight">
+          {t(labels, "checkout.review.title", "Review your booking")}
+        </h1>
+
+        {errorMsg && (
+          <div className="rounded-xl border border-red-400/30 bg-red-400/5 px-4 py-3 text-sm text-red-300">
+            {decodeURIComponent(errorMsg)}
+          </div>
+        )}
+
+        <ReviewSummary
+          tourName={tour?.name ?? null}
+          partySize={booking.party_size}
+          baseCents={booking.base_cents}
+          currency={booking.currency}
+          addonLines={booking.booking_addons.map((ba) => ({
+            name: addonMap.get(ba.addon_id) ?? "Add-on",
+            qty: ba.qty,
+            unit_price_cents: ba.unit_price_cents,
+            vat_rate: ba.vat_rate,
+          }))}
+          labels={labels}
+        />
+
+        <CheckoutButton bookingId={params.id} labels={labels} />
+
+        <p className="text-center text-xs text-warm-cream/30">
+          Booking ref: <span className="font-mono text-warm-cream/40">{booking.id}</span>
+        </p>
       </div>
     </main>
   );

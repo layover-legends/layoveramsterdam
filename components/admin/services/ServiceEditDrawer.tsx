@@ -2,7 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { updateServiceFields } from "@/app/admin/services/actions";
+import { syncServiceToStripe } from "@/app/actions/sync-stripe";
 import { formatPrice } from "@/lib/i18n/format-price";
+import type { ServiceKind } from "@/lib/stripe/types";
 
 type ServiceRow = {
   id: string;
@@ -12,6 +14,7 @@ type ServiceRow = {
   cogs_cents: number | null;
   vat_rate: number;
   sort_order: number;
+  service_kind: ServiceKind;
 };
 
 type Props = {
@@ -29,12 +32,19 @@ export default function ServiceEditDrawer({ service, onClose }: Props) {
 
   function handleSave() {
     startTransition(async () => {
+      const newPrice = parseInt(priceCents, 10) || service.price_cents;
       await updateServiceFields(service.id, {
-        price_cents: parseInt(priceCents, 10) || service.price_cents,
+        price_cents: newPrice,
         cogs_cents: cogsCents !== "" ? parseInt(cogsCents, 10) : null,
         vat_rate: (parseInt(vatRate, 10) || 21) / 100,
         sort_order: parseInt(sortOrder, 10) || service.sort_order,
       });
+
+      // Auto-sync to Stripe if price changed
+      if (newPrice !== service.price_cents) {
+        await syncServiceToStripe(service.service_kind, service.id).catch(() => {});
+      }
+
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     });

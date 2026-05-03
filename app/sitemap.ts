@@ -2,11 +2,12 @@ import type { MetadataRoute } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { getPublishedArticleSlugs } from "@/lib/public/articles";
 import { SITE } from "@/lib/seo/site";
+import { getShopServices } from "@/lib/public/shop";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = createClient();
 
-  const [destRes, tourRes, articles] = await Promise.all([
+  const [destRes, tourRes, articles, shopServices] = await Promise.all([
     supabase
       .from("destinations")
       .select("slug, updated_at")
@@ -18,6 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .select("slug, updated_at")
       .eq("is_active", true),
     getPublishedArticleSlugs(),
+    getShopServices("en"),
   ]);
 
   type SlugRow = { slug: string; updated_at: string | null };
@@ -43,13 +45,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   }));
 
+  const shopEntries: MetadataRoute.Sitemap = shopServices.map((s) => ({
+    url: `${SITE.url}/shop/${s.slug}`,
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
   return [
     { url: SITE.url,                changeFrequency: "weekly",  priority: 1.0 },
     { url: `${SITE.url}/stops`,     changeFrequency: "weekly",  priority: 0.9 },
     { url: `${SITE.url}/tours`,     changeFrequency: "weekly",  priority: 0.9 },
+    { url: `${SITE.url}/shop`,      changeFrequency: "weekly",  priority: 0.85 },
     { url: `${SITE.url}/blog`,      changeFrequency: "weekly",  priority: 0.9 },
     ...articleEntries,
     ...tours,
     ...destinations,
+    ...shopEntries,
   ];
 }

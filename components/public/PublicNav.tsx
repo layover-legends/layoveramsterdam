@@ -30,6 +30,7 @@ export default function PublicNav({ locale, langLabel = "Select language" }: Pro
   const navLinks = [
     { label: "Tours",        href: "/tours" },
     { label: "Destinations", href: "/stops" },
+    { label: "Shop",         href: "/shop" },
     { label: "Blog",         href: "/blog" },
   ];
 

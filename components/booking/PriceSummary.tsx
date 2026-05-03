@@ -3,7 +3,7 @@ import { formatPrice } from "@/lib/i18n/format-price";
 import { t } from "@/lib/i18n/ui";
 
 type Props = {
-  tourName: string;
+  tourName: string | null;
   baseCents: number;
   currency: string;
   partySize: number;
@@ -41,13 +41,15 @@ export default function PriceSummary({
 
   return (
     <div className="rounded-2xl border border-warm-cream/10 bg-warm-cream/[0.03] p-5 space-y-3">
-      {/* Tour base */}
-      <div className="flex justify-between text-sm">
-        <span className="text-warm-cream/70">
-          {t(labels, "booking.summary.tour", "Tour")}: {tourName}
-        </span>
-        <span className="font-mono text-warm-cream">{formatPrice(baseCents, currency)}</span>
-      </div>
+      {/* Tour base (omit row when standalones-only) */}
+      {tourName && baseCents > 0 && (
+        <div className="flex justify-between text-sm">
+          <span className="text-warm-cream/70">
+            {t(labels, "booking.summary.tour", "Tour")}: {tourName}
+          </span>
+          <span className="font-mono text-warm-cream">{formatPrice(baseCents, currency)}</span>
+        </div>
+      )}
 
       {/* Add-on lines */}
       {addonLines.map((line, i) => (

@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getTourAddons } from "@/lib/public/tour-addons";
+import { getShopServices } from "@/lib/public/shop";
 import { getUiStrings } from "@/lib/i18n/ui";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import AddonStepClient from "@/components/booking/AddonStepClient";
@@ -36,7 +37,7 @@ export default async function BookingAddonsPage({ params }: PageProps) {
   const booking = rawBooking as {
     id: string;
     user_id: string;
-    tour_id: string;
+    tour_id: string | null;
     party_size: number;
     base_cents: number;
     total_cents: number;
@@ -45,6 +46,36 @@ export default async function BookingAddonsPage({ params }: PageProps) {
     booking_addons: Array<{ addon_id: string }>;
   };
 
+  const locale = resolveLocale();
+  const currentAddonIds = new Set(booking.booking_addons.map((b) => b.addon_id));
+
+  // Standalones-only booking (no tour)
+  if (!booking.tour_id) {
+    const [shopServices, labels] = await Promise.all([getShopServices(locale), getUiStrings()]);
+    const currentSlugs = shopServices
+      .filter((s) => currentAddonIds.has(s.id))
+      .map((s) => s.slug);
+
+    return (
+      <main className="min-h-screen bg-ink-black text-warm-cream px-5 py-12">
+        <div className="max-w-2xl mx-auto">
+          <AddonStepClient
+            bookingId={params.id}
+            tourName={null}
+            tourSlug={null}
+            baseCents={0}
+            partySize={booking.party_size}
+            currency={booking.currency}
+            addons={shopServices}
+            initialSelectedSlugs={currentSlugs}
+            labels={labels}
+          />
+        </div>
+      </main>
+    );
+  }
+
+  // Tour + addons booking
   const { data: rawTour } = await admin
     .from("tours")
     .select("id, name, slug, price_cents, currency, pricing_model")
@@ -62,15 +93,14 @@ export default async function BookingAddonsPage({ params }: PageProps) {
     pricing_model: string;
   };
 
-  const locale = resolveLocale();
   const [addons, labels] = await Promise.all([
     getTourAddons(booking.tour_id, locale),
     getUiStrings(),
   ]);
 
-  // Map currently-selected addon IDs back to slugs
-  const currentAddonIds = new Set(booking.booking_addons.map((b) => b.addon_id));
-  const currentAddonSlugs = addons.filter((a) => currentAddonIds.has(a.id)).map((a) => a.slug);
+  const currentAddonSlugs = addons
+    .filter((a) => currentAddonIds.has(a.id))
+    .map((a) => a.slug);
 
   return (
     <main className="min-h-screen bg-ink-black text-warm-cream px-5 py-12">

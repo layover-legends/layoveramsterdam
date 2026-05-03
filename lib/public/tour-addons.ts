@@ -65,7 +65,10 @@ export async function getTourAddons(tourId: string, locale: string): Promise<Pub
       .from("addons")
       .select("id, slug, category, fulfillment, pricing_model, price_cents, vat_rate, sort_order")
       .in("id", addonIds)
-      .eq("is_active", true),
+      .eq("is_active", true)
+      // Only surface active items in the booking flow — coming_soon items stay hidden
+      .eq("availability_status", "active")
+      .in("service_type", ["addon", "both"]),
     supabase
       .from("translations")
       .select("entity_id, field, language, value")

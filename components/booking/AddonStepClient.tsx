@@ -21,8 +21,8 @@ const CATEGORY_ORDER = [
 
 type Props = {
   bookingId: string;
-  tourName: string;
-  tourSlug: string;
+  tourName: string | null;
+  tourSlug: string | null;
   baseCents: number;
   partySize: number;
   currency: string;

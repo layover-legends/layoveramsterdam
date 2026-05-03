@@ -618,6 +618,34 @@ export const UI_STRINGS = {
   "booking.summary.total":                 "Total",
   "booking.summary.tour":                  "Tour",
   "booking.summary.vat":                   "VAT (incl.)",
+
+  // ── Public — Shop ────────────────────────────────────────────────────────
+  "shop.add_to_cart":                      "Add to cart →",
+  "shop.added_to_cart":                    "Added",
+  "shop.cart.checkout":                    "Checkout",
+  "shop.cart.empty":                       "Your cart is empty",
+  "shop.coming_soon.already":              "You're already on the waitlist.",
+  "shop.coming_soon.badge":                "Coming soon",
+  "shop.coming_soon.email_placeholder":    "your@email.com",
+  "shop.coming_soon.label":                "Coming soon",
+  "shop.coming_soon.notify_button":        "Notify me when available",
+  "shop.coming_soon.success":              "We'll email you when this is available.",
+  "shop.empty":                            "Nothing here yet — check back soon.",
+  "shop.subtitle":                         "Standalone services for your Amsterdam stay",
+  "shop.title":                            "Layover Legends Shop",
+
+  // ── Admin — services ─────────────────────────────────────────────────────
+  "admin.services.margin.healthy":         "Healthy",
+  "admin.services.margin.loss":            "Loss",
+  "admin.services.margin.thin":            "Thin",
+  "admin.services.status.active":          "Active",
+  "admin.services.status.coming_soon":     "Coming soon",
+  "admin.services.status.inactive":        "Inactive",
+  "admin.services.tabs.addons":            "Add-ons",
+  "admin.services.tabs.standalones":       "Standalones",
+  "admin.services.tabs.tours":             "Tours",
+  "admin.services.waitlist.count":         "{n} on waitlist",
+  "admin.sidebar.services":               "Services",
 } as const;
 
 export type UIStringKey = keyof typeof UI_STRINGS;

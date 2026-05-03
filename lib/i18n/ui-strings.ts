@@ -721,6 +721,102 @@ export const UI_STRINGS = {
   "admin.services.tabs.tours":             "Tours",
   "admin.services.waitlist.count":         "{n} on waitlist",
   "admin.sidebar.services":               "Services",
+
+  // ── Account — Deletion ────────────────────────────────────────────────────
+  "account.delete.bullet_bookings":        "Booking financial records — anonymised and kept 7 years (Dutch tax law)",
+  "account.delete.bullet_layovers":        "All layover records",
+  "account.delete.bullet_profile":         "Your profile — name, phone, nationality, preferences",
+  "account.delete.bullet_routes":          "Custom routes you have built",
+  "account.delete.bullet_waitlist":        "Waitlist signups",
+  "account.delete.confirm_button":         "Permanently delete my account",
+  "account.delete.error_type":             "Please type DELETE in the box to confirm.",
+  "account.delete.gdpr_note":              "This deletion is processed under GDPR Art. 17 (Right to Erasure). You will receive a confirmation email. Contact travellayoverlegends@gmail.com with questions.",
+  "account.delete.h1":                     "Delete your account",
+  "account.delete.subtitle":              "This action is permanent and cannot be undone.",
+  "account.delete.type_label":             "Type DELETE to confirm",
+  "account.delete.what_happens":           "What will be deleted:",
+  "account.delete.what_kept":              "What is retained (legal obligation):",
+  "account.export.rate_limited":           "You can only export your data once every 24 hours. Please try again later.",
+
+  // ── Adult gate ────────────────────────────────────────────────────────────
+  "adult_gate.badge":                      "18+ Content",
+  "adult_gate.body":                       "This tour includes adult-only content (after-dark venues, coffee shops, or red-light district). You must be 18 or older to book.",
+  "adult_gate.confirm_label":              "I confirm that I am 18 years of age or older and consent to accessing this content.",
+  "adult_gate.dob_label":                  "Your date of birth",
+  "adult_gate.error_checkbox":             "Please confirm you are 18 or older.",
+  "adult_gate.error_dob":                  "Please enter your date of birth.",
+  "adult_gate.error_generic":              "Verification failed. Please try again.",
+  "adult_gate.privacy_note":               "Your date of birth is stored securely and used only for age verification. It is not shared with third parties. Verification is valid for 90 days.",
+  "adult_gate.submit":                     "Confirm age & continue",
+  "adult_gate.title":                      "Age verification required",
+  "adult_gate.verifying":                  "Verifying…",
+
+  // ── Cookie banner ─────────────────────────────────────────────────────────
+  "cookies.banner.accept_all":             "Accept all",
+  "cookies.banner.aria_label":             "Cookie consent",
+  "cookies.banner.body":                   "We use cookies to make your booking work and to improve our service. Optional analytics and marketing cookies are off by default.",
+  "cookies.banner.customize":              "Customize",
+  "cookies.banner.learn_more":             "Learn more",
+  "cookies.banner.reject_all":             "Reject all",
+
+  // ── Cookie settings modal ─────────────────────────────────────────────────
+  "cookies.settings.always_active":        "Always active",
+  "cookies.settings.analytics_desc":       "Vercel Speed Insights. Helps us understand which pages perform well. No personal identifiers stored.",
+  "cookies.settings.analytics_label":      "Analytics",
+  "cookies.settings.essential_desc":       "Session management, authentication, language preference, security. Cannot be disabled.",
+  "cookies.settings.essential_label":      "Strictly necessary",
+  "cookies.settings.intro":                "Choose which cookies you allow. Strictly necessary cookies are always active — they keep the site and booking flow working.",
+  "cookies.settings.marketing_desc":       "Future remarketing pixels (Meta, Google Ads). Currently inactive. Enabling now sets the preference for when we activate these.",
+  "cookies.settings.marketing_label":      "Marketing",
+  "cookies.settings.policy_link":          "Cookie policy",
+  "cookies.settings.policy_link_prefix":   "See our",
+  "cookies.settings.policy_link_suffix":   "for the full list.",
+  "cookies.settings.save":                 "Save preferences",
+  "cookies.settings.title":               "Cookie preferences",
+
+  // ── Cookie legal page ─────────────────────────────────────────────────────
+  "legal.cookies.analytics_h2":            "2. Analytics cookies (optional)",
+  "legal.cookies.analytics_intro":         "These cookies help us understand how visitors use the site. They are only activated if you click 'Accept all' or enable the Analytics category in your preferences. No personal identifiers are stored.",
+  "legal.cookies.consent_purpose":         "Stores your cookie consent choices so we don't ask again.",
+  "legal.cookies.contact_body":            "Email travellayoverlegends@gmail.com or contact the Dutch data protection authority: Autoriteit Persoonsgegevens, autoriteitpersoonsgegevens.nl.",
+  "legal.cookies.contact_h2":              "Questions?",
+  "legal.cookies.dnt_body":                "If your browser sends the Do Not Track (DNT) signal, we automatically decline all optional cookies.",
+  "legal.cookies.essential_h2":            "1. Strictly necessary cookies",
+  "legal.cookies.essential_intro":         "These cookies are required for the site to function. They cannot be disabled. No personal data is transmitted to third parties through these cookies.",
+  "legal.cookies.h1":                      "Cookie Policy",
+  "legal.cookies.lang_purpose":            "Stores your language preference.",
+  "legal.cookies.manage_body":             "You can change your cookie preferences at any time by clicking 'Manage cookies' in the footer of any page. You can also clear cookies through your browser settings, though this will sign you out.",
+  "legal.cookies.manage_h2":               "Managing your preferences",
+  "legal.cookies.marketing_h2":            "3. Marketing cookies (optional)",
+  "legal.cookies.marketing_intro":         "Marketing cookies are currently not active on this site. If we introduce remarketing tools in the future, we will update this policy and request fresh consent before activating them.",
+  "legal.cookies.sb_purpose":              "Authentication session token. Keeps you signed in.",
+  "legal.cookies.session_expire":          "Session",
+  "legal.cookies.summary_body":            "We use a small number of cookies to keep your session active, remember your language preference, and (only if you consent) measure site performance. We do not sell your data or run advertising trackers by default.",
+  "legal.cookies.summary_h2":              "In plain language",
+  "legal.cookies.table_expires":           "Expires",
+  "legal.cookies.table_name":              "Name",
+  "legal.cookies.table_provider":          "Provider",
+  "legal.cookies.table_purpose":           "Purpose",
+  "legal.cookies.thirdparty_body":         "The following third-party services may set cookies or access data through our site. Each has its own privacy policy and cookie policy.",
+  "legal.cookies.thirdparty_h2":           "Third-party services",
+  "legal.cookies.updated":                 "Last updated: {date}",
+  "legal.cookies.vsi_purpose":             "Vercel Speed Insights — anonymous page performance measurement.",
+  "legal.cookies.what_body":               "Cookies are small text files stored in your browser when you visit a website. They allow the site to remember your preferences and session state between page loads.",
+  "legal.cookies.what_h2":                 "What are cookies?",
+  "legal.cookies.year":                    "year",
+
+  // ── Footer ────────────────────────────────────────────────────────────────
+  "footer.cookies":                        "Cookie policy",
+  "footer.manage_cookies":                 "Manage cookies",
+
+  // ── Account — GDPR rights ─────────────────────────────────────────────────
+  "account.gdpr.delete":                   "Delete my account",
+  "account.gdpr.export":                   "Download my data",
+  "account.gdpr.note":                     "GDPR Art. 20 (portability) and Art. 17 (erasure). Data export is limited to 1 per 24 hours. Deletion is permanent.",
+  "account.gdpr.title":                    "Your data rights",
+
+  // ── Admin sidebar ─────────────────────────────────────────────────────────
+  "admin.sidebar.legal":                   "Legal / DPA",
 } as const;
 
 export type UIStringKey = keyof typeof UI_STRINGS;

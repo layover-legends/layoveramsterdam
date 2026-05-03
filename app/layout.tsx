@@ -3,6 +3,8 @@ import { Cormorant_Garamond, Outfit, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { SITE } from "@/lib/seo/site";
 import { resolveLocale } from "@/lib/i18n/resolve";
+import { getUiStrings } from "@/lib/i18n/ui";
+import ConsentBanner from "@/components/cookies/ConsentBanner";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -39,8 +41,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const locale = resolveLocale();
+  const s = await getUiStrings();
+
+  // Extract only cookie-related labels to avoid passing the full bundle to client
+  const cookieLabels: Record<string, string> = Object.fromEntries(
+    Object.entries(s).filter(([k]) => k.startsWith("cookies.") || k === "common.close" || k === "common.cancel")
+  );
 
   return (
     <html
@@ -53,6 +61,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="font-sans bg-ink-black text-warm-cream">
         {children}
+        <ConsentBanner labels={cookieLabels} />
       </body>
     </html>
   );

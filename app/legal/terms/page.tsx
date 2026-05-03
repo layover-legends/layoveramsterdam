@@ -90,13 +90,17 @@ export default async function TermsPage() {
         </p>
       </section>
 
-      <nav className="pt-4 text-xs text-warm-cream/40 flex gap-4">
+      <nav className="pt-4 text-xs text-warm-cream/40 flex flex-wrap gap-4">
         <Link href="/legal/privacy" className="hover:text-warm-cream/70 transition-colors">
           {t(s, "footer.privacy", "Privacy policy")}
         </Link>
         <span aria-hidden="true">·</span>
         <Link href="/legal/cancellation" className="hover:text-warm-cream/70 transition-colors">
           {t(s, "footer.cancellation", "Cancellation policy")}
+        </Link>
+        <span aria-hidden="true">·</span>
+        <Link href="/legal/cookies" className="hover:text-warm-cream/70 transition-colors">
+          {t(s, "footer.cookies", "Cookie policy")}
         </Link>
       </nav>
     </main>

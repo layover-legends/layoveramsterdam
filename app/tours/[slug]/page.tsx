@@ -10,7 +10,9 @@ import { resolveLocale } from "@/lib/i18n/resolve";
 import { OG_LOCALE } from "@/lib/i18n/locales";
 import { createBooking } from "@/app/booking/actions";
 import AddonHeroStrip from "@/components/tours/AddonHeroStrip";
+import AdultGate from "@/components/booking/AdultGate";
 import { getUiStrings } from "@/lib/i18n/ui";
+import { checkAdultConsent } from "@/lib/age-verification/verify";
 
 export const dynamic = "force-dynamic";
 
@@ -68,7 +70,10 @@ export default async function TourPage({ params, searchParams }: PageProps) {
 
   const layoverId = searchParams?.layover ?? null;
   const locale = resolveLocale();
-  const labels = await getUiStrings();
+  const [labels, adultVerified] = await Promise.all([
+    getUiStrings(),
+    tour.is_adult_only ? checkAdultConsent() : Promise.resolve(true),
+  ]);
 
   return (
     <>
@@ -105,39 +110,55 @@ export default async function TourPage({ params, searchParams }: PageProps) {
         <p className="text-warm-cream/80 leading-relaxed">{tour.description}</p>
       )}
 
-      <AddonHeroStrip
-        tourId={tour.id}
-        tourSlug={tour.slug}
-        locale={locale}
-        labels={labels}
-      />
-
-      <div className="pt-4 border-t border-warm-cream/10 space-y-3">
-        {layoverId ? (
-          <form action={createBooking}>
-            <input type="hidden" name="tour_id" value={tour.id} />
-            <input type="hidden" name="layover_id" value={layoverId} />
-            <button
-              type="submit"
-              className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-legend-gold text-ink-black font-semibold tracking-wide hover:bg-gold-light active:bg-gold-dark transition-colors"
-            >
-              Book this tour →
-            </button>
-          </form>
-        ) : (
-          <div className="space-y-2">
-            <Link
-              href="/layover"
-              className="inline-block px-8 py-3.5 rounded-full bg-legend-gold text-ink-black font-semibold tracking-wide hover:bg-gold-light transition-colors"
-            >
-              Enter your flights to book →
-            </Link>
-            <p className="text-xs text-warm-cream/40">
-              Tell us your layover details and we&apos;ll check availability.
-            </p>
+      {(() => {
+        const bookingCta = (
+          <div className="pt-4 border-t border-warm-cream/10 space-y-3">
+            {layoverId ? (
+              <form action={createBooking}>
+                <input type="hidden" name="tour_id" value={tour.id} />
+                <input type="hidden" name="layover_id" value={layoverId} />
+                <button
+                  type="submit"
+                  className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-legend-gold text-ink-black font-semibold tracking-wide hover:bg-gold-light active:bg-gold-dark transition-colors"
+                >
+                  Book this tour →
+                </button>
+              </form>
+            ) : (
+              <div className="space-y-2">
+                <Link
+                  href="/layover"
+                  className="inline-block px-8 py-3.5 rounded-full bg-legend-gold text-ink-black font-semibold tracking-wide hover:bg-gold-light transition-colors"
+                >
+                  Enter your flights to book →
+                </Link>
+                <p className="text-xs text-warm-cream/40">
+                  Tell us your layover details and we&apos;ll check availability.
+                </p>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        );
+
+        const addons = (
+          <AddonHeroStrip
+            tourId={tour.id}
+            tourSlug={tour.slug}
+            locale={locale}
+            labels={labels}
+          />
+        );
+
+        if (tour.is_adult_only && !adultVerified) {
+          return (
+            <AdultGate labels={labels}>
+              {addons}
+              {bookingCta}
+            </AdultGate>
+          );
+        }
+        return <>{addons}{bookingCta}</>;
+      })()}
     </main>
     </>
   );

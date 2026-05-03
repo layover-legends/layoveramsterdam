@@ -44,6 +44,7 @@ const NAV: NavItem[] = [
   { key: "staff",     labelKey: "admin.sidebar.staff",      labelFallback: "Staff",      href: "/admin/staff",              icon: "◑", matchPrefix: "/admin/staff" },
   { key: "partners",  labelKey: "admin.sidebar.partners",   labelFallback: "Partners",   href: "/admin/partners",           icon: "◈", matchPrefix: "/admin/partners" },
   { key: "souvenirs", labelKey: "admin.sidebar.souvenirs",  labelFallback: "Souvenirs",  href: "/admin/souvenirs",          icon: "◎", matchPrefix: "/admin/souvenirs" },
+  { key: "legal",     labelKey: "admin.sidebar.legal",      labelFallback: "Legal / DPA", href: "/admin/legal/processors",  icon: "⚖", matchPrefix: "/admin/legal" },
 ];
 
 export default function AdminSidebar({ email, fullName, avatarUrl, labels }: Props) {

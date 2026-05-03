@@ -1,7 +1,9 @@
 ﻿import { redirect } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import AccountForm from "@/components/AccountForm";
+import LegalFooter from "@/components/public/LegalFooter";
 import type { UserProfile } from "@/lib/types/profile";
 import { getUiStrings, t, tpl } from "@/lib/i18n/ui";
 
@@ -144,6 +146,34 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
               {t(s, "auth.signout", "Sign out")}
             </button>
           </form>
+        </div>
+
+        {/* GDPR rights section */}
+        <div className="rounded-2xl border border-warm-cream/10 bg-warm-cream/5 p-6 space-y-4">
+          <h2 className="text-sm font-semibold text-warm-cream/60 uppercase tracking-wide">
+            {t(s, "account.gdpr.title", "Your data rights")}
+          </h2>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <a
+              href="/account/export"
+              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-warm-cream/20 text-warm-cream/70 text-sm hover:bg-warm-cream/5 transition-colors"
+            >
+              <span>↓</span>
+              {t(s, "account.gdpr.export", "Download my data")}
+            </a>
+            <Link
+              href="/account/delete"
+              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-red-400/20 text-red-400/70 text-sm hover:bg-red-400/5 transition-colors"
+            >
+              <span>×</span>
+              {t(s, "account.gdpr.delete", "Delete my account")}
+            </Link>
+          </div>
+          <p className="text-xs text-warm-cream/30 leading-relaxed">
+            {t(s, "account.gdpr.note",
+              "GDPR Art. 20 (portability) and Art. 17 (erasure). Data export is limited to 1 per 24 hours. Deletion is permanent."
+            )}
+          </p>
         </div>
 
         <div className="text-xs text-warm-cream/40 text-center pt-2">

@@ -11,7 +11,9 @@ export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;
   const incoming = req.headers.get("authorization");
 
-  if (secret && incoming !== `Bearer ${secret}`) {
+  // SEC-11: require the secret unconditionally — an unset CRON_SECRET would
+  // mean any caller could run health checks and modify the snapshots table.
+  if (!secret || incoming !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

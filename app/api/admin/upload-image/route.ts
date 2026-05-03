@@ -49,6 +49,16 @@ export async function POST(req: NextRequest) {
     return new NextResponse("Missing file, source, or slug", { status: 400 });
   }
 
+  // SEC-09: allowlist source and validate slug to prevent storage path manipulation
+  const ALLOWED_SOURCES = new Set(["tour", "addon"]);
+  if (!ALLOWED_SOURCES.has(source)) {
+    return new NextResponse("Invalid source — must be 'tour' or 'addon'", { status: 400 });
+  }
+  const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,79}$/;
+  if (!SLUG_RE.test(slug.trim())) {
+    return new NextResponse("Invalid slug — must be 2-80 lowercase alphanumeric/hyphen chars", { status: 400 });
+  }
+
   if (file.size > MAX_BYTES) {
     return NextResponse.json({ error: "File too large (max 10 MB)" }, { status: 400 });
   }

@@ -121,10 +121,14 @@ export async function createCheckoutSession(
   // Create Stripe Checkout session
   const stripeLocale = (STRIPE_LOCALE[locale] ?? "en") as "auto";
 
+  // MON-01: automatic_tax conflicts with tax_behavior: "inclusive" on line items —
+  // Stripe would override the stored VAT rate with its own calculation, producing
+  // inconsistent VAT amounts. We rely on inclusive pricing + stored vat_rate instead.
+  // Re-enable automatic_tax only after setting tax_code on every Stripe Product and
+  // configuring Stripe Tax with the business's NL address.
   const session = await getStripe().checkout.sessions.create({
     mode: "payment",
     payment_method_types: ["card", "ideal"],
-    automatic_tax: { enabled: true },
     line_items: lineItems,
     client_reference_id: bookingId,
     customer_email: userEmail ?? undefined,

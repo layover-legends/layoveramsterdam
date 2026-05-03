@@ -28,6 +28,13 @@ export async function POST(req: NextRequest) {
     return new NextResponse(`Webhook signature failed: ${message}`, { status: 400 });
   }
 
+  // MON-06: reject test-mode events hitting the production webhook.
+  // This prevents a misconfigured Stripe dashboard from flipping real bookings to "paid".
+  if (process.env.NODE_ENV === "production" && !event.livemode) {
+    console.warn("[webhook] test-mode event rejected in production:", event.id, event.type);
+    return new NextResponse("Test event rejected in production", { status: 400 });
+  }
+
   const admin = createAdminClient();
 
   // Dedup — Stripe retries on non-200, so we must handle replays

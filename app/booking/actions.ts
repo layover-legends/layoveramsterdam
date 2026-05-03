@@ -30,10 +30,12 @@ export async function createBooking(formData: FormData) {
   let dropoffAt: string;
 
   if (layover_id) {
+    // SEC-04: verify the layover belongs to this user before inheriting party_size
     const { data: layover, error: layoverErr } = await supabase
       .from("layovers")
       .select("party_size, flight_in_at, flight_out_at")
       .eq("id", layover_id)
+      .eq("user_id", user.id)
       .maybeSingle();
 
     if (layoverErr || !layover) redirect("/?error=layover_not_found");
@@ -53,34 +55,34 @@ export async function createBooking(formData: FormData) {
 
   const baseCents = (tour.price_cents ?? 0) * partySize;
 
-  const { data: booking, error } = await supabase
-    .from("bookings")
-    .insert({
-      user_id: user.id,
-      city_id: tour.city_id,
-      tour_id,
-      layover_id,
-      party_size: partySize,
-      scheduled_pickup_at: pickupAt,
-      scheduled_dropoff_at: dropoffAt,
-      base_cents: baseCents,
-      addons_cents: 0,
-      total_cents: baseCents,
-      currency: tour.currency ?? "EUR",
-      status: "pending_payment",
-    })
-    .select("id")
-    .single();
+  // MON-03: use the atomic RPC that holds a row-level lock on the tour to prevent
+  // concurrent overbooking. The function checks capacity before inserting.
+  const { data: newBookingId, error } = await supabase.rpc("create_pending_booking", {
+    p_user_id:    user.id,
+    p_city_id:    tour.city_id,
+    p_tour_id:    tour_id,
+    p_layover_id: layover_id,
+    p_party_size: partySize,
+    p_pickup_at:  pickupAt,
+    p_dropoff_at: dropoffAt,
+    p_base_cents: baseCents,
+    p_currency:   tour.currency ?? "EUR",
+  });
 
-  if (error) redirect(`/?error=${encodeURIComponent(error.message)}`);
+  if (error) {
+    if (error.message.includes("tour_fully_booked")) {
+      redirect("/tours?error=tour_fully_booked");
+    }
+    redirect(`/?error=${encodeURIComponent(error.message)}`);
+  }
 
   track("booking_created", {
-    booking_id: booking.id,
+    booking_id: newBookingId as string,
     tour_id,
     layover_id,
     party_size: partySize,
     total_cents: baseCents,
   }, { user_id: user.id, city_id: tour.city_id as string });
 
-  redirect(`/booking/${booking.id}`);
+  redirect(`/booking/${newBookingId}`);
 }

@@ -8,6 +8,8 @@ import { tourLd, breadcrumbLd } from "@/lib/seo/jsonld";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { OG_LOCALE } from "@/lib/i18n/locales";
 import { createBooking } from "@/app/booking/actions";
+import AddonHeroStrip from "@/components/tours/AddonHeroStrip";
+import { getUiStrings } from "@/lib/i18n/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +66,8 @@ export default async function TourPage({ params, searchParams }: PageProps) {
       : null;
 
   const layoverId = searchParams?.layover ?? null;
+  const locale = resolveLocale();
+  const labels = await getUiStrings();
 
   return (
     <>
@@ -87,6 +91,13 @@ export default async function TourPage({ params, searchParams }: PageProps) {
       {tour.description && (
         <p className="text-warm-cream/80 leading-relaxed">{tour.description}</p>
       )}
+
+      <AddonHeroStrip
+        tourId={tour.id}
+        tourSlug={tour.slug}
+        locale={locale}
+        labels={labels}
+      />
 
       <div className="pt-4 border-t border-warm-cream/10 space-y-3">
         {layoverId ? (

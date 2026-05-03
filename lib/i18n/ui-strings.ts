@@ -593,6 +593,31 @@ export const UI_STRINGS = {
   "admin.souvenirs.col_photos":            "Photos",
   "admin.souvenirs.empty_default":         "No souvenirs yet.",
   "admin.souvenirs.title":                 "Souvenirs",
+
+  // ── Public — Tour add-ons hero strip ─────────────────────────────────────
+  "tour.addons.add":                       "Add",
+  "tour.addons.added":                     "Added ✓",
+  "tour.addons.heading":                   "Add to your day",
+  "tour.addons.per_person":                "/ person",
+
+  // ── Public — Booking add-ons step ────────────────────────────────────────
+  "booking.category.comfort":              "Comfort",
+  "booking.category.connectivity":         "Connectivity",
+  "booking.category.food":                 "Food",
+  "booking.category.mobility":             "Mobility",
+  "booking.category.photo":                "Photo & memories",
+  "booking.category.premium":              "Premium",
+  "booking.category.souvenir":             "Souvenir",
+  "booking.category.tickets":              "Tickets",
+  "booking.step.addons.continue":          "Continue to review →",
+  "booking.step.addons.skip":              "Skip add-ons →",
+  "booking.step.addons.title":             "Add-ons (optional)",
+  "booking.summary.addon":                 "Add-on",
+  "booking.summary.addon_pp":              "Add-on (per person)",
+  "booking.summary.subtotal":              "Subtotal",
+  "booking.summary.total":                 "Total",
+  "booking.summary.tour":                  "Tour",
+  "booking.summary.vat":                   "VAT (incl.)",
 } as const;
 
 export type UIStringKey = keyof typeof UI_STRINGS;

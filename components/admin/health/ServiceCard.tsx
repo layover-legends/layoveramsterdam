@@ -102,7 +102,20 @@ export default function ServiceCard({ snapshot, service, isTesting, onTest, onOp
 
       {/* Key metric */}
       <div onClick={(e) => e.stopPropagation()}>
-        {snapshot ? <KeyMetric snap={snapshot} /> : (
+        {snapshot ? (
+          <>
+            <KeyMetric snap={snapshot} />
+            {(snapshot.status === "degraded" || snapshot.status === "down") && snapshot.error_message && (
+              <p className={`text-[11px] mt-1 line-clamp-2 leading-snug ${
+                snapshot.status === "down" ? "text-red-300/80" : "text-amber-300/80"
+              }`}>
+                ⚠ {snapshot.error_message.length > 80
+                    ? snapshot.error_message.slice(0, 80) + "…"
+                    : snapshot.error_message}
+              </p>
+            )}
+          </>
+        ) : (
           <p className="text-xs text-warm-cream/30 italic">No data yet</p>
         )}
       </div>

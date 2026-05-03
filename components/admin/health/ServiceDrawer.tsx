@@ -6,6 +6,32 @@ import { SERVICE_LABELS } from "@/lib/admin/health/types";
 import HistoryChart from "./HistoryChart";
 import QuotaBar from "./QuotaBar";
 
+function StatusPillLarge({ status }: { status: string }) {
+  const cfg: Record<string, { label: string; cls: string }> = {
+    healthy:  { label: "Healthy",  cls: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" },
+    degraded: { label: "Degraded", cls: "bg-amber-400/15 text-amber-300 border-amber-400/30" },
+    down:     { label: "Down",     cls: "bg-red-500/15 text-red-400 border-red-500/30" },
+    unknown:  { label: "Unknown",  cls: "bg-warm-cream/8 text-warm-cream/40 border-warm-cream/15" },
+  };
+  const { label, cls } = cfg[status] ?? cfg.unknown;
+  return (
+    <span className={`text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full border ${cls}`}>
+      {label}
+    </span>
+  );
+}
+
+function relativeTime(iso: string): string {
+  const secs = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (secs < 60) return `${secs}s ago`;
+  if (secs < 3600) return `${Math.floor(secs / 60)}m ago`;
+  return `${Math.floor(secs / 3600)}h ago`;
+}
+
+function looksLikeStackTrace(msg: string): boolean {
+  return msg.includes("\n") || /Error:|at \w/.test(msg);
+}
+
 type Props = {
   service: ServiceName | null;
   snapshot: HealthSnapshot | null;
@@ -68,6 +94,15 @@ export default function ServiceDrawer({ service, snapshot, onClose }: Props) {
           {snapshot && (
             <section className="space-y-3">
               <h3 className="text-[10px] uppercase tracking-widest text-warm-cream/40">Current status</h3>
+
+              {/* Status pill + last checked */}
+              <div className="flex items-center gap-3">
+                <StatusPillLarge status={snapshot.status} />
+                <span className="text-[11px] text-warm-cream/35 font-mono">
+                  Last checked {relativeTime(snapshot.checked_at)}
+                </span>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-xl border border-warm-cream/10 bg-warm-cream/[0.03] p-3">
                   <p className="text-[10px] text-warm-cream/40 uppercase tracking-wide mb-1">Latency</p>
@@ -130,9 +165,23 @@ export default function ServiceDrawer({ service, snapshot, onClose }: Props) {
                 </div>
               )}
 
+              {/* Error message — full, monospace for stack traces */}
               {snapshot.error_message && (
-                <div className="rounded-lg border border-red-400/20 bg-red-400/5 px-3 py-2 text-xs text-red-300 font-mono">
-                  {snapshot.error_message}
+                <div className="rounded-lg border border-red-400/20 bg-red-400/5 px-3 py-2">
+                  <p className="text-[10px] uppercase tracking-widest text-red-400/60 mb-1.5">Error</p>
+                  <p className={`text-xs text-red-300 ${looksLikeStackTrace(snapshot.error_message) ? "font-mono whitespace-pre-wrap break-all" : ""}`}>
+                    {snapshot.error_message}
+                  </p>
+                </div>
+              )}
+
+              {/* Metadata JSON */}
+              {snapshot.metadata && Object.keys(snapshot.metadata).length > 0 && (
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-warm-cream/40 mb-1.5">Metadata</p>
+                  <pre className="text-[10px] text-warm-cream/50 font-mono bg-warm-cream/[0.03] rounded-lg border border-warm-cream/8 p-3 overflow-x-auto whitespace-pre-wrap break-all leading-relaxed">
+                    {JSON.stringify(snapshot.metadata, null, 2)}
+                  </pre>
                 </div>
               )}
             </section>
@@ -145,13 +194,17 @@ export default function ServiceDrawer({ service, snapshot, onClose }: Props) {
               <div className="h-20 flex items-center justify-center">
                 <div className="w-5 h-5 rounded-full border-2 border-legend-gold border-t-transparent animate-spin" />
               </div>
+            ) : history.length === 0 ? (
+              <div className="h-20 flex items-center justify-center rounded-lg border border-warm-cream/8 bg-warm-cream/[0.02]">
+                <p className="text-xs text-warm-cream/30">No history yet — cron will populate this view every 5 minutes</p>
+              </div>
             ) : (
               <HistoryChart data={history} metric="latency" />
             )}
           </section>
 
           {/* 24h quota chart (if applicable) */}
-          {history.some((h) => h.quota_limit !== null) && (
+          {!loading && history.some((h) => h.quota_limit !== null) && (
             <section className="space-y-3">
               <h3 className="text-[10px] uppercase tracking-widest text-warm-cream/40">24h quota</h3>
               <HistoryChart data={history} metric="quota_pct" />

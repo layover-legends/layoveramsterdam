@@ -620,6 +620,8 @@ export const UI_STRINGS = {
   "booking.summary.vat":                   "VAT (incl.)",
 
   // ── Public — Shop ────────────────────────────────────────────────────────
+  "public.shop.back":                      "Back to home",
+  "public.shop.back_to_shop":              "Back to shop",
   "shop.add_to_cart":                      "Add to cart →",
   "shop.added_to_cart":                    "Added",
   "shop.cart.checkout":                    "Checkout",

@@ -44,8 +44,11 @@ export default async function ShopSlugPage({ params }: PageProps) {
   return (
     <main className="min-h-screen bg-ink-black text-warm-cream px-5 py-12">
       <div className="max-w-2xl mx-auto space-y-8">
-        <Link href="/shop" className="text-sm text-warm-cream/50 hover:text-warm-cream/80 transition-colors">
-          ← Shop
+        <Link
+          href="/shop"
+          className="inline-flex items-center gap-1 text-xs text-warm-cream/60 hover:text-legend-gold transition-colors mb-6"
+        >
+          ← <span>{t(labels, "public.shop.back_to_shop", "Back to shop")}</span>
         </Link>
 
         <header className="space-y-3">

@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { UI_STRINGS_CACHE_TAG } from "@/lib/i18n/ui";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { isLocale, type Locale } from "@/lib/i18n/locales";
@@ -26,6 +27,10 @@ function revalidateEntity(entityType: string, entityId: string) {
     revalidatePath("/admin/tours");
   } else if (entityType === "article") {
     revalidatePath(`/admin/articles/${entityId}`);
+  } else if (entityType === "ui") {
+    // Bust the getUiStrings() cache so the change is visible on the public
+    // site immediately rather than waiting for the 1-hour TTL.
+    revalidateTag(UI_STRINGS_CACHE_TAG);
   }
 }
 

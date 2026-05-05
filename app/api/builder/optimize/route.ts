@@ -27,6 +27,13 @@ type StopRow = {
 };
 
 export async function POST(req: Request): Promise<NextResponse> {
+  // Auth gate — anonymous callers would consume Mapbox API quota for free
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
   let body: RequestBody;
   try {
     body = (await req.json()) as RequestBody;
@@ -43,8 +50,6 @@ export async function POST(req: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "layover_minutes required (min 60)" }, { status: 400 });
   }
 
-  // Fetch stop details
-  const supabase = createClient();
   const { data, error } = await supabase
     .from("destinations")
     .select("id, slug, name, latitude, longitude, duration_minutes")

@@ -989,6 +989,15 @@ export const UI_STRINGS = {
   // ── Currency ──────────────────────────────────────────────────────────────
   "checkout.fx_disclosure":               "Charged in EUR {eur} by Stripe. Your bank may apply FX fees.",
 
+  // ── Error pages ───────────────────────────────────────────────────────────
+  "public.errors.404.headline":           "Lost in Schiphol?",
+  "public.errors.404.body":              "This page doesn't exist or has moved.",
+  "public.errors.404.cta":               "← Back to homepage",
+  "public.errors.500.headline":           "Something went off-route",
+  "public.errors.500.body":              "An unexpected error occurred. Our team has been notified.",
+  "public.errors.500.retry":             "Try again",
+  "public.errors.500.home":             "Go to homepage",
+
   // ── Footer columns ────────────────────────────────────────────────────────
   "footer.about":                         "About us",
   "footer.all_tours":                     "All tours",

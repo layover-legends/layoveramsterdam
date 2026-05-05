@@ -1,4 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
+import { unstable_cache } from "next/cache";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { FALLBACK_CHAIN, DEFAULT_LOCALE, type Locale } from "@/lib/i18n/locales";
 import { resolveLocale } from "@/lib/i18n/resolve";
 
@@ -6,17 +7,21 @@ import { resolveLocale } from "@/lib/i18n/resolve";
 // Client components must import directly from @/lib/i18n/t instead.
 export { t, tpl } from "@/lib/i18n/t";
 
+// Cache tag used for on-demand invalidation.
+// Call revalidateTag(UI_STRINGS_CACHE_TAG) after any translation write.
+export const UI_STRINGS_CACHE_TAG = "ui-strings";
+
 /**
- * Load UI string translations for the given locale.
- * Falls back through the chain; falls back to DEFAULT_LOCALE values if
- * the chain is exhausted.
+ * Inner fetch — uses admin client (no cookies) so it is safe inside
+ * unstable_cache, which runs outside the request context.
+ * UI strings are non-sensitive public data; bypassing RLS is correct here.
  */
-export async function loadUiStrings(locale: Locale): Promise<Record<string, string>> {
+async function _fetchUiStrings(locale: Locale): Promise<Record<string, string>> {
   const langs = [locale, ...FALLBACK_CHAIN[locale], DEFAULT_LOCALE];
   const unique = [...new Set(langs)];
 
-  const supabase = createClient();
-  const { data } = await supabase
+  const admin = createAdminClient();
+  const { data } = await admin
     .from("translations")
     .select("field, language, value")
     .eq("entity_type", "ui")
@@ -38,15 +43,37 @@ export async function loadUiStrings(locale: Locale): Promise<Record<string, stri
 }
 
 /**
+ * Cached variant — one entry per locale, revalidated hourly or on
+ * revalidateTag("ui-strings") when an admin saves a translation.
+ */
+const _cachedFetchUiStrings = unstable_cache(
+  _fetchUiStrings,
+  [UI_STRINGS_CACHE_TAG],
+  { revalidate: 3600, tags: [UI_STRINGS_CACHE_TAG] },
+);
+
+/**
+ * Load UI string translations for the given locale.
+ * Falls back through the chain; falls back to DEFAULT_LOCALE values if
+ * the chain is exhausted.
+ */
+export async function loadUiStrings(locale: Locale): Promise<Record<string, string>> {
+  return _cachedFetchUiStrings(locale);
+}
+
+/**
  * Convenience: resolve locale from request cookies/headers then load the
  * strings bundle in one call.  Use in every server component that renders
  * user-facing text.
  *
  *   const s = await getUiStrings();
  *   <h1>{t(s, "admin.stops.title", "Stops")}</h1>
+ *
+ * Cache is per-locale, TTL 1 h. Invalidate immediately after any translation
+ * write by calling revalidateTag(UI_STRINGS_CACHE_TAG) in the server action.
  */
 export async function getUiStrings(): Promise<Record<string, string>> {
-  return loadUiStrings(resolveLocale());
+  return _cachedFetchUiStrings(resolveLocale());
 }
 
 /** Keys used across public pages. Always fetch these. */

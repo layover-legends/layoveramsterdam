@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { SmartImage } from "@/components/photos/SmartImage";
 import { useRouter } from "next/navigation";
 import {
   DndContext,
@@ -148,11 +149,11 @@ function SortableStopRow({
 
         {/* Thumbnail */}
         {d.primary_photo_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={d.primary_photo_url}
+          <SmartImage
+            fallbackUrl={d.primary_photo_url}
             alt=""
-            className="w-10 h-10 rounded-lg object-cover border border-warm-cream/10 flex-shrink-0"
+            ratio="1:1"
+            className="w-10 h-10 rounded-lg border border-warm-cream/10 flex-shrink-0"
           />
         ) : (
           <div className="w-10 h-10 rounded-lg bg-warm-cream/5 border border-warm-cream/10 flex-shrink-0 flex items-center justify-center text-warm-cream/20 text-xs">

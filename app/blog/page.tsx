@@ -1,5 +1,6 @@
 ﻿import Link from "next/link";
 import type { Metadata } from "next";
+import { SmartImage } from "@/components/photos/SmartImage";
 import { listPublishedArticles } from "@/lib/public/articles";
 import { SITE, canonicalFor, ogImageFor, langAlternates } from "@/lib/seo/site";
 import { resolveLocale } from "@/lib/i18n/resolve";
@@ -73,11 +74,11 @@ export default async function BlogPage() {
                 className="group flex flex-col rounded-2xl border border-warm-cream/10 bg-warm-cream/[0.03] overflow-hidden hover:border-legend-gold/30 hover:bg-warm-cream/[0.06] transition-colors"
               >
                 {a.cover_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={a.cover_url}
+                  <SmartImage
+                    fallbackUrl={a.cover_url}
                     alt={a.title}
-                    className="w-full h-44 object-cover"
+                    ratio="16:9"
+                    className="w-full h-44"
                   />
                 ) : (
                   <div className="w-full h-44 bg-legend-gold/10 flex items-center justify-center text-5xl">

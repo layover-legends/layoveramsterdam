@@ -1,6 +1,6 @@
 ﻿import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import { SmartImage } from "@/components/photos/SmartImage";
 import type { Metadata } from "next";
 import { getTourBySlug } from "@/lib/public/tour-detail";
 import { SITE, canonicalFor, ogImageFor, langAlternates } from "@/lib/seo/site";
@@ -97,16 +97,13 @@ export default async function TourPage({ params, searchParams }: PageProps) {
     ]} />
     <main className="min-h-screen bg-ink-black text-warm-cream px-5 py-12 max-w-3xl mx-auto space-y-6">
       {tour.image_url && (
-        <div className="rounded-2xl overflow-hidden aspect-video w-full">
-          <Image
-            src={tour.image_url}
-            alt={tour.name}
-            width={1200}
-            height={675}
-            className="w-full h-full object-cover"
-            priority
-          />
-        </div>
+        <SmartImage
+          fallbackUrl={tour.image_url}
+          alt={tour.name}
+          ratio="16:9"
+          className="rounded-2xl aspect-video w-full"
+          priority
+        />
       )}
       <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight">{tour.name}</h1>
       {tour.tagline && (

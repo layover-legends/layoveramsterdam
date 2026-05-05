@@ -1,4 +1,5 @@
 ﻿import Link from "next/link";
+import { SmartImage } from "@/components/photos/SmartImage";
 import { listStops } from "@/lib/admin/stops";
 import { STOP_FILTERS, type StopFilter } from "@/lib/admin/stops-types";
 import StopsFilters from "@/components/admin/StopsFilters";
@@ -116,9 +117,12 @@ export default async function AdminStopsPage({ searchParams }: PageProps) {
                       <Link href={`/admin/stops/${row.id}`} className="block group">
                         <div className="flex items-center gap-3">
                           {row.primary_photo_url ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={row.primary_photo_url} alt=""
-                              className="w-10 h-10 rounded-lg object-cover border border-warm-cream/15 flex-shrink-0" />
+                            <SmartImage
+                              fallbackUrl={row.primary_photo_url}
+                              alt=""
+                              ratio="1:1"
+                              className="w-10 h-10 rounded-lg border border-warm-cream/15 flex-shrink-0"
+                            />
                           ) : (
                             <div className="w-10 h-10 rounded-lg bg-warm-cream/5 border border-warm-cream/10 flex-shrink-0" />
                           )}

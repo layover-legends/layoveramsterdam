@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { SmartImage } from "@/components/photos/SmartImage";
 import type { PublicService } from "@/lib/public/shop";
 import { formatPrice } from "@/lib/i18n/format-price";
 import { t } from "@/lib/i18n/t";
@@ -44,16 +44,12 @@ export default function ServiceCard({ service, labels }: Props) {
 
       {/* Thumbnail */}
       {service.image_url && (
-        <div className="rounded-xl overflow-hidden aspect-video -mx-1">
-          <Image
-            src={service.image_url}
-            alt={service.name}
-            width={400}
-            height={225}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
-        </div>
+        <SmartImage
+          fallbackUrl={service.image_url}
+          alt={service.name}
+          ratio="16:9"
+          className="rounded-xl -mx-1"
+        />
       )}
 
       {/* Header */}

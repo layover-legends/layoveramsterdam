@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SmartImage } from "@/components/photos/SmartImage";
 import { createClient } from "@/lib/supabase/server";
 import { listStaff } from "@/lib/admin/staff";
 import { resolveLocale } from "@/lib/i18n/resolve";
@@ -146,9 +147,12 @@ export default async function AboutPage() {
               {staffResult.rows.map((member) => (
                 <div key={member.id} className="flex items-start gap-4 rounded-2xl border border-warm-cream/10 p-4">
                   {member.photo_url ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img src={member.photo_url} alt={member.full_name}
-                      className="w-14 h-14 rounded-full object-cover border-2 border-legend-gold/40 shrink-0" />
+                    <SmartImage
+                      fallbackUrl={member.photo_url}
+                      alt={member.full_name}
+                      ratio="1:1"
+                      className="w-14 h-14 rounded-full border-2 border-legend-gold/40 shrink-0"
+                    />
                   ) : (
                     <div className="w-14 h-14 rounded-full bg-legend-gold/20 border-2 border-legend-gold/40 flex items-center justify-center text-xl font-bold shrink-0">
                       {(member.preferred_name || member.full_name).charAt(0)}

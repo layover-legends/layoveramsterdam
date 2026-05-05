@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
+import { SmartImage } from "@/components/photos/SmartImage";
 import type { BuilderStop } from "@/lib/builder/types";
 import { MAX_STOPS, DEFAULT_DURATION_MINUTES } from "@/lib/builder/types";
 import { formatMinutes } from "@/lib/builder/time-budget";
@@ -184,8 +184,12 @@ export default function DestinationPicker({
                 )}
                 {/* Photo */}
                 {dest.primary_photo_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={dest.primary_photo_url} alt={dest.name} className="w-full h-28 object-cover" loading="lazy" />
+                  <SmartImage
+                    fallbackUrl={dest.primary_photo_url}
+                    alt={dest.name}
+                    ratio="4:3"
+                    className="w-full h-28"
+                  />
                 ) : (
                   <div className="w-full h-28 bg-canal-blue/10 flex items-center justify-center text-2xl text-warm-cream/10">◆</div>
                 )}

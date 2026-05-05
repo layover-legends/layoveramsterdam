@@ -1,5 +1,6 @@
 ﻿import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { SmartImage } from "@/components/photos/SmartImage";
 import { getArticleBySlug } from "@/lib/public/articles";
 import { renderMarkdown } from "@/lib/markdown";
 import { SITE, canonicalFor, ogImageFor, langAlternates } from "@/lib/seo/site";
@@ -77,11 +78,12 @@ export default async function BlogArticlePage({ params }: PageProps) {
     ]} />
     <main className="min-h-screen bg-ink-black text-warm-cream">
       {article.cover_url && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={article.cover_url}
+        <SmartImage
+          fallbackUrl={article.cover_url}
           alt={article.title}
-          className="w-full max-h-72 sm:max-h-96 object-cover"
+          ratio="21:9"
+          className="w-full"
+          priority
         />
       )}
 

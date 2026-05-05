@@ -1,4 +1,4 @@
-﻿import Image from "next/image";
+﻿import { SmartImage } from "@/components/photos/SmartImage";
 import type { StopsTeaser as StopsTeaserData } from "@/lib/public/stops";
 import { t, tpl } from "@/lib/i18n/ui";
 
@@ -45,15 +45,13 @@ export default function StopsTeaser({ data, strings }: Props) {
               className="rounded-2xl border border-warm-cream/10 bg-warm-cream/5 hover:bg-warm-cream/[0.07] transition-colors text-left flex flex-col overflow-hidden"
             >
               {stop.primary_photo_url && (
-                <div className="relative w-full h-40">
-                  <Image
-                    src={stop.primary_photo_url}
-                    alt={stop.name}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover"
-                  />
-                </div>
+                <SmartImage
+                  fallbackUrl={stop.primary_photo_url}
+                  alt={stop.name}
+                  ratio="4:3"
+                  className="w-full h-40"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                />
               )}
               <div className="p-5 flex flex-col gap-2 flex-1">
                 {stop.category_name && (

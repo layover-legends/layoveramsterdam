@@ -1,5 +1,6 @@
 ﻿import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { SmartImage } from "@/components/photos/SmartImage";
 import { getStopBySlug } from "@/lib/public/stop-detail";
 import { SITE, canonicalFor, ogImageFor, langAlternates } from "@/lib/seo/site";
 import { StructuredData } from "@/components/seo/StructuredData";
@@ -73,11 +74,11 @@ export default async function StopPage({ params }: PageProps) {
         <p className="text-warm-cream/60">{stop.area}</p>
       )}
       {stop.primary_photo_url && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={stop.primary_photo_url}
+        <SmartImage
+          fallbackUrl={stop.primary_photo_url}
           alt={stop.name}
-          className="w-full rounded-2xl object-cover max-h-80"
+          ratio="16:9"
+          className="w-full rounded-2xl"
         />
       )}
       {stop.description && (

@@ -1,4 +1,5 @@
 ﻿import Link from "next/link";
+import { SmartImage } from "@/components/photos/SmartImage";
 import { listArticles } from "@/lib/admin/articles";
 import { ARTICLE_FILTERS, type ArticleFilter } from "@/lib/admin/articles-types";
 import { getUiStrings, t, tpl } from "@/lib/i18n/ui";
@@ -114,8 +115,12 @@ export default async function AdminArticlesPage({ searchParams }: PageProps) {
                       <Link href={`/admin/articles/${a.id}`} className="block group">
                         <div className="flex items-center gap-3">
                           {a.cover_url ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={a.cover_url} alt="" className="w-12 h-10 rounded-lg object-cover border border-warm-cream/10 flex-shrink-0" />
+                            <SmartImage
+                              fallbackUrl={a.cover_url}
+                              alt=""
+                              ratio="4:3"
+                              className="w-12 h-10 rounded-lg border border-warm-cream/10 flex-shrink-0"
+                            />
                           ) : (
                             <div className="w-12 h-10 rounded-lg bg-warm-cream/5 border border-warm-cream/10 flex-shrink-0 flex items-center justify-center text-warm-cream/20 text-lg">✍</div>
                           )}

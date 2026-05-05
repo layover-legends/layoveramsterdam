@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import { SmartImage } from "@/components/photos/SmartImage";
 import type { Metadata } from "next";
 import { getShopServiceBySlug } from "@/lib/public/shop";
 import { resolveLocale } from "@/lib/i18n/resolve";
@@ -53,16 +53,13 @@ export default async function ShopSlugPage({ params }: PageProps) {
         </Link>
 
         {service.image_url && (
-          <div className="rounded-2xl overflow-hidden aspect-video w-full">
-            <Image
-              src={service.image_url}
-              alt={service.name}
-              width={1200}
-              height={675}
-              className="w-full h-full object-cover"
-              priority
-            />
-          </div>
+          <SmartImage
+            fallbackUrl={service.image_url}
+            alt={service.name}
+            ratio="16:9"
+            className="rounded-2xl w-full"
+            priority
+          />
         )}
 
         <header className="space-y-3">

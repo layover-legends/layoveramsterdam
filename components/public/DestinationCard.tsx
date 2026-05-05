@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { PublicStop } from "@/lib/public/stops-list-types";
+import { SmartImage } from "@/components/photos/SmartImage";
 
 type Props = {
   stop: PublicStop;
@@ -21,15 +22,12 @@ export default function DestinationCard({
     >
       {/* Photo or placeholder */}
       {stop.primary_photo_url ? (
-        <div className="h-40 overflow-hidden">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={stop.primary_photo_url}
-            alt={stop.name}
-            loading="lazy"
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-        </div>
+        <SmartImage
+          fallbackUrl={stop.primary_photo_url}
+          alt={stop.name}
+          ratio="4:3"
+          className="h-40 transition-transform duration-300 group-hover:scale-105"
+        />
       ) : (
         <div className="h-40 bg-canal-blue/10 flex items-center justify-center">
           <span className="text-3xl text-warm-cream/20">◆</span>

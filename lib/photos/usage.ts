@@ -72,6 +72,30 @@ export async function relinkPhoto(
 }
 
 /**
+ * Link an already-uploaded photo to an entity slot, replacing any existing
+ * link for the same (entity_type, entity_id, field_name) slot.
+ * Use when admin picks from the Asset Library instead of uploading a new file.
+ */
+export async function linkExistingPhoto(
+  photoId: string,
+  entityType: PhotoUsageEntityType,
+  entityId: string,
+  fieldName: string,
+  context?: string
+): Promise<void> {
+  const admin = createAdminClient();
+  // Clear whatever was in this slot before
+  await admin
+    .from("photo_usage")
+    .delete()
+    .eq("entity_type", entityType)
+    .eq("entity_id",   entityId)
+    .eq("field_name",  fieldName);
+  // Insert the new link
+  await linkPhoto(photoId, entityType, entityId, fieldName, context);
+}
+
+/**
  * Fetch all usage rows for a photo (for the "Used in X places" panel in admin).
  */
 export async function getPhotoUsage(photoId: string): Promise<Array<{

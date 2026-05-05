@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import type { Article } from "@/lib/admin/articles-types";
+import { PhotoUploader } from "@/components/photos/PhotoUploader";
 
 type Props = {
   article?: Article | null;
@@ -113,15 +114,18 @@ export default function ArticleForm({ article, action, mode, deleteAction, label
       </div>
 
       <div>
-        <label htmlFor="cover_url" className={labelClass}>{lbl(labels, "admin.articleForm.cover_label", "Cover image URL")}</label>
-        <input id="cover_url" name="cover_url" type="url"
-          value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)} className={inputClass} placeholder="https://…/image.jpg" />
-        {coverUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={coverUrl} alt={lbl(labels, "admin.articleForm.cover_alt", "Cover preview")}
-            className="mt-2 rounded-xl max-h-40 object-cover border border-warm-cream/10"
-            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
-        )}
+        <p className={labelClass}>{lbl(labels, "admin.articleForm.cover_label", "Cover image")}</p>
+        <PhotoUploader
+          source="marketing"
+          entityType="article"
+          entityId={article?.id}
+          fieldName="cover_image"
+          currentLegacyUrl={coverUrl || null}
+          ratio="16:9"
+          onUploadComplete={(r) => setCoverUrl(r.cdn_url)}
+        />
+        {/* Hidden input so form action still receives cover_url */}
+        <input type="hidden" name="cover_url" value={coverUrl} />
       </div>
 
       <fieldset className="space-y-4">

@@ -6,7 +6,7 @@ import { updateTourFields, updateAddonFields, createTour, createAddon } from "@/
 import { syncServiceToStripe } from "@/app/actions/sync-stripe";
 import { formatPrice } from "@/lib/i18n/format-price";
 import { slugify } from "@/lib/slug";
-import ImageUploadField from "./ImageUploadField";
+import { PhotoUploader } from "@/components/photos/PhotoUploader";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Row types (id === '__new__' means create mode)
@@ -287,11 +287,14 @@ export default function ServiceEditDrawer(props: Props) {
 
           {/* Image */}
           <Section label="Image" />
-          <ImageUploadField
-            source={source}
-            slug={slug || row.slug}
-            currentUrl={imageUrl}
-            onChange={setImageUrl}
+          <PhotoUploader
+            source={source === "tour" ? "tour" : "marketing"}
+            entityType={source === "tour" ? "tour" : undefined}
+            entityId={row.id !== "__new__" ? row.id : undefined}
+            fieldName="hero_image"
+            currentLegacyUrl={imageUrl}
+            ratio="16:9"
+            onUploadComplete={(r) => setImageUrl(r.cdn_url)}
           />
 
           {/* ── Identity ──────────────────────────────────────────────────── */}

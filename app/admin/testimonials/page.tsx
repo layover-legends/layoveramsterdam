@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getUiStrings, t } from "@/lib/i18n/ui";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { PhotoUrlField } from "@/components/photos/PhotoUrlField";
 
 export const dynamic = "force-dynamic";
 
@@ -138,6 +139,17 @@ export default async function AdminTestimonialsPage({ searchParams }: PageProps)
                   className="w-full px-3 py-2 rounded-xl bg-warm-cream/5 border border-warm-cream/15 text-warm-cream text-sm" />
               </div>
             </div>
+            {/* Logo / source image */}
+            <PhotoUrlField
+              name="source_logo_url"
+              defaultValue={(editRow as { source_logo_url?: string } | null)?.source_logo_url ?? ""}
+              source="marketing"
+              entityType="testimonial"
+              entityId={editRow?.id}
+              fieldName="source_logo"
+              ratio="1:1"
+              label="Logo or image (optional)"
+            />
             <div className="flex gap-3">
               <button type="submit"
                 className="px-5 py-2 rounded-full bg-legend-gold text-ink-black font-semibold text-sm hover:bg-gold-light">

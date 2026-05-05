@@ -3,13 +3,9 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export type FxRate = {
-  currency_code: string;
-  rate_to_eur: number;
-  symbol: string;
-  symbol_position: "before" | "after";
-  decimals: number;
-};
+// Re-export from client-safe types module
+export type { FxRate } from "@/lib/currency/types";
+import type { FxRate } from "@/lib/currency/types";
 
 /** Country code → preferred currency (ISO-4217). Covers most visitor origins. */
 const COUNTRY_TO_CURRENCY: Record<string, string> = {
@@ -49,6 +45,13 @@ export async function getAllRates(): Promise<Map<string, FxRate>> {
 }
 
 /** Get a single FX rate. Falls back to EUR (rate 1.0) if not found. */
+/** All rates as a sorted array (for CurrencyPicker dropdown). */
+export async function getAllRatesList(): Promise<FxRate[]> {
+  const map = await getAllRates();
+  const order = ["EUR","USD","GBP","CAD","AUD","JPY","CHF","CNY","NOK","SEK","DKK"];
+  return order.map((code) => map.get(code)).filter((r): r is FxRate => !!r);
+}
+
 export async function getRate(currencyCode: string): Promise<FxRate> {
   const rates = await getAllRates();
   return rates.get(currencyCode) ?? {

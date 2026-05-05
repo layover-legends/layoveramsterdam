@@ -1,10 +1,13 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
+import { cookies, headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getUiStrings, t } from "@/lib/i18n/ui";
 import ReviewSummary from "@/components/booking/ReviewSummary";
 import CheckoutButton from "@/components/booking/CheckoutButton";
+import { getAllRatesList, countryToCurrency, getRate } from "@/lib/currency/fx";
+import { parseCurrencyCookie, CURRENCY_COOKIE, formatPrice, formatEur } from "@/lib/currency/format";
 
 export const dynamic = "force-dynamic";
 
@@ -71,6 +74,13 @@ export default async function BookingReviewPage({ params, searchParams }: PagePr
     );
   }
 
+  // Resolve display currency for FX disclosure
+  const cookieCurrency  = parseCurrencyCookie(cookies().get(CURRENCY_COOKIE)?.value);
+  const geoCountry      = headers().get("x-vercel-ip-country") ?? null;
+  const displayCurrency = cookieCurrency !== "EUR" ? cookieCurrency : countryToCurrency(geoCountry);
+  const fxRate          = await getRate(displayCurrency);
+  const showFxDisclosure = displayCurrency !== "EUR";
+
   const labels = await getUiStrings();
   const errorMsg = searchParams?.error;
 
@@ -107,6 +117,25 @@ export default async function BookingReviewPage({ params, searchParams }: PagePr
           }))}
           labels={labels}
         />
+
+        {/* FX disclosure — shown when visitor's display currency != EUR */}
+        {showFxDisclosure && (
+          <div className="rounded-xl border border-warm-cream/10 bg-warm-cream/3 px-5 py-4 space-y-1">
+            <div className="flex items-baseline justify-between">
+              <span className="text-sm text-warm-cream/70">
+                {t(labels, "checkout.review.total", "Total")}
+              </span>
+              <span className="font-display text-xl font-semibold text-legend-gold">
+                {formatPrice(booking.base_cents + booking.booking_addons.reduce((s, a) => s + a.unit_price_cents * a.qty, 0), fxRate)}
+              </span>
+            </div>
+            <p className="text-xs text-warm-cream/40 text-right">
+              {t(labels, "checkout.fx_disclosure",
+                "Charged in EUR {eur} by Stripe. Your bank may apply FX fees."
+              ).replace("{eur}", formatEur(booking.base_cents + booking.booking_addons.reduce((s, a) => s + a.unit_price_cents * a.qty, 0)))}
+            </p>
+          </div>
+        )}
 
         <CheckoutButton bookingId={params.id} labels={labels} />
 

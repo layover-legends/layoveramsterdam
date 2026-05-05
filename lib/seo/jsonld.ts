@@ -111,3 +111,50 @@ export function tourLd(tour: TourDetail) {
       : {}),
   };
 }
+
+type ReviewForLd = {
+  reviewer_name: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+};
+
+/**
+ * Product + aggregateRating + Review items for Google Rich Results.
+ * Only generates aggregateRating when reviewCount > 0 — Google penalises
+ * zero-review structured data.
+ */
+export function tourReviewsLd(
+  tour: TourDetail & { avg_rating?: number | null; reviews_count?: number },
+  reviews: ReviewForLd[] = []
+) {
+  const reviewCount = tour.reviews_count ?? 0;
+  const avgRating   = tour.avg_rating ?? null;
+
+  if (reviewCount === 0) return null;
+
+  const reviewItems = reviews.map((r) => ({
+    "@type": "Review",
+    author: { "@type": "Person", name: r.reviewer_name },
+    reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5, worstRating: 1 },
+    reviewBody:   r.comment ?? undefined,
+    datePublished: r.created_at.slice(0, 10),
+  }));
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: tour.name,
+    description: tour.description ?? tour.tagline ?? undefined,
+    url: canonicalFor(`/tours/${tour.slug}`),
+    brand: PUBLISHER,
+    aggregateRating: {
+      "@type":       "AggregateRating",
+      ratingValue:   avgRating ?? undefined,
+      reviewCount,
+      bestRating:    5,
+      worstRating:   1,
+    },
+    review: reviewItems,
+  };
+}

@@ -11,33 +11,22 @@ export type TourDetail = {
   currency: string;
   is_active: boolean;
   is_adult_only: boolean;
+  avg_rating: number | null;
+  reviews_count: number;
+  last_review_at: string | null;
   meta_title: string | null;
   meta_description: string | null;
   image_url: string | null;
 };
 
-type Row = {
-  id: string;
-  name: string;
-  slug: string;
-  tagline: string | null;
-  description: string | null;
-  duration_hours: number | null;
-  price_cents: number | null;
-  currency: string;
-  is_active: boolean;
-  is_adult_only: boolean;
-  meta_title: string | null;
-  meta_description: string | null;
-  image_url: string | null;
-};
+type Row = TourDetail;
 
 export async function getTourBySlug(slug: string): Promise<TourDetail | null> {
   const supabase = createClient();
   const { data } = await supabase
     .from("tours")
     .select(
-      "id, name, slug, tagline, description, duration_hours, price_cents, currency, is_active, is_adult_only, meta_title, meta_description, image_url",
+      "id, name, slug, tagline, description, duration_hours, price_cents, currency, is_active, is_adult_only, avg_rating, reviews_count, last_review_at, meta_title, meta_description, image_url",
     )
     .eq("slug", slug)
     .eq("is_active", true)
@@ -56,6 +45,9 @@ export async function getTourBySlug(slug: string): Promise<TourDetail | null> {
     currency: r.currency,
     is_active: r.is_active,
     is_adult_only: r.is_adult_only ?? false,
+    avg_rating: r.avg_rating ?? null,
+    reviews_count: r.reviews_count ?? 0,
+    last_review_at: r.last_review_at ?? null,
     meta_title: r.meta_title,
     meta_description: r.meta_description,
     image_url: r.image_url,

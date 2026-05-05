@@ -985,6 +985,25 @@ export const UI_STRINGS = {
   "driver.today.no_tours":                "No tours today",
   "driver.today.n_tours":                 "{n} tour{s} today",
   "driver.sos.confirm_body":              "This will email your GPS location and current assignment to the operator immediately.",
+
+  // ── Currency ──────────────────────────────────────────────────────────────
+  "checkout.fx_disclosure":               "Charged in EUR {eur} by Stripe. Your bank may apply FX fees.",
+
+  // ── Footer columns ────────────────────────────────────────────────────────
+  "footer.about":                         "About us",
+  "footer.all_tours":                     "All tours",
+  "footer.blog":                          "Blog",
+  "footer.col_company":                   "Company",
+  "footer.col_connect":                   "Connect",
+  "footer.col_legal":                     "Legal",
+  "footer.col_tours":                     "Tours",
+  "footer.contact":                       "Contact",
+  "footer.faq":                           "FAQ",
+  "footer.newsletter_coming":             "Newsletter · Coming soon",
+  "footer.reviews_link":                  "Reviews",
+  "footer.security":                      "Security policy",
+  "footer.social_coming":                 "Social links coming soon.",
+  "footer.stops":                         "Destinations",
 } as const;
 
 export type UIStringKey = keyof typeof UI_STRINGS;

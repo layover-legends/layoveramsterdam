@@ -77,8 +77,13 @@ export function renderBookingConfirmation(data: BookingConfirmationData): {
       </tr>
       ${addonRows}
       <tr style="border-top:1px solid rgba(247,243,236,0.1);">
-        <td style="padding:16px 0 0;color:#F7F3EC;font-weight:600;font-size:16px;">Total</td>
+        <td style="padding:16px 0 0;color:#F7F3EC;font-weight:600;font-size:16px;">Total (EUR)</td>
         <td style="padding:16px 0 0;text-align:right;color:#C9963A;font-weight:600;font-size:20px;font-family:monospace;">${money(data.totalCents, data.currency)}</td>
+      </tr>
+      <tr>
+        <td colspan="2" style="padding:6px 0 0;text-align:right;color:rgba(247,243,236,0.35);font-size:11px;">
+          Charged in EUR by Stripe. Your bank may apply FX fees.
+        </td>
       </tr>
     </table>
 

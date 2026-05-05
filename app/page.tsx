@@ -233,23 +233,6 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         <FinalCTA />
       </main>
 
-      {/* ── Footer ─────────────────────────────────────────────────────── */}
-      <footer className="px-5 py-10 border-t border-warm-cream/8 text-xs text-warm-cream/40">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p>
-            {`© ${new Date().getFullYear()} Layover Legends. All rights reserved.`}
-          </p>
-          <nav className="flex items-center gap-4">
-            <Link href="/legal/privacy" className="hover:text-warm-cream/70 transition-colors">Privacy</Link>
-            <span aria-hidden>·</span>
-            <Link href="/legal/terms" className="hover:text-warm-cream/70 transition-colors">Terms</Link>
-            <span aria-hidden>·</span>
-            <Link href="/legal/cancellation" className="hover:text-warm-cream/70 transition-colors">Cancellations</Link>
-            <span aria-hidden>·</span>
-            <Link href="/account" className="hover:text-warm-cream/70 transition-colors">Account</Link>
-          </nav>
-        </div>
-      </footer>
     </>
   );
 }

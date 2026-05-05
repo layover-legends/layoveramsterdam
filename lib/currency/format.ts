@@ -1,4 +1,4 @@
-import type { FxRate } from "@/lib/currency/fx";
+import type { FxRate } from "@/lib/currency/types";
 
 /**
  * Convert EUR cents to a display string in the visitor's currency.

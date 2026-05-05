@@ -5,6 +5,7 @@ import { SITE } from "@/lib/seo/site";
 import { resolveLocale } from "@/lib/i18n/resolve";
 import { getUiStrings } from "@/lib/i18n/ui";
 import ConsentBanner from "@/components/cookies/ConsentBanner";
+import SiteFooter from "@/components/public/SiteFooter";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -45,7 +46,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const locale = resolveLocale();
   const s = await getUiStrings();
 
-  // Extract only cookie-related labels to avoid passing the full bundle to client
   const cookieLabels: Record<string, string> = Object.fromEntries(
     Object.entries(s).filter(([k]) => k.startsWith("cookies.") || k === "common.close" || k === "common.cancel")
   );
@@ -61,6 +61,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body className="font-sans bg-ink-black text-warm-cream">
         {children}
+        <SiteFooter />
         <ConsentBanner labels={cookieLabels} />
       </body>
     </html>

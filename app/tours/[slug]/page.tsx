@@ -11,8 +11,11 @@ import { OG_LOCALE } from "@/lib/i18n/locales";
 import { createBooking } from "@/app/booking/actions";
 import AddonHeroStrip from "@/components/tours/AddonHeroStrip";
 import AdultGate from "@/components/booking/AdultGate";
+import ReviewCard from "@/components/reviews/ReviewCard";
 import { getUiStrings } from "@/lib/i18n/ui";
 import { checkAdultConsent } from "@/lib/age-verification/verify";
+import { getApprovedReviewsForTour, canUserReviewTour } from "@/lib/public/reviews";
+import { tourReviewsLd } from "@/lib/seo/jsonld";
 
 export const dynamic = "force-dynamic";
 
@@ -70,10 +73,13 @@ export default async function TourPage({ params, searchParams }: PageProps) {
 
   const layoverId = searchParams?.layover ?? null;
   const locale = resolveLocale();
-  const [labels, adultVerified] = await Promise.all([
+  const [labels, adultVerified, reviewsData, userCanReview] = await Promise.all([
     getUiStrings(),
     tour.is_adult_only ? checkAdultConsent() : Promise.resolve(true),
+    getApprovedReviewsForTour(tour.id, { limit: 5 }),
+    canUserReviewTour(tour.id),
   ]);
+  const { rows: reviews, total: reviewTotal } = reviewsData;
 
   return (
     <>
@@ -84,6 +90,17 @@ export default async function TourPage({ params, searchParams }: PageProps) {
         { name: "Tours", url: `${SITE.url}/tours` },
         { name: tour.name, url: canonicalFor(`/tours/${tour.slug}`) },
       ]),
+      ...(tourReviewsLd(tour, reviews.map(r => ({
+        reviewer_name: r.reviewer_name,
+        rating: r.rating,
+        comment: r.comment,
+        created_at: r.created_at,
+      }))) ? [tourReviewsLd(tour, reviews.map(r => ({
+        reviewer_name: r.reviewer_name,
+        rating: r.rating,
+        comment: r.comment,
+        created_at: r.created_at,
+      })))!] : []),
     ]} />
     <main className="min-h-screen bg-ink-black text-warm-cream px-5 py-12 max-w-3xl mx-auto space-y-6">
       {tour.image_url && (
@@ -102,9 +119,20 @@ export default async function TourPage({ params, searchParams }: PageProps) {
       {tour.tagline && (
         <p className="text-xl text-legend-gold">{tour.tagline}</p>
       )}
-      <div className="flex gap-4 text-sm text-warm-cream/60">
+      <div className="flex flex-wrap items-center gap-4 text-sm text-warm-cream/60">
         {tour.duration_hours !== null && <span>{tour.duration_hours}h</span>}
         {price && <span>{price}</span>}
+        {tour.reviews_count > 0 && (
+          <Link href={`/tours/${tour.slug}/reviews`}
+            className="flex items-center gap-1.5 text-legend-gold hover:text-gold-light transition-colors">
+            <span className="tracking-wider">
+              {"★".repeat(Math.round(tour.avg_rating ?? 0))}{"☆".repeat(5 - Math.round(tour.avg_rating ?? 0))}
+            </span>
+            <span className="text-warm-cream/60 text-xs">
+              {tour.avg_rating?.toFixed(1)} ({tour.reviews_count} review{tour.reviews_count !== 1 ? "s" : ""})
+            </span>
+          </Link>
+        )}
       </div>
       {tour.description && (
         <p className="text-warm-cream/80 leading-relaxed">{tour.description}</p>
@@ -159,6 +187,49 @@ export default async function TourPage({ params, searchParams }: PageProps) {
         }
         return <>{addons}{bookingCta}</>;
       })()}
+
+      {/* ── Reviews section ──────────────────────────────────────────────── */}
+      {(reviews.length > 0 || userCanReview) && (
+        <section className="pt-8 border-t border-warm-cream/10 space-y-5">
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="font-display text-xl font-semibold">
+              {tour.reviews_count > 0
+                ? `${tour.reviews_count} review${tour.reviews_count !== 1 ? "s" : ""}`
+                : "Reviews"}
+            </h2>
+            <div className="flex items-center gap-3">
+              {reviewTotal > 5 && (
+                <Link href={`/tours/${tour.slug}/reviews`}
+                  className="text-sm text-legend-gold hover:text-gold-light transition-colors">
+                  View all →
+                </Link>
+              )}
+              {userCanReview && (
+                <Link href={`/review/${tour.id}`}
+                  className="px-4 py-2 rounded-full border border-legend-gold/40 text-legend-gold text-xs font-medium hover:bg-legend-gold/10 transition-colors">
+                  Write a review
+                </Link>
+              )}
+            </div>
+          </div>
+
+          {reviews.length > 0 ? (
+            <div className="space-y-4">
+              {reviews.map((r) => (
+                <ReviewCard key={r.id} review={r as unknown as Parameters<typeof ReviewCard>[0]["review"]} />
+              ))}
+              {reviewTotal > 5 && (
+                <Link href={`/tours/${tour.slug}/reviews`}
+                  className="block text-center py-3 rounded-2xl border border-warm-cream/15 text-warm-cream/60 hover:bg-warm-cream/5 text-sm transition-colors">
+                  View all {reviewTotal} reviews →
+                </Link>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm text-warm-cream/40">No reviews yet.</p>
+          )}
+        </section>
+      )}
     </main>
     </>
   );

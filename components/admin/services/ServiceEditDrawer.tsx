@@ -289,7 +289,7 @@ export default function ServiceEditDrawer(props: Props) {
           <Section label="Image" />
           <PhotoUploader
             source={source === "tour" ? "tour" : "marketing"}
-            entityType={source === "tour" ? "tour" : undefined}
+            entityType={source === "tour" ? "tour" : "addon"}
             entityId={row.id !== "__new__" ? row.id : undefined}
             fieldName="hero_image"
             currentLegacyUrl={imageUrl}

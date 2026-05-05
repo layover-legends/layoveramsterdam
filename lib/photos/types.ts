@@ -10,7 +10,7 @@ export type ModerationStatus =
   | "auto_approved" | "pending_review" | "approved" | "rejected";
 
 export type PhotoUsageEntityType =
-  | "tour" | "destination" | "staff" | "vehicle" | "article"
+  | "tour" | "addon" | "destination" | "staff" | "vehicle" | "article"
   | "about" | "review" | "testimonial" | "site_setting";
 
 export type AspectRatio = "1:1" | "4:3" | "16:9" | "21:9" | "9:16";

@@ -238,6 +238,9 @@ export type Database = {
           image_url: string | null;
           stripe_product_id: string | null;
           stripe_price_id: string | null;
+          avg_rating: number | null;
+          reviews_count: number;
+          last_review_at: string | null;
           meta_title: string | null;
           meta_description: string | null;
           created_at: string;
@@ -314,6 +317,180 @@ export type Database = {
         };
         Insert: Omit<Database["public"]["Tables"]["translations"]["Row"], "id" | "created_at"> & { id?: string; created_at?: string };
         Update: Partial<Database["public"]["Tables"]["translations"]["Row"]>;
+      };
+      reviews: {
+        Row: {
+          id: string;
+          booking_id: string;
+          user_id: string | null;
+          tour_id: string | null;
+          rating: number;
+          body: string | null;
+          title: string | null;
+          comment: string | null;
+          photos: string[];
+          language: string;
+          reviewer_name: string;
+          reviewer_country: string | null;
+          status: "pending" | "approved" | "rejected" | "spam" | "flagged";
+          rejection_reason: string | null;
+          operator_response: string | null;
+          operator_response_at: string | null;
+          helpful_count: number;
+          reported_count: number;
+          ip_address: string | null;
+          user_agent: string | null;
+          is_published: boolean;
+          is_verified_purchase: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["reviews"]["Row"], "id" | "created_at" | "updated_at"> & { id?: string };
+        Update: Partial<Database["public"]["Tables"]["reviews"]["Row"]>;
+      };
+      review_request_log: {
+        Row: {
+          id: string;
+          booking_id: string;
+          sent_at: string;
+          opened_at: string | null;
+          clicked_at: string | null;
+          completed_at: string | null;
+          unique_token: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["review_request_log"]["Row"], "id" | "sent_at"> & { id?: string; sent_at?: string };
+        Update: Partial<Database["public"]["Tables"]["review_request_log"]["Row"]>;
+      };
+      photos: {
+        Row: {
+          id: string;
+          storage_path: string;
+          cdn_url: string | null;
+          source: string;
+          related_id: string | null;
+          caption: string | null;
+          alt_text: string;
+          width_px: number | null;
+          height_px: number | null;
+          bytes: number | null;
+          exif_stripped: boolean;
+          uploaded_by: string | null;
+          is_featured: boolean;
+          is_public: boolean;
+          sort_order: number;
+          // 9d.1 fields
+          original_filename: string | null;
+          mime_type: string | null;
+          focal_point_x: number | null;
+          focal_point_y: number | null;
+          crop_strategy: string;
+          aspect_ratios_generated: string[];
+          blurhash: string | null;
+          dominant_color: string | null;
+          tags: string[];
+          copyright_holder: string | null;
+          license_type: string | null;
+          license_expires_at: string | null;
+          photographer_credit: string | null;
+          license_notes: string | null;
+          nsfw_flag: boolean;
+          moderation_status: string;
+          moderation_notes: string | null;
+          ai_alt_text_suggested: string | null;
+          usage_count: number;
+          last_used_at: string | null;
+          created_at: string;
+          updated_at: string | null;
+        };
+        Insert: Omit<Database["public"]["Tables"]["photos"]["Row"], "id" | "created_at"> & { id?: string; created_at?: string };
+        Update: Partial<Database["public"]["Tables"]["photos"]["Row"]>;
+      };
+      photo_usage: {
+        Row: {
+          id: string;
+          photo_id: string;
+          entity_type: string;
+          entity_id: string | null;
+          field_name: string;
+          context: string | null;
+          created_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["photo_usage"]["Row"], "id" | "created_at"> & { id?: string };
+        Update: Partial<Database["public"]["Tables"]["photo_usage"]["Row"]>;
+      };
+      faq_entries: {
+        Row: {
+          id: string;
+          category: string;
+          sort_order: number;
+          is_active: boolean;
+          question: string;
+          answer: string;
+          source_lang: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["faq_entries"]["Row"], "id" | "created_at" | "updated_at"> & { id?: string };
+        Update: Partial<Database["public"]["Tables"]["faq_entries"]["Row"]>;
+      };
+      contact_submissions: {
+        Row: {
+          id: string;
+          name: string;
+          email: string;
+          phone: string | null;
+          subject: string;
+          message: string;
+          ip_address: string | null;
+          user_agent: string | null;
+          status: "new" | "replied" | "closed" | "spam";
+          replied_at: string | null;
+          replied_by_user_id: string | null;
+          internal_notes: string | null;
+          created_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["contact_submissions"]["Row"], "id" | "created_at"> & { id?: string };
+        Update: Partial<Database["public"]["Tables"]["contact_submissions"]["Row"]>;
+      };
+      testimonials: {
+        Row: {
+          id: string;
+          source_type: string;
+          quote: string;
+          attribution: string;
+          attribution_url: string | null;
+          source_logo_url: string | null;
+          context: string | null;
+          is_active: boolean;
+          sort_order: number;
+          language: string;
+          created_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["testimonials"]["Row"], "id" | "created_at"> & { id?: string };
+        Update: Partial<Database["public"]["Tables"]["testimonials"]["Row"]>;
+      };
+      site_settings: {
+        Row: {
+          key: string;
+          value: string | null;
+          updated_at: string;
+          updated_by_user_id: string | null;
+        };
+        Insert: { key: string; value?: string | null };
+        Update: { value?: string | null; updated_at?: string; updated_by_user_id?: string | null };
+      };
+      fx_rates: {
+        Row: {
+          currency_code: string;
+          rate_to_eur: number;
+          symbol: string;
+          symbol_position: "before" | "after";
+          decimals: number;
+          is_active: boolean;
+          fetched_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["fx_rates"]["Row"], "fetched_at"> & { fetched_at?: string };
+        Update: Partial<Database["public"]["Tables"]["fx_rates"]["Row"]>;
       };
     };
     Views: Record<string, never>;

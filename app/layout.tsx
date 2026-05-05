@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Outfit, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { SITE } from "@/lib/seo/site";
@@ -37,9 +37,24 @@ export const metadata: Metadata = {
   description: "Premium layover tours at Amsterdam Schiphol. Don't waste your layover.",
   icons: {
     icon: [
+      // SVG first — vector, infinitely sharp where supported
       { url: "/logo/favicon-set/favicon.svg", type: "image/svg+xml" },
+      // PNG fallbacks — sized for browser tab + bookmarks
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
     ],
+    // Multi-resolution .ico for legacy + Edge address-bar
+    shortcut: "/favicon.ico",
+    // iOS home-screen icon when added to Home Screen
+    apple: "/apple-touch-icon.png",
   },
+};
+
+// themeColor lives in viewport (Next 14+ — moved out of metadata)
+// Tints the mobile browser chrome (Android Chrome address bar, iOS Safari status bar)
+// to match brand black instead of default white.
+export const viewport: Viewport = {
+  themeColor: "#0D0D0D",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

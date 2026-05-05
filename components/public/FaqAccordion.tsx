@@ -25,6 +25,7 @@ export default function FaqAccordion({ entries }: Props) {
               type="button"
               onClick={() => setOpenId(isOpen ? null : e.id)}
               aria-expanded={isOpen}
+              aria-controls={`faq-answer-${e.id}`}
               className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left hover:bg-warm-cream/[0.03] transition-colors"
             >
               <span className="font-medium text-warm-cream/90 text-sm leading-relaxed">
@@ -37,20 +38,24 @@ export default function FaqAccordion({ entries }: Props) {
               </span>
             </button>
 
-            {isOpen && (
-              <div className="px-5 pb-5 pt-1 border-t border-warm-cream/8">
-                <p className="text-sm text-warm-cream/75 leading-relaxed whitespace-pre-line">
-                  {e.answer}
-                </p>
-                <a
-                  href={`#${anchor}`}
-                  className="inline-block mt-2 text-xs text-warm-cream/30 hover:text-warm-cream/50 transition-colors"
-                  onClick={(ev) => ev.stopPropagation()}
-                >
-                  # permalink
-                </a>
-              </div>
-            )}
+            <div
+              id={`faq-answer-${e.id}`}
+              role="region"
+              aria-labelledby={`faq-btn-${e.id}`}
+              hidden={!isOpen}
+              className="px-5 pb-5 pt-1 border-t border-warm-cream/8"
+            >
+              <p className="text-sm text-warm-cream/75 leading-relaxed whitespace-pre-line">
+                {e.answer}
+              </p>
+              <a
+                href={`#${anchor}`}
+                className="inline-block mt-2 text-xs text-warm-cream/30 hover:text-warm-cream/50 transition-colors"
+                onClick={(ev) => ev.stopPropagation()}
+              >
+                # permalink
+              </a>
+            </div>
           </div>
         );
       })}

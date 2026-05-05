@@ -32,7 +32,9 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
     default: `${SITE.name} — Don't waste your layover.`,
-    template: `%s · ${SITE.name}`,
+    // Sub-pages already include the brand in their title string.
+    // Keeping template as pass-through prevents double-append.
+    template: `%s`,
   },
   description: "Premium layover tours at Amsterdam Schiphol. Don't waste your layover.",
   icons: {

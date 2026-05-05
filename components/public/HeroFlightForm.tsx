@@ -210,7 +210,7 @@ export default function HeroFlightForm({ cityId, formAction }: Props) {
       <p className="text-center text-[11px] text-warm-cream/40 tracking-wide">
         Insured
         <span className="mx-2 text-legend-gold/50">·</span>
-        4.9★ average rating
+        Verified bookings
         <span className="mx-2 text-legend-gold/50">·</span>
         100% on-time return
       </p>

@@ -88,7 +88,26 @@ export function touristAttractionLd(stop: StopDetail) {
   };
 }
 
-export function tourLd(tour: TourDetail) {
+type ReviewForLd = {
+  reviewer_name: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+};
+
+/**
+ * TouristTrip LD with optional aggregateRating + Review items.
+ *
+ * aggregateRating is only emitted when tour.reviews_count > 0 and
+ * tour.avg_rating is non-null — Google penalises empty/zero rating markup.
+ *
+ * Pass `reviews` (top 5 approved) to include individual Review items,
+ * which unlocks star snippets in search results.
+ */
+export function tourLd(
+  tour: TourDetail,
+  reviews: ReviewForLd[] = []
+) {
   const offers =
     tour.price_cents !== null
       ? {
@@ -97,6 +116,18 @@ export function tourLd(tour: TourDetail) {
           priceCurrency: tour.currency,
         }
       : undefined;
+
+  const reviewCount = tour.reviews_count ?? 0;
+  const avgRating   = tour.avg_rating ?? null;
+  const hasRating   = reviewCount > 0 && avgRating !== null;
+
+  const reviewItems = reviews.map((r) => ({
+    "@type": "Review",
+    author: { "@type": "Person", name: r.reviewer_name },
+    reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5, worstRating: 1 },
+    reviewBody:   r.comment ?? undefined,
+    datePublished: r.created_at.slice(0, 10),
+  }));
 
   return {
     "@context": "https://schema.org",
@@ -109,52 +140,23 @@ export function tourLd(tour: TourDetail) {
     ...(tour.duration_hours
       ? { duration: `PT${Math.round(tour.duration_hours * 60)}M` }
       : {}),
+    ...(hasRating ? {
+      aggregateRating: {
+        "@type":       "AggregateRating",
+        ratingValue:   avgRating!.toFixed(1),
+        reviewCount,
+        bestRating:    5,
+        worstRating:   1,
+      },
+    } : {}),
+    ...(reviewItems.length > 0 ? { review: reviewItems } : {}),
   };
 }
 
-type ReviewForLd = {
-  reviewer_name: string;
-  rating: number;
-  comment: string | null;
-  created_at: string;
-};
-
-/**
- * Product + aggregateRating + Review items for Google Rich Results.
- * Only generates aggregateRating when reviewCount > 0 — Google penalises
- * zero-review structured data.
- */
+/** @deprecated Use tourLd(tour, reviews) — aggregateRating is now on TouristTrip. */
 export function tourReviewsLd(
-  tour: TourDetail & { avg_rating?: number | null; reviews_count?: number },
+  tour: TourDetail,
   reviews: ReviewForLd[] = []
 ) {
-  const reviewCount = tour.reviews_count ?? 0;
-  const avgRating   = tour.avg_rating ?? null;
-
-  if (reviewCount === 0) return null;
-
-  const reviewItems = reviews.map((r) => ({
-    "@type": "Review",
-    author: { "@type": "Person", name: r.reviewer_name },
-    reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5, worstRating: 1 },
-    reviewBody:   r.comment ?? undefined,
-    datePublished: r.created_at.slice(0, 10),
-  }));
-
-  return {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: tour.name,
-    description: tour.description ?? tour.tagline ?? undefined,
-    url: canonicalFor(`/tours/${tour.slug}`),
-    brand: PUBLISHER,
-    aggregateRating: {
-      "@type":       "AggregateRating",
-      ratingValue:   avgRating ?? undefined,
-      reviewCount,
-      bestRating:    5,
-      worstRating:   1,
-    },
-    review: reviewItems,
-  };
+  return tourLd(tour, reviews);
 }

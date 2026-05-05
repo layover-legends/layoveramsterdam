@@ -15,7 +15,6 @@ import ReviewCard from "@/components/reviews/ReviewCard";
 import { getUiStrings } from "@/lib/i18n/ui";
 import { checkAdultConsent } from "@/lib/age-verification/verify";
 import { getApprovedReviewsForTour, canUserReviewTour } from "@/lib/public/reviews";
-import { tourReviewsLd } from "@/lib/seo/jsonld";
 
 export const dynamic = "force-dynamic";
 
@@ -84,23 +83,17 @@ export default async function TourPage({ params, searchParams }: PageProps) {
   return (
     <>
     <StructuredData data={[
-      tourLd(tour),
+      tourLd(tour, reviews.map(r => ({
+        reviewer_name: r.reviewer_name,
+        rating: r.rating,
+        comment: r.comment,
+        created_at: r.created_at,
+      }))),
       breadcrumbLd([
         { name: "Home", url: SITE.url },
         { name: "Tours", url: `${SITE.url}/tours` },
         { name: tour.name, url: canonicalFor(`/tours/${tour.slug}`) },
       ]),
-      ...(tourReviewsLd(tour, reviews.map(r => ({
-        reviewer_name: r.reviewer_name,
-        rating: r.rating,
-        comment: r.comment,
-        created_at: r.created_at,
-      }))) ? [tourReviewsLd(tour, reviews.map(r => ({
-        reviewer_name: r.reviewer_name,
-        rating: r.rating,
-        comment: r.comment,
-        created_at: r.created_at,
-      })))!] : []),
     ]} />
     <main className="min-h-screen bg-ink-black text-warm-cream px-5 py-12 max-w-3xl mx-auto space-y-6">
       {tour.image_url && (

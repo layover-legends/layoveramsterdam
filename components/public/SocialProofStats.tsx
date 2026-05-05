@@ -3,8 +3,8 @@ type Props = {
 };
 
 const stats = (count: number) => [
-  { value: "100%",     label: "On-time return guarantee", icon: "⏱" },
-  { value: "4.9★",     label: "Average guest rating",    icon: "⭐" },
+  { value: "100%", label: "On-time return guarantee",  icon: "⏱" },
+  { value: "✓",    label: "Verified bookings only",    icon: "🛡" },
   { value: `${Math.max(count, 1000).toLocaleString("en")}+`, label: "Happy travellers", icon: "✈" },
 ];
 

@@ -1,1 +1,232 @@
-[]
+[
+  {
+    "entity_type": "destination",
+    "old_slug": "ancienne-centrale-electrique-hidden",
+    "new_slug": "former-power-station-hidden"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "atelier-cuisine-hollandaise-activities",
+    "new_slug": "dutch-cooking-workshop-activities"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "atelier-diamant-coster-hidden",
+    "new_slug": "diamond-workshop-coster-hidden"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "atelier-fromage-activities",
+    "new_slug": "cheese-workshop-activities"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "atelier-poterie-delft-activities",
+    "new_slug": "delftware-pottery-workshop-activities"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "atelier-sabots-klompen-activities",
+    "new_slug": "klompen-workshop-dutch-clogs-activities"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "bar-a-cocktails-jordaan-bars",
+    "new_slug": "cocktail-bar-jordaan-bars"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "begijnhof-la-cour-secrete-quartiers",
+    "new_slug": "begijnhof-hidden-courtyard-quartiers"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "bord-de-l-ij-vue-port-nature",
+    "new_slug": "ij-waterfront-nature"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "boutique-delft-authentique-shopping",
+    "new_slug": "authentic-delftware-shop-shopping"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "cave-a-jenever-shopping",
+    "new_slug": "jenever-cellar-shopping"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "chateau-de-muiderslot-nature",
+    "new_slug": "muiderslot-castle-nature"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "croisiere-canal-privee-activities",
+    "new_slug": "private-canal-cruise-activities"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "de-pijp-le-quartier-latin-quartiers",
+    "new_slug": "de-pijp-latin-quarter-quartiers"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "degustation-fromage-gouda-food",
+    "new_slug": "gouda-cheese-tasting-food"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "degustation-jenever-guidee-food",
+    "new_slug": "guided-jenever-tasting-food"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "distillerie-bols-activities",
+    "new_slug": "bols-distillery-activities"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "distillerie-bols-after-dark-bars",
+    "new_slug": "bols-distillery-after-dark-bars"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "foret-d-amsterdam-nature",
+    "new_slug": "amsterdamse-bos-forest-nature"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "fromagerie-artisanale-shopping",
+    "new_slug": "artisan-cheese-shop-shopping"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "galerie-des-gardes-civiques-activities",
+    "new_slug": "civic-guards-gallery-activities"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "herengracht-la-courbe-d-or-canals",
+    "new_slug": "herengracht-golden-curve-canals"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "jordaan-le-quartier-boheme-quartiers",
+    "new_slug": "jordaan-bohemian-quarter-quartiers"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "kayak-sur-les-canaux-activities",
+    "new_slug": "canal-kayaking-activities"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "keukenhof-jardins-de-tulipes-nature",
+    "new_slug": "keukenhof-tulip-gardens-nature"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "la-maison-la-plus-etroite-hidden",
+    "new_slug": "narrowest-house-hidden"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "les-9-rues-boutiques-createurs-shopping",
+    "new_slug": "9-streets-designer-boutiques-shopping"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "les-9-rues-de-9-straatjes-quartiers",
+    "new_slug": "9-streets-de-9-straatjes-quartiers"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "librairies-d-occasion-shopping",
+    "new_slug": "second-hand-bookshops-shopping"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "maison-d-anne-frank-museums",
+    "new_slug": "anne-frank-house-museums"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "marche-albert-cuyp-food",
+    "new_slug": "albert-cuyp-market-food"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "marche-aux-fleurs-bloemenmarkt-hidden",
+    "new_slug": "bloemenmarkt-flower-market-hidden"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "marche-aux-puces-waterlooplein-shopping",
+    "new_slug": "waterlooplein-flea-market-shopping"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "marche-lindengracht-food",
+    "new_slug": "lindengracht-market-food"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "moulin-de-sloten-activities",
+    "new_slug": "sloten-windmill-activities"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "musee-de-la-pipe-museums",
+    "new_slug": "pipe-museum-museums"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "musee-historique-juif-museums",
+    "new_slug": "jewish-historical-museum-museums"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "musee-van-gogh-museums",
+    "new_slug": "van-gogh-museum-museums"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "oude-kerk-au-coeur-du-rld-red-light",
+    "new_slug": "oude-kerk-rld-red-light"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "patinoire-plein-air-activities",
+    "new_slug": "open-air-ice-rink-activities"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "plantage-le-quartier-vert-quartiers",
+    "new_slug": "plantage-green-quarter-quartiers"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "spui-la-place-des-livres-hidden",
+    "new_slug": "spui-book-square-hidden"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "stand-haring-harengs-food",
+    "new_slug": "haring-herring-stand-food"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "tour-de-la-monnaie-munttoren-monuments",
+    "new_slug": "munttoren-mint-tower-monuments"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "tour-des-pleureuses-monuments",
+    "new_slug": "schreierstoren-weepers-tower-monuments"
+  },
+  {
+    "entity_type": "destination",
+    "old_slug": "winkel-43-tarte-aux-pommes-food",
+    "new_slug": "winkel-43-apple-pie-food"
+  }
+]

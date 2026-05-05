@@ -22,6 +22,12 @@ export const STAFF_ROLE_OPTIONS: { value: string; label: string }[] = [
 export const STAFF_ROLES = STAFF_ROLE_OPTIONS.map((r) => r.value);
 export const STAFF_STATUSES: StaffStatus[] = ["active", "onboarding", "inactive", "suspended"];
 
+export const PAYOUT_METHODS: { value: PayoutMethod; label: string }[] = [
+  { value: "bank_transfer", label: "Bank transfer (IBAN)" },
+  { value: "cash",          label: "Cash" },
+  { value: "platform",      label: "Platform credit" },
+];
+
 export type StaffRow = {
   id: string;
   user_id: string | null;

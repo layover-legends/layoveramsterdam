@@ -1,7 +1,7 @@
 // Shared photo types — safe to import from both server and client files.
 
 export type PhotoSource =
-  | "tour" | "staff" | "vehicle" | "destination" | "about"
+  | "tour" | "addon" | "staff" | "vehicle" | "destination" | "about"
   | "marketing" | "customer_upload" | "review";
 
 export type CropStrategy = "center" | "attention" | "entropy" | "manual_focal";

@@ -149,6 +149,11 @@ export default async function AdminTestimonialsPage({ searchParams }: PageProps)
               fieldName="source_logo"
               ratio="1:1"
               label="Logo or image (optional)"
+              defaultAltText={
+                (editRow as { attribution?: string } | null)?.attribution
+                  ? `${(editRow as { attribution: string }).attribution} logo`
+                  : undefined
+              }
             />
             <div className="flex gap-3">
               <button type="submit"

@@ -20,6 +20,7 @@ type Props = {
   fieldName?: string;
   ratio?: AspectRatio;
   label?: string;
+  defaultAltText?: string;
 };
 
 export function PhotoUrlField({
@@ -31,6 +32,7 @@ export function PhotoUrlField({
   fieldName,
   ratio = "16:9",
   label,
+  defaultAltText,
 }: Props) {
   const [url, setUrl] = useState(defaultValue ?? "");
 
@@ -47,6 +49,7 @@ export function PhotoUrlField({
         fieldName={fieldName}
         currentLegacyUrl={url || null}
         ratio={ratio}
+        defaultAltText={defaultAltText}
         onUploadComplete={(r) => setUrl(r.cdn_url)}
       />
 

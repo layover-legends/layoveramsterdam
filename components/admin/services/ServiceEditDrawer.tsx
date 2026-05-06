@@ -288,12 +288,17 @@ export default function ServiceEditDrawer(props: Props) {
           {/* Image */}
           <Section label="Image" />
           <PhotoUploader
-            source={source === "tour" ? "tour" : "marketing"}
+            source={source === "tour" ? "tour" : "addon"}
             entityType={source === "tour" ? "tour" : "addon"}
             entityId={row.id !== "__new__" ? row.id : undefined}
             fieldName="hero_image"
             currentLegacyUrl={imageUrl}
             ratio="16:9"
+            defaultAltText={
+              source === "tour"
+                ? `${name || "Tour"} — Layover Legends Amsterdam tour`
+                : `${name || "Add-on"} — add-on for Layover Legends tours`
+            }
             onUploadComplete={(r) => setImageUrl(r.cdn_url)}
           />
 

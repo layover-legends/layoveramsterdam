@@ -16,6 +16,7 @@ type Props = {
   fieldName?: string;
   currentLegacyUrl?: string | null;
   ratio?: AspectRatio;
+  defaultAltText?: string;
   onUploadComplete?: (result: { photo_id: string; cdn_url: string }) => void;
 };
 
@@ -26,6 +27,7 @@ export function PhotoUploader({
   fieldName,
   currentLegacyUrl,
   ratio = "16:9",
+  defaultAltText,
   onUploadComplete,
 }: Props) {
   const [pending, startTransition] = useTransition();
@@ -48,7 +50,7 @@ export function PhotoUploader({
 
     const altText = window.prompt(
       "Describe this image for screen readers (required, min 3 characters):",
-      ""
+      defaultAltText ?? ""
     );
     if (!altText || altText.trim().length < 3) {
       setError("Alt text is required (min 3 chars). Upload cancelled.");

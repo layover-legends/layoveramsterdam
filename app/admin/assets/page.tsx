@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 48;
 const SOURCE_OPTIONS = [
-  "tour","staff","vehicle","destination","about","marketing","customer_upload","review"
+  "tour","addon","staff","vehicle","destination","about","marketing","customer_upload","review"
 ];
 const LICENSE_OPTIONS = ["owned","royalty_free","unsplash","creative_commons","licensed","unknown"];
 const USAGE_OPTIONS   = [
@@ -45,10 +45,12 @@ export default async function AdminAssetsPage({ searchParams }: PageProps) {
     .from("v_asset_library_summary")
     .select("*")
     .maybeSingle();
-  const summaryRow = summary as {
-    total: number; orphans: number; pending_moderation: number;
-    license_expiring: number; nsfw_flagged: number; total_bytes: number;
-  } | null;
+  type SummaryRow = {
+    total_photos: number; orphaned_count: number; pending_moderation: number;
+    license_expiring_soon: number; nsfw_flagged: number; total_bytes: number;
+    unique_uploaders: number;
+  };
+  const summaryRow = summary as SummaryRow | null;
 
   // ── Build query ───────────────────��───────────────────────────────────────
   let qry = supabase.from("photos").select(
@@ -104,10 +106,11 @@ export default async function AdminAssetsPage({ searchParams }: PageProps) {
           </h1>
           {summaryRow && (
             <p className="text-sm text-warm-cream/60">
-              {summaryRow.total} total ·{" "}
-              {summaryRow.orphans > 0 && <span className="text-amber-300">{summaryRow.orphans} orphans · </span>}
+              {summaryRow.total_photos} total ·{" "}
+              {summaryRow.orphaned_count > 0 && <span className="text-amber-300">{summaryRow.orphaned_count} orphan{summaryRow.orphaned_count !== 1 ? "s" : ""} · </span>}
               {summaryRow.pending_moderation > 0 && <span className="text-orange-300">{summaryRow.pending_moderation} pending · </span>}
-              {summaryRow.total_bytes > 0 && <span>{(summaryRow.total_bytes / 1024 / 1024 / 1024).toFixed(1)} GB</span>}
+              {summaryRow.license_expiring_soon > 0 && <span className="text-red-300">{summaryRow.license_expiring_soon} license expiring · </span>}
+              {summaryRow.total_bytes > 0 && <span>{(summaryRow.total_bytes / 1024 / 1024).toFixed(1)} MB</span>}
             </p>
           )}
         </div>
@@ -117,16 +120,46 @@ export default async function AdminAssetsPage({ searchParams }: PageProps) {
         </Link>
       </header>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 text-sm">
+      {/* Filters — pure GET form, no JS handlers; works without JS too */}
+      <form method="GET" action="/admin/assets" className="flex flex-wrap gap-3 text-sm">
+        {/* Carry forward filters not represented by selects in this form */}
+        {usage !== "all"        && <input type="hidden" name="usage" value={usage} />}
+        {sort  !== "created_at" && <input type="hidden" name="sort"  value={sort} />}
+        {view  !== "grid"       && <input type="hidden" name="view"  value={view} />}
+
         {/* Source */}
-        <select value={source} onChange={() => {}}
+        <select name="source" defaultValue={source}
           className="px-3 py-1.5 rounded-lg bg-warm-cream/5 border border-warm-cream/15 text-warm-cream text-xs cursor-pointer"
           style={{ backgroundColor: "#0D0D0D", color: "#F7F3EC" }}>
           <option value="all">All sources</option>
           {SOURCE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
         </select>
-        {/* Usage */}
+
+        {/* License */}
+        <select name="license" defaultValue={license}
+          className="px-3 py-1.5 rounded-lg bg-warm-cream/5 border border-warm-cream/15 text-warm-cream text-xs cursor-pointer"
+          style={{ backgroundColor: "#0D0D0D", color: "#F7F3EC" }}>
+          <option value="all">All licenses</option>
+          {LICENSE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+
+        {/* Moderation */}
+        <select name="mod" defaultValue={mod}
+          className="px-3 py-1.5 rounded-lg bg-warm-cream/5 border border-warm-cream/15 text-warm-cream text-xs cursor-pointer"
+          style={{ backgroundColor: "#0D0D0D", color: "#F7F3EC" }}>
+          {MOD_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+
+        {/* Search */}
+        <input name="q" defaultValue={q} placeholder="Search alt text…"
+          className="px-3 py-1.5 rounded-lg bg-warm-cream/5 border border-warm-cream/15 text-warm-cream placeholder:text-warm-cream/30 text-xs w-48" />
+
+        <button type="submit"
+          className="px-3 py-1.5 rounded-lg bg-legend-gold text-ink-black text-xs font-semibold hover:bg-gold-light transition-colors">
+          Apply
+        </button>
+
+        {/* Usage chips — Links so single-tap works without submitting the form */}
         {USAGE_OPTIONS.map((u) => (
           <Link key={u.value} href={buildHref({ usage: u.value, page: "1" })}
             className={`px-3 py-1.5 rounded-full border text-xs transition-colors ${
@@ -137,11 +170,7 @@ export default async function AdminAssetsPage({ searchParams }: PageProps) {
             {u.label}
           </Link>
         ))}
-        {/* Search */}
-        <form method="GET" action="/admin/assets">
-          <input name="q" defaultValue={q} placeholder="Search alt text…"
-            className="px-3 py-1.5 rounded-lg bg-warm-cream/5 border border-warm-cream/15 text-warm-cream placeholder:text-warm-cream/30 text-xs w-48" />
-        </form>
+
         {/* View toggle */}
         <div className="flex border border-warm-cream/15 rounded-lg overflow-hidden ml-auto">
           <Link href={buildHref({ view: "grid" })}
@@ -153,7 +182,7 @@ export default async function AdminAssetsPage({ searchParams }: PageProps) {
             ≡ List
           </Link>
         </div>
-      </div>
+      </form>
 
       {/* Grid / List */}
       {rows.length === 0 ? (

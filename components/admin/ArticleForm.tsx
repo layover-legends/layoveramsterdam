@@ -122,6 +122,7 @@ export default function ArticleForm({ article, action, mode, deleteAction, label
           fieldName="cover_image"
           currentLegacyUrl={coverUrl || null}
           ratio="16:9"
+          defaultAltText={title || undefined}
           onUploadComplete={(r) => setCoverUrl(r.cdn_url)}
         />
         {/* Hidden input so form action still receives cover_url */}

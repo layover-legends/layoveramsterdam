@@ -310,4 +310,9 @@ export default async function AssetDetailPage({ params }: PageProps) {
           <button type="submit"
             className="px-6 py-2.5 rounded-full bg-legend-gold text-ink-black font-semibold text-sm hover:bg-gold-light transition-colors">
             {t(s, "common.save_changes", "Save changes")}
-  
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}

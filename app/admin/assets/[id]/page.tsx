@@ -138,8 +138,8 @@ export default async function AssetDetailPage({ params }: PageProps) {
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={thumbUrl} alt={`${ratio} crop`}
                         className="rounded object-cover"
-                        style={{ width: Math.round(60 * w/h), height: 60 }}
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                        style={{ width: Math.round(60 * w/h), height: 60, backgroundColor: photo.dominant_color ?? "#1a1a1a" }}
+                        loading="lazy"
                       />
                       <p className="text-[9px] text-warm-cream/30 text-center">{ratio}</p>
                     </div>
@@ -310,9 +310,4 @@ export default async function AssetDetailPage({ params }: PageProps) {
           <button type="submit"
             className="px-6 py-2.5 rounded-full bg-legend-gold text-ink-black font-semibold text-sm hover:bg-gold-light transition-colors">
             {t(s, "common.save_changes", "Save changes")}
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-}
+  

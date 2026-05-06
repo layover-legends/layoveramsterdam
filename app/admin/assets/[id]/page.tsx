@@ -131,7 +131,8 @@ export default async function AssetDetailPage({ params }: PageProps) {
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {["1:1","4:3","16:9","21:9","9:16"].map((ratio) => {
                   const [w,h] = ratio.split(":").map(Number);
-                  const thumbUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${photo.storage_path}${ratio}-400.webp`;
+                  const fileRatio = ratio.replace(":", "x");
+                  const thumbUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${photo.storage_path}${fileRatio}-400.webp`;
                   return (
                     <div key={ratio} className="shrink-0 space-y-0.5">
                       {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -15,6 +15,10 @@ export type UploadPhotoInput = {
   field_name?: string;
   replace_existing?: boolean;
   tags?: string[];
+  // Watermark overrides — undefined = use site_settings defaults
+  watermark_enabled?:  boolean;
+  watermark_position?: string;
+  watermark_opacity?:  number;
 };
 
 export type UploadPhotoResult =
@@ -49,10 +53,13 @@ export async function uploadPhoto(
   let result: Awaited<ReturnType<typeof processUpload>>;
   try {
     result = await processUpload(buffer, input.file.name, {
-      source: input.source,
-      altText: input.alt_text.trim(),
-      uploadedBy: user.id,
-      tags: input.tags,
+      source:             input.source,
+      altText:            input.alt_text.trim(),
+      uploadedBy:         user.id,
+      tags:               input.tags,
+      watermarkEnabled:   input.watermark_enabled,
+      watermarkPosition:  input.watermark_position,
+      watermarkOpacity:   input.watermark_opacity,
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

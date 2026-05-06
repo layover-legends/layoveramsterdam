@@ -9,7 +9,7 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 
 function thumbUrl(photo: PickerPhoto): string {
   if (photo.aspect_ratios_generated?.includes("16:9") && photo.storage_path) {
-    return `${SUPABASE_URL}/storage/v1/object/public/photos/${photo.storage_path}16:9-400.webp`;
+    return `${SUPABASE_URL}/storage/v1/object/public/photos/${photo.storage_path}16x9-400.webp`;
   }
   return photo.cdn_url ?? "";
 }

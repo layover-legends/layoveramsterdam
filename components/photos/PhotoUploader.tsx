@@ -30,10 +30,12 @@ export function PhotoUploader({
   defaultAltText,
   onUploadComplete,
 }: Props) {
-  const [pending, startTransition] = useTransition();
-  const [error, setError]           = useState<string | null>(null);
+  const [pending, startTransition]    = useTransition();
+  const [error, setError]             = useState<string | null>(null);
   const [showLibrary, setShowLibrary] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(currentLegacyUrl ?? null);
+  const [previewUrl, setPreviewUrl]   = useState<string | null>(currentLegacyUrl ?? null);
+  // null = use site_settings default, true = force on, false = force off
+  const [wmOverride, setWmOverride]   = useState<boolean | null>(null);
 
   const hasEntity = !!(entityType && entityId && fieldName);
 
@@ -60,12 +62,13 @@ export function PhotoUploader({
     startTransition(async () => {
       const result = await uploadPhoto({
         file,
-        alt_text: altText.trim(),
+        alt_text:          altText.trim(),
         source,
-        entity_type:      entityType,
-        entity_id:        entityId,
-        field_name:       fieldName,
-        replace_existing: true,
+        entity_type:       entityType,
+        entity_id:         entityId,
+        field_name:        fieldName,
+        replace_existing:  true,
+        watermark_enabled: wmOverride !== null ? wmOverride : undefined,
       });
 
       if (!result.ok) {
@@ -150,6 +153,24 @@ export function PhotoUploader({
             className="px-4 py-2 rounded-lg border border-legend-gold/40 text-legend-gold text-xs font-medium hover:bg-legend-gold/10 transition-colors"
           >
             Browse library
+          </button>
+
+          {/* 3-state watermark override: null=default / true=on / false=off */}
+          <button
+            type="button"
+            title="Override default watermark policy for this upload"
+            onClick={() =>
+              setWmOverride((p) => (p === null ? true : p === true ? false : null))
+            }
+            className={`text-xs px-2.5 py-1.5 rounded-full border transition-colors ${
+              wmOverride === true
+                ? "bg-legend-gold/20 text-legend-gold border-legend-gold/40"
+                : wmOverride === false
+                  ? "bg-warm-cream/5 text-warm-cream/30 border-warm-cream/15 line-through"
+                  : "bg-warm-cream/5 text-warm-cream/40 border-warm-cream/15"
+            }`}
+          >
+            {wmOverride === true ? "★ Watermark ON" : wmOverride === false ? "Watermark OFF" : "Watermark: default"}
           </button>
 
           <a

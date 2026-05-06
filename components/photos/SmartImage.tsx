@@ -11,7 +11,7 @@
  */
 
 import type { AspectRatio, PhotoRow } from "@/lib/photos/types";
-import { PHOTO_SIZES } from "@/lib/photos/types";
+import { PHOTO_SIZES, ratioToFilename } from "@/lib/photos/types";
 
 type SmartImageProps = {
   /** Full photo row — preferred path (gives blurhash + dominant color + AVIF) */
@@ -32,7 +32,7 @@ type SmartImageProps = {
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 
 function variantSrc(storagePath: string, ratio: AspectRatio, size: number, fmt: string): string {
-  return `${SUPABASE_URL}/storage/v1/object/public/photos/${storagePath}${ratio}-${size}.${fmt}`;
+  return `${SUPABASE_URL}/storage/v1/object/public/photos/${storagePath}${ratioToFilename(ratio)}-${size}.${fmt}`;
 }
 
 export function SmartImage({

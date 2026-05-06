@@ -59,6 +59,39 @@ async function saveSettings(formData: FormData) {
   revalidatePath("/");
 }
 
+const WM_POSITIONS = [
+  "northwest","north","northeast",
+  "west",     "center","east",
+  "southwest","south", "southeast",
+] as const;
+
+const WM_SOURCES: { value: string; label: string }[] = [
+  { value: "tour",            label: "Tours" },
+  { value: "addon",           label: "Add-ons" },
+  { value: "destination",     label: "Destinations" },
+  { value: "marketing",       label: "Marketing" },
+  { value: "about",           label: "About page" },
+  { value: "staff",           label: "Staff" },
+  { value: "vehicle",         label: "Vehicles" },
+];
+
+async function saveWatermarkSettings(formData: FormData) {
+  "use server";
+  const admin = await requireAdmin();
+  const enabledSources = WM_SOURCES
+    .map((s) => s.value)
+    .filter((v) => formData.get(`wm_source_${v}`) === "on");
+
+  const entries: Record<string, string | null> = {
+    watermark_default_enabled:  formData.get("wm_enabled") === "on" ? "true" : "false",
+    watermark_default_position: (formData.get("wm_position") as string) || "southeast",
+    watermark_default_opacity:  (formData.get("wm_opacity")  as string) || "60",
+    watermark_sources_enabled:  enabledSources.join(","),
+  };
+  await upsertSettings(entries, admin.id);
+  revalidatePath("/admin/settings");
+}
+
 export default async function AdminSettingsPage({ searchParams }: { searchParams?: { saved?: string } }) {
   await requireAdmin();
   const [settings, s] = await Promise.all([getSiteSettings(), getUiStrings()]);
@@ -104,6 +137,80 @@ export default async function AdminSettingsPage({ searchParams }: { searchParams
           {t(s, "common.save_changes", "Save all settings")}
         </button>
       </form>
+
+      {/* ── Watermark defaults ──────────────────────────────────────────── */}
+      <section className="space-y-4 border-t border-warm-cream/10 pt-6">
+        <div>
+          <h2 className="text-sm font-semibold text-legend-gold uppercase tracking-wide">Watermark</h2>
+          <p className="text-xs text-warm-cream/50 mt-1">
+            Applied to new uploads automatically. Individual uploads can override via the PhotoUploader toggle.
+            <br />review + customer_upload sources never receive a watermark regardless of these settings.
+          </p>
+        </div>
+
+        <form action={saveWatermarkSettings} className="space-y-5">
+          {/* Enable toggle */}
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" name="wm_enabled"
+              defaultChecked={settings.watermark_default_enabled !== "false"}
+              className="w-4 h-4 rounded accent-legend-gold" />
+            <span className="text-sm text-warm-cream/80">Enable watermarking by default</span>
+          </label>
+
+          {/* Position */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-medium text-warm-cream/60 uppercase tracking-wide">
+              Default position
+            </label>
+            <div className="grid grid-cols-3 gap-1 w-48">
+              {WM_POSITIONS.map((pos) => (
+                <label key={pos} className="flex items-center gap-1.5 cursor-pointer text-xs text-warm-cream/70">
+                  <input type="radio" name="wm_position" value={pos}
+                    defaultChecked={(settings.watermark_default_position ?? "southeast") === pos}
+                    className="accent-legend-gold" />
+                  {pos}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Opacity */}
+          <div className="space-y-1.5">
+            <label htmlFor="wm_opacity" className="block text-xs font-medium text-warm-cream/60 uppercase tracking-wide">
+              Default opacity (1–100)
+            </label>
+            <input id="wm_opacity" name="wm_opacity" type="number" min="1" max="100"
+              defaultValue={settings.watermark_default_opacity ?? "60"}
+              className="w-24 px-3 py-2 rounded-xl bg-warm-cream/5 border border-warm-cream/15 text-warm-cream text-sm focus:outline-none focus:ring-2 focus:ring-legend-gold/40" />
+          </div>
+
+          {/* Sources */}
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-warm-cream/60 uppercase tracking-wide">
+              Apply watermark by default for these sources
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {WM_SOURCES.map(({ value, label }) => {
+                const enabledList = (settings.watermark_sources_enabled ?? "tour,destination,marketing,about")
+                  .split(",").map((s) => s.trim());
+                return (
+                  <label key={value} className="flex items-center gap-2 cursor-pointer text-sm text-warm-cream/70">
+                    <input type="checkbox" name={`wm_source_${value}`}
+                      defaultChecked={enabledList.includes(value)}
+                      className="accent-legend-gold" />
+                    {label}
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          <button type="submit"
+            className="px-5 py-2 rounded-full bg-legend-gold text-ink-black font-semibold text-sm hover:bg-gold-light transition-colors">
+            Save watermark defaults
+          </button>
+        </form>
+      </section>
     </div>
   );
 }

@@ -68,6 +68,9 @@ export type PhotoRow = {
   updated_at: string | null;
 };
 
+/** Aspect ratio → URL-safe filename segment. "16:9" → "16x9". */
+export const ratioToFilename = (r: AspectRatio | string) => r.replace(":", "x");
+
 /** Construct the CDN URL for a specific variant. */
 export function variantUrl(
   baseStoragePath: string,
@@ -76,9 +79,9 @@ export function variantUrl(
   format: PhotoFormat
 ): string {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-  // storage_path is stored as photos/{uuid}/
-  const path = `${baseStoragePath}${ratio}-${size}.${format}`;
-  return `${supabaseUrl}/storage/v1/object/public/photos/${path}`;
+  // Filenames use `x` not `:` to avoid URL parsing issues
+  const filePath = `${baseStoragePath}${ratioToFilename(ratio)}-${size}.${format}`;
+  return `${supabaseUrl}/storage/v1/object/public/photos/${filePath}`;
 }
 
 /** URL for the best default CDN thumbnail (16:9 medium WebP). */

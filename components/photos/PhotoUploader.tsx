@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { SmartImage } from "@/components/photos/SmartImage";
 import { AssetLibraryPickerModal } from "@/components/photos/AssetLibraryPickerModal";
 import { uploadPhoto } from "@/app/admin/photos/upload-action";
@@ -36,6 +36,13 @@ export function PhotoUploader({
   const [previewUrl, setPreviewUrl]   = useState<string | null>(currentLegacyUrl ?? null);
   // null = use site_settings default, true = force on, false = force off
   const [wmOverride, setWmOverride]   = useState<boolean | null>(null);
+  const [longRunning, setLongRunning] = useState(false);
+
+  useEffect(() => {
+    if (!pending) { setLongRunning(false); return; }
+    const t = setTimeout(() => setLongRunning(true), 30_000);
+    return () => clearTimeout(t);
+  }, [pending]);
 
   const hasEntity = !!(entityType && entityId && fieldName);
 
@@ -126,7 +133,9 @@ export function PhotoUploader({
       {pending && (
         <div className="flex items-center gap-2 text-xs text-warm-cream/60 bg-warm-cream/5 rounded-lg px-3 py-2">
           <div className="w-3 h-3 rounded-full border border-legend-gold border-t-transparent animate-spin flex-none" />
-          Processing image (generating 45 variants)…
+          {longRunning
+            ? "Still working — large images take 30–60s. Don't close this tab."
+            : "Processing image (generating 45 variants)…"}
         </div>
       )}
 

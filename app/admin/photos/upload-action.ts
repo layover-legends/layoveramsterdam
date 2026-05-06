@@ -62,6 +62,7 @@ export async function uploadPhoto(
       watermarkOpacity:   input.watermark_opacity,
     });
   } catch (err) {
+    console.error("[upload-action] processUpload failed:", err);
     const msg = err instanceof Error ? err.message : String(err);
     return { ok: false, error: msg };
   }

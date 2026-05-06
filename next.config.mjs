@@ -50,6 +50,12 @@ const DRIVER_HEADERS = SECURITY_HEADERS.map((h) =>
 const nextConfig = {
   poweredByHeader: false,
 
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "20mb", // matches MAX_BYTES guard in upload-action.ts
+    },
+  },
+
   images: {
     remotePatterns: [
       {

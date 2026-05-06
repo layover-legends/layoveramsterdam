@@ -235,8 +235,31 @@ export async function processUpload(
     }
   }
 
-  // ── Generate 45 variants ──────────────────────────────────────────────────
+  // ── Generate 45 variants in parallel batches ─────────────────────────────
+  // BATCH_SIZE = 6: sharp uses ~50-100 MB RAM per op on a 12 MP input.
+  // Vercel Hobby = 1024 MB. 6 concurrent = ~600 MB peak — safe headroom.
+  const BATCH_SIZE = 6;
   const ratiosGenerated: string[] = [];
+
+  type VariantJob = {
+    ar:       typeof ASPECT_RATIOS[number];
+    size:     number;
+    format:   typeof PHOTO_FORMATS[number];
+    outW:     number;
+    outH:     number;
+    cropLeft: number | undefined;
+    cropTop:  number | undefined;
+    cropW:    number | undefined;
+    cropH:    number | undefined;
+    position: sharp.ResizeOptions["position"];
+    wmOverlay: Buffer | null;
+  };
+
+  // Watermark overlay cached per variant width (5 sizes × 1 build = 5 builds max)
+  const wmOverlayCache = new Map<number, Buffer>();
+
+  // Build flat job list (CPU-light; runs sequentially to avoid memory spikes)
+  const jobs: VariantJob[] = [];
 
   for (const ar of ASPECT_RATIOS) {
     for (const size of PHOTO_SIZES) {
@@ -245,74 +268,83 @@ export async function processUpload(
 
       let cropLeft: number | undefined;
       let cropTop:  number | undefined;
-      let position: sharp.ResizeOptions["position"] = sharp.strategy.attention;
+      let cropW:    number | undefined;
+      let cropH:    number | undefined;
+      const position: sharp.ResizeOptions["position"] =
+        (meta.width && meta.height) ? "centre" : sharp.strategy.attention;
 
       if (meta.width && meta.height) {
-        const scaledW = Math.min(meta.width,  Math.round(meta.height * ar.w / ar.h));
-        const scaledH = Math.min(meta.height, Math.round(meta.width  * ar.h / ar.w));
-        cropLeft = focalToCropOffset(focal.x, meta.width,  scaledW);
-        cropTop  = focalToCropOffset(focal.y, meta.height, scaledH);
+        cropW    = Math.min(meta.width,  Math.round(meta.height * ar.w / ar.h));
+        cropH    = Math.min(meta.height, Math.round(meta.width  * ar.h / ar.w));
+        cropLeft = focalToCropOffset(focal.x, meta.width,  cropW);
+        cropTop  = focalToCropOffset(focal.y, meta.height, cropH);
       }
 
-      // Build watermark overlay once per size (size drives mark dimensions)
-      let wmOverlay: Buffer | null = null;
-      if (watermark.enabled && markSvgBuffer) {
+      // Build watermark overlay once per size (cached across all formats + ratios at this size)
+      if (watermark.enabled && markSvgBuffer && !wmOverlayCache.has(size)) {
         try {
-          wmOverlay = await buildWatermarkOverlay(
-            markSvgBuffer, outW, watermark.opacityPercent
+          wmOverlayCache.set(
+            size,
+            await buildWatermarkOverlay(markSvgBuffer, size, watermark.opacityPercent)
           );
         } catch (err) {
-          console.warn("[upload] watermark overlay failed:", err);
+          console.warn("[upload] watermark overlay build failed:", err);
         }
       }
+      const wmOverlay = wmOverlayCache.get(size) ?? null;
 
       for (const fmt of PHOTO_FORMATS) {
-        // `:` → `x` so paths are valid in all URL contexts
-        const variantPath = `${storagePath}${ratioToFilename(ar.ratio)}-${outW}.${fmt}`;
-        try {
-          let pipeline = sharp(file).rotate().withMetadata({ exif: {} });
-
-          if (cropLeft !== undefined && cropTop !== undefined) {
-            const scaledW = Math.min(meta.width!,  Math.round(meta.height! * ar.w / ar.h));
-            const scaledH = Math.min(meta.height!, Math.round(meta.width!  * ar.h / ar.w));
-            pipeline = pipeline.extract({
-              left:   cropLeft,
-              top:    cropTop,
-              width:  scaledW,
-              height: scaledH,
-            });
-            position = "centre";
-          }
-
-          // Crop + resize → intermediate buffer so we can composite watermark
-          const croppedBuf = await pipeline
-            .resize(outW, outH, { fit: "cover", position })
-            .toBuffer();
-
-          // Apply watermark if enabled; re-encode to target format
-          let finalPipeline: sharp.Sharp = sharp(croppedBuf);
-          if (wmOverlay) {
-            finalPipeline = finalPipeline.composite([{
-              input:   wmOverlay,
-              gravity: watermark.position,
-              blend:   "over",
-            }]);
-          }
-
-          const buf = await finalPipeline
-            .toFormat(fmt as "avif" | "webp" | "jpeg", {
-              quality: fmt === "avif" ? 60 : fmt === "webp" ? 80 : 82,
-            })
-            .toBuffer();
-
-          await uploadVariant(admin, variantPath, buf,
-            fmt === "jpeg" ? "image/jpeg" : `image/${fmt}`);
-        } catch (err) {
-          console.error(`[upload] variant ${variantPath} failed:`, err);
-        }
+        jobs.push({ ar, size, format: fmt, outW, outH, cropLeft, cropTop, cropW, cropH, position, wmOverlay });
       }
     }
     if (!ratiosGenerated.includes(ar.ratio)) ratiosGenerated.push(ar.ratio);
+  }
+
+  // Process one variant
+  async function processVariant(job: VariantJob): Promise<void> {
+    const variantPath = `${storagePath}${ratioToFilename(job.ar.ratio)}-${job.outW}.${job.format}`;
+    try {
+      let pipeline = sharp(file).rotate().withMetadata({ exif: {} });
+
+      if (job.cropLeft !== undefined && job.cropTop !== undefined &&
+          job.cropW    !== undefined && job.cropH  !== undefined) {
+        pipeline = pipeline.extract({
+          left:   job.cropLeft,
+          top:    job.cropTop,
+          width:  job.cropW,
+          height: job.cropH,
+        });
+      }
+
+      const croppedBuf = await pipeline
+        .resize(job.outW, job.outH, { fit: "cover", position: job.position })
+        .toBuffer();
+
+      let finalPipeline: sharp.Sharp = sharp(croppedBuf);
+      if (job.wmOverlay) {
+        finalPipeline = finalPipeline.composite([{
+          input:   job.wmOverlay,
+          gravity: watermark.position,
+          blend:   "over",
+        }]);
+      }
+
+      const buf = await finalPipeline
+        .toFormat(job.format as "avif" | "webp" | "jpeg", {
+          quality: job.format === "avif" ? 60 : job.format === "webp" ? 80 : 82,
+        })
+        .toBuffer();
+
+      await uploadVariant(admin, variantPath, buf,
+        job.format === "jpeg" ? "image/jpeg" : `image/${job.format}`);
+    } catch (err) {
+      console.error(`[upload] variant ${variantPath} failed:`, err);
+    }
+  }
+
+  // Run in batches of 6 — ~8 batches × ~500ms each ≈ 4s vs ~31s sequential
+  for (let i = 0; i < jobs.length; i += BATCH_SIZE) {
+    await Promise.all(jobs.slice(i, i + BATCH_SIZE).map(processVariant));
   }
 
   // ── Default CDN URL: 16x9 × 1200 WebP ────────────────────────────────────

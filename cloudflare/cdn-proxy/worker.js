@@ -55,16 +55,20 @@ export default {
 
     let response = await cache.match(cacheKey);
     if (!response) {
+      // Plain fetch — the cf: cache hints conflict with cross-zone proxying
+      // (Supabase is also on Cloudflare in some regions) and trigger 530.
+      // The Cache API below handles caching explicitly.
       response = await fetch(originUrl, {
-        cf: {
-          // Tell Cloudflare to cache aggressively at the edge
-          cacheEverything: true,
-          cacheTtl: 31536000,
+        // Pass through user-agent + accept so origin-side analytics still work
+        headers: {
+          "user-agent": request.headers.get("user-agent") ?? "layover-legends-cdn",
+          "accept":     request.headers.get("accept")     ?? "*/*",
         },
       });
 
       if (!response.ok) {
-        // Don't cache errors
+        const body = await response.text().catch(() => "");
+        console.error(`[cdn-proxy] origin ${response.status} for ${originUrl}: ${body.slice(0, 200)}`);
         return new Response(`Origin returned ${response.status}`, { status: response.status });
       }
 

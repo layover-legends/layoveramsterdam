@@ -84,6 +84,7 @@ export default async function AssetDetailPage({ params }: PageProps) {
     ai_alt_text_suggested: string | null;
     is_featured: boolean; is_public: boolean;
     usage_count: number; created_at: string;
+    watermarked: boolean | null;
   };
 
   const usageRows = await getPhotoUsage(params.id);
@@ -100,6 +101,20 @@ export default async function AssetDetailPage({ params }: PageProps) {
               Orphan — not used anywhere
             </span>
           )}
+          {photo.cdn_url && (
+            <a
+              href={photo.cdn_url}
+              download
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-1.5 rounded-lg bg-warm-cream/10 border border-warm-cream/20 text-warm-cream text-xs font-semibold hover:bg-warm-cream/15 transition-colors"
+              title={photo.watermarked
+                ? "Download the watermarked WebP variant (1200px)"
+                : "Download the WebP variant (no watermark)"}
+            >
+              ⬇ Download {photo.watermarked && <span className="text-legend-gold">★ watermarked</span>}
+            </a>
+          )}
           <DeleteAssetButton photoId={photo.id} usageCount={photo.usage_count} />
         </div>
       </header>
@@ -112,7 +127,7 @@ export default async function AssetDetailPage({ params }: PageProps) {
             {photo.cdn_url && (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img src={photo.cdn_url} alt={photo.alt_text}
-                className="w-full h-full object-cover" />
+                className="w-full h-full object-contain" />
             )}
             {/* Focal point dot */}
             {photo.focal_point_x != null && photo.focal_point_y != null && (

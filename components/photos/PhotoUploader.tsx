@@ -124,6 +124,7 @@ export function PhotoUploader({
             alt="Current image"
             ratio={ratio}
             className="w-full h-full"
+            fit="contain"
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-warm-cream/25">

@@ -85,14 +85,6 @@ export function SmartImage({
       style={{ ...placeholderStyle, ...style }}
     >
       <picture>
-        {/* AVIF — best compression (~50% smaller than WebP) */}
-        <source
-          type="image/avif"
-          sizes={sizes}
-          srcSet={PHOTO_SIZES.map((s) =>
-            `${variantSrc(sp, ratio, s, "avif")} ${s}w`
-          ).join(", ")}
-        />
         {/* WebP — broad browser support */}
         <source
           type="image/webp"

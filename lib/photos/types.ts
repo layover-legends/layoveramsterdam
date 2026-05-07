@@ -17,16 +17,19 @@ export type AspectRatio = "1:1" | "4:3" | "16:9" | "21:9" | "9:16";
 export type PhotoSize = 400 | 1200 | 2400;
 export type PhotoFormat = "avif" | "webp" | "jpeg";
 
+// Variant grid: 4 ratios × 3 sizes × 2 formats = 24 variants per photo.
+// Dropped 21:9 (not used in current layouts) and AVIF (slowest sharp encoder
+// by ~5–10× — the dominant cost in the upload pipeline). WebP is universally
+// supported and visually equivalent for our use cases.
 export const ASPECT_RATIOS: { ratio: AspectRatio; w: number; h: number }[] = [
   { ratio: "1:1",  w: 1,  h: 1  },
   { ratio: "4:3",  w: 4,  h: 3  },
   { ratio: "16:9", w: 16, h: 9  },
-  { ratio: "21:9", w: 21, h: 9  },
   { ratio: "9:16", w: 9,  h: 16 },
 ];
 
 export const PHOTO_SIZES: PhotoSize[] = [400, 1200, 2400];
-export const PHOTO_FORMATS: PhotoFormat[] = ["avif", "webp", "jpeg"];
+export const PHOTO_FORMATS: PhotoFormat[] = ["webp", "jpeg"];
 
 export type PhotoRow = {
   id: string;

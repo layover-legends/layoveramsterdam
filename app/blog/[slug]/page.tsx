@@ -81,7 +81,7 @@ export default async function BlogArticlePage({ params }: PageProps) {
         <SmartImage
           fallbackUrl={article.cover_url}
           alt={article.title}
-          ratio="21:9"
+          ratio="16:9"
           className="w-full"
           priority
         />

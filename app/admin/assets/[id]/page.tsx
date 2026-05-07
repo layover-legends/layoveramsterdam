@@ -129,7 +129,7 @@ export default async function AssetDetailPage({ params }: PageProps) {
             <div className="space-y-2">
               <p className="text-xs text-warm-cream/40 uppercase tracking-wide">Crop previews</p>
               <div className="flex gap-2 overflow-x-auto pb-1">
-                {["1:1","4:3","16:9","21:9","9:16"].map((ratio) => {
+                {["1:1","4:3","16:9","9:16"].map((ratio) => {
                   const [w,h] = ratio.split(":").map(Number);
                   const fileRatio = ratio.replace(":", "x");
                   const thumbUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${photo.storage_path}${fileRatio}-400.webp`;

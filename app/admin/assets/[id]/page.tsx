@@ -134,7 +134,10 @@ export default async function AssetDetailPage({ params }: PageProps) {
                 {["1:1","4:3","16:9","9:16"].map((ratio) => {
                   const [w,h] = ratio.split(":").map(Number);
                   const fileRatio = ratio.replace(":", "x");
-                  const thumbUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${photo.storage_path}${fileRatio}-400.webp`;
+                  const photosBase = process.env.NEXT_PUBLIC_PHOTOS_CDN_URL
+                    ? `${process.env.NEXT_PUBLIC_PHOTOS_CDN_URL.replace(/\/$/, "")}/photos`
+                    : `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos`;
+                  const thumbUrl = `${photosBase}/${photo.storage_path}${fileRatio}-400.webp`;
                   return (
                     <div key={ratio} className="shrink-0 space-y-0.5">
                       {/* eslint-disable-next-line @next/next/no-img-element */}

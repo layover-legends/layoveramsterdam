@@ -1,0 +1,13 @@
+name = "layover-legends-cdn-proxy"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+# Secrets (set via `npx wrangler secret put NAME`):
+#   SUPABASE_PROJECT_REF — e.g. "idgobxvhbhdymfsfmhae"
+#
+# Public bindings — none. The Worker is read-only and stateless.
+#
+# Routes — configured in the Cloudflare dashboard under Custom Domains
+# (Workers & Pages → cdn-proxy → Settings → Triggers → Custom Domains).
+# Add "cdn.layover-legends.com" there. Cloudflare creates the DNS A/AAAA
+# records automatically — no manual DNS edits needed.

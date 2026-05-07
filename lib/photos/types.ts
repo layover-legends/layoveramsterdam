@@ -74,6 +74,22 @@ export type PhotoRow = {
 /** Aspect ratio → URL-safe filename segment. "16:9" → "16x9". */
 export const ratioToFilename = (r: AspectRatio | string) => r.replace(":", "x");
 
+/**
+ * If NEXT_PUBLIC_PHOTOS_CDN_URL is set (e.g. https://cdn.layover-legends.com),
+ * variant URLs are served from the Cloudflare Worker instead of going direct
+ * to Supabase Storage. The Worker proxies + edge-caches variants for 1 year,
+ * giving ~95% cache hit rate and near-zero Supabase egress.
+ *
+ * Falls back to direct Supabase URLs if the env var is unset (so unconfigured
+ * environments work the same as before — opt-in by deploy).
+ */
+function photosBaseUrl(): string {
+  const cdn = process.env.NEXT_PUBLIC_PHOTOS_CDN_URL;
+  if (cdn) return `${cdn.replace(/\/$/, "")}/photos`;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  return `${supabaseUrl}/storage/v1/object/public/photos`;
+}
+
 /** Construct the CDN URL for a specific variant. */
 export function variantUrl(
   baseStoragePath: string,
@@ -81,10 +97,9 @@ export function variantUrl(
   size: PhotoSize,
   format: PhotoFormat
 ): string {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
   // Filenames use `x` not `:` to avoid URL parsing issues
   const filePath = `${baseStoragePath}${ratioToFilename(ratio)}-${size}.${format}`;
-  return `${supabaseUrl}/storage/v1/object/public/photos/${filePath}`;
+  return `${photosBaseUrl()}/${filePath}`;
 }
 
 /** URL for the best default CDN thumbnail (16:9 medium WebP). */

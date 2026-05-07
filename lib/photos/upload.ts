@@ -378,7 +378,12 @@ export async function processUpload(
   }
 
   // ── Default CDN URL: 16x9 × 1200 WebP ────────────────────────────────────
-  const cdnUrl = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${storagePath}16x9-1200.webp`;
+  //   Uses NEXT_PUBLIC_PHOTOS_CDN_URL if set (Cloudflare Worker proxy),
+  //   falls back to direct Supabase URL.
+  const cdnBase = process.env.NEXT_PUBLIC_PHOTOS_CDN_URL
+    ? `${process.env.NEXT_PUBLIC_PHOTOS_CDN_URL.replace(/\/$/, "")}/photos`
+    : `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}`;
+  const cdnUrl = `${cdnBase}/${storagePath}16x9-1200.webp`;
 
   // ── Insert photos row ─────────────────────────────────────────────────────
   const { error: insertErr } = await admin

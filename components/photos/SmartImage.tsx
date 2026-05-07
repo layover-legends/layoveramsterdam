@@ -29,10 +29,13 @@ type SmartImageProps = {
   style?: React.CSSProperties;
 };
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+// Use Cloudflare CDN proxy when configured, fall back to direct Supabase URL.
+const PHOTOS_BASE = process.env.NEXT_PUBLIC_PHOTOS_CDN_URL
+  ? `${process.env.NEXT_PUBLIC_PHOTOS_CDN_URL.replace(/\/$/, "")}/photos`
+  : `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? ""}/storage/v1/object/public/photos`;
 
 function variantSrc(storagePath: string, ratio: AspectRatio, size: number, fmt: string): string {
-  return `${SUPABASE_URL}/storage/v1/object/public/photos/${storagePath}${ratioToFilename(ratio)}-${size}.${fmt}`;
+  return `${PHOTOS_BASE}/${storagePath}${ratioToFilename(ratio)}-${size}.${fmt}`;
 }
 
 export function SmartImage({

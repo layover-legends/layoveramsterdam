@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AssetGrid from "@/components/admin/AssetGrid";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { createClient } from "@/lib/supabase/server";
 import { getUiStrings, t } from "@/lib/i18n/ui";
@@ -189,82 +190,8 @@ export default async function AdminAssetsPage({ searchParams }: PageProps) {
         <div className="rounded-2xl border border-warm-cream/10 px-6 py-12 text-center text-warm-cream/40">
           No photos found. <Link href="/admin/assets/upload" className="text-legend-gold hover:text-gold-light">Upload some →</Link>
         </div>
-      ) : view === "grid" ? (
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-          {rows.map((row) => (
-            <Link key={row.id} href={`/admin/assets/${row.id}`}
-              className="group relative rounded-xl overflow-hidden aspect-square bg-warm-cream/10 hover:ring-2 hover:ring-legend-gold/50 transition-all">
-              {row.cdn_url ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={row.cdn_url} alt={row.alt_text}
-                  className="w-full h-full object-cover"
-                  style={{ backgroundColor: row.dominant_color ?? "#1a1a1a" }}
-                  loading="lazy" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-warm-cream/20 text-2xl">🖼</div>
-              )}
-              {/* Overlays */}
-              {row.usage_count === 0 && (
-                <span className="absolute top-1 right-1 text-[9px] bg-amber-400/90 text-black px-1 rounded">orphan</span>
-              )}
-              {row.is_featured && (
-                <span className="absolute top-1 left-1 text-[9px] bg-legend-gold text-black px-1 rounded">★</span>
-              )}
-              {/* Hover overlay */}
-              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2">
-                <p className="text-[9px] text-white truncate">{row.alt_text || row.original_filename}</p>
-                <p className="text-[8px] text-white/60">{row.usage_count}× · {row.source}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
       ) : (
-        <div className="rounded-2xl border border-warm-cream/10 overflow-hidden">
-          <table className="min-w-full text-xs">
-            <thead className="bg-warm-cream/[0.04] text-warm-cream/55 uppercase tracking-wide">
-              <tr>
-                <th className="px-4 py-3 text-left font-medium">Preview</th>
-                <th className="px-4 py-3 text-left font-medium">Alt text</th>
-                <th className="px-4 py-3 text-left font-medium">Source</th>
-                <th className="px-4 py-3 text-left font-medium">Size</th>
-                <th className="px-4 py-3 text-left font-medium">Uses</th>
-                <th className="px-4 py-3 text-left font-medium">Uploaded</th>
-                <th className="px-4 py-3"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-warm-cream/10">
-              {rows.map((row) => (
-                <tr key={row.id} className="hover:bg-warm-cream/[0.03]">
-                  <td className="px-4 py-3">
-                    {row.cdn_url
-                      ? <img src={row.cdn_url} alt="" className="w-12 h-9 object-cover rounded"
-                          style={{ backgroundColor: row.dominant_color ?? "#1a1a1a" }} />
-                      : <div className="w-12 h-9 rounded bg-warm-cream/10" />}
-                  </td>
-                  <td className="px-4 py-3 text-warm-cream/80 max-w-xs">
-                    <p className="truncate">{row.alt_text || <span className="text-red-400">Missing!</span>}</p>
-                  </td>
-                  <td className="px-4 py-3 text-warm-cream/50">{row.source}</td>
-                  <td className="px-4 py-3 text-warm-cream/40 font-mono">
-                    {row.width_px && row.height_px ? `${row.width_px}×${row.height_px}` : "—"}
-                    {row.bytes && <span className="ml-1">· {Math.round(row.bytes/1024)}KB</span>}
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <span className={row.usage_count === 0 ? "text-amber-300" : "text-warm-cream/70"}>
-                      {row.usage_count}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-warm-cream/40">
-                    {new Date(row.created_at).toLocaleDateString("nl-NL")}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <Link href={`/admin/assets/${row.id}`} className="text-legend-gold hover:text-gold-light">Edit →</Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <AssetGrid rows={rows} view={view === "list" ? "list" : "grid"} />
       )}
 
       {/* Pagination */}

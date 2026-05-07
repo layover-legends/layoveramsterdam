@@ -122,6 +122,30 @@ export async function uploadPhoto(formData: FormData): Promise<UploadPhotoResult
       } else {
         await linkPhoto(result.id, entityType, entityId, fieldName);
       }
+
+      // Also update the legacy image-URL column on the entity table so the
+      // public site (/shop, tour detail, blog) immediately reflects the new
+      // image without requiring a separate "Save" click on the edit drawer.
+      // Maps (entity_type, field_name) → (table, column).
+      const ENTITY_IMAGE_COLUMNS: Record<string, { table: string; column: string }> = {
+        "tour:hero_image":     { table: "tours",    column: "image_url" },
+        "staff:photo":         { table: "staff",    column: "photo_url" },
+        "staff:hero_image":    { table: "staff",    column: "photo_url" },
+        "article:cover":       { table: "articles", column: "cover_url" },
+        "article:hero_image":  { table: "articles", column: "cover_url" },
+      };
+      const slot = `${entityType}:${fieldName}`;
+      const target = ENTITY_IMAGE_COLUMNS[slot];
+      if (target) {
+        const admin = createAdminClient();
+        const { error: colErr } = await admin
+          .from(target.table)
+          .update({ [target.column]: result.cdnUrl })
+          .eq("id", entityId);
+        if (colErr) {
+          console.error(`[upload-action] failed to update ${target.table}.${target.column}:`, colErr.message);
+        }
+      }
     } catch (err) {
       console.error("[upload-action] linkPhoto failed:", err);
       // Don't fail the whole upload — the photo is in the library, just unlinked

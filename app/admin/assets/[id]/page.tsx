@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getPhotoUsage } from "@/lib/photos/usage";
 import { getUiStrings, t } from "@/lib/i18n/ui";
 import { revalidatePath } from "next/cache";
+import DeleteAssetButton from "@/components/admin/DeleteAssetButton";
 
 export const dynamic = "force-dynamic";
 
@@ -93,12 +94,13 @@ export default async function AssetDetailPage({ params }: PageProps) {
         <Link href="/admin/assets" className="text-xs text-warm-cream/50 hover:text-warm-cream/80">
           ← Assets
         </Link>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           {photo.usage_count === 0 && (
             <span className="text-xs px-2 py-1 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30">
               Orphan — not used anywhere
             </span>
           )}
+          <DeleteAssetButton photoId={photo.id} usageCount={photo.usage_count} />
         </div>
       </header>
 

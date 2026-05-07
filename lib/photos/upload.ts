@@ -5,6 +5,7 @@ import path from "path";
 import fs from "fs/promises";
 import { encode as encodeBlurhash } from "blurhash";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { moderateImage } from "@/lib/photos/moderation";
 import {
   ASPECT_RATIOS, PHOTO_SIZES, PHOTO_FORMATS,
   type PhotoSource, type CropStrategy,
@@ -182,6 +183,18 @@ export async function processUpload(
   if (!meta.format || !allowedFormats.includes(meta.format)) {
     throw new Error(`Unsupported image format: ${meta.format ?? "unknown"}`);
   }
+
+  // ── Image moderation (Sightengine, opt-in via env) ───────────────────────
+  //   No-op + auto-approves when SIGHTENGINE_API_USER is unset (default).
+  //   Hard-rejects high-confidence nudity/weapon/drugs/gore/offensive
+  //   content; flags borderline cases for manual review.
+  const moderation = await moderateImage(file);
+  if (moderation.verdict === "rejected") {
+    throw new Error(`Content rejected by moderation: ${moderation.reasons.join(", ")}`);
+  }
+  // moderation.verdict === "manual_review" → photo proceeds, but we'll set
+  // moderation_status: "pending_review" on the photos row below so admin
+  // can approve/reject in the UI.
 
   const photoId    = crypto.randomUUID();
   const storagePath = `${photoId}/`;
@@ -414,8 +427,9 @@ export async function processUpload(
       tags:                    options.tags ?? [],
       copyright_holder:        options.copyrightHolder ?? "Layover Legends",
       license_type:            options.licenseType ?? "owned",
-      nsfw_flag:               false,
-      moderation_status:       "auto_approved",
+      nsfw_flag:               moderation.verdict === "manual_review",
+      moderation_status:       moderation.verdict === "manual_review" ? "pending_review" : "auto_approved",
+      moderation_notes:        moderation.reasons.length > 0 ? moderation.reasons.join(", ") : null,
       usage_count:             0,
       watermarked:             watermark.enabled,
       watermark_position:      watermark.enabled ? String(watermark.position) : null,

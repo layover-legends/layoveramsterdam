@@ -125,6 +125,14 @@ export type ProcessUploadOptions = {
   watermarkEnabled?:  boolean;
   watermarkPosition?: string;
   watermarkOpacity?:  number;
+  /**
+   * Async worker hint — when set, processUpload skips the dedup check + the
+   * photos.insert and instead UPDATEs the existing row. Used by the
+   * background job queue (lib/photos/process-job.ts) to fill in variants
+   * for a photo that was previously inserted in 'pending' state by
+   * /api/admin/upload-photo/finalize.
+   */
+  existingPhotoId?:   string;
 };
 
 export type ProcessedPhotoResult = {
@@ -157,24 +165,27 @@ export async function processUpload(
 
   // ── Deduplication: hash the original buffer and reuse existing photo if
   //    we've already processed this exact file. Saves ~10s of pipeline work
-  //    plus 24 storage objects per duplicate.
+  //    plus 24 storage objects per duplicate. Skipped when called from the
+  //    async worker (existingPhotoId set) — that row already exists.
   const fileHash = (await import("crypto"))
     .createHash("sha256").update(file).digest("hex");
-  const adminEarly = createAdminClient();
-  const { data: existingPhoto } = await adminEarly
-    .from("photos")
-    .select("id, cdn_url, blurhash, dominant_color")
-    .eq("file_hash", fileHash)
-    .maybeSingle();
-  if (existingPhoto) {
-    const e = existingPhoto as { id: string; cdn_url: string | null; blurhash: string | null; dominant_color: string | null };
-    if (e.cdn_url) {
-      return {
-        id:             e.id,
-        cdnUrl:         e.cdn_url,
-        blurhash:       e.blurhash,
-        dominantColor:  e.dominant_color,
-      };
+  if (!options.existingPhotoId) {
+    const adminEarly = createAdminClient();
+    const { data: existingPhoto } = await adminEarly
+      .from("photos")
+      .select("id, cdn_url, blurhash, dominant_color")
+      .eq("file_hash", fileHash)
+      .maybeSingle();
+    if (existingPhoto) {
+      const e = existingPhoto as { id: string; cdn_url: string | null; blurhash: string | null; dominant_color: string | null };
+      if (e.cdn_url) {
+        return {
+          id:             e.id,
+          cdnUrl:         e.cdn_url,
+          blurhash:       e.blurhash,
+          dominantColor:  e.dominant_color,
+        };
+      }
     }
   }
 
@@ -196,7 +207,7 @@ export async function processUpload(
   // moderation_status: "pending_review" on the photos row below so admin
   // can approve/reject in the UI.
 
-  const photoId    = crypto.randomUUID();
+  const photoId    = options.existingPhotoId ?? crypto.randomUUID();
   const storagePath = `${photoId}/`;
 
   // ── Blurhash ──────────────────────────────────────────────────────────────
@@ -398,10 +409,13 @@ export async function processUpload(
     : `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}`;
   const cdnUrl = `${cdnBase}/${storagePath}16x9-1200.webp`;
 
-  // ── Insert photos row ─────────────────────────────────────────────────────
+  // ── Upsert photos row ────────────────────────────────────────────────────
+  //   When existingPhotoId is set (worker path), the row already exists in
+  //   'pending' state — upsert with onConflict updates it in place. Otherwise
+  //   inserts a fresh row with the freshly minted photoId.
   const { error: insertErr } = await admin
     .from("photos")
-    .insert({
+    .upsert({
       id:                      photoId,
       storage_path:            storagePath,
       cdn_url:                 cdnUrl,
@@ -435,9 +449,10 @@ export async function processUpload(
       watermark_position:      watermark.enabled ? String(watermark.position) : null,
       watermark_opacity:       watermark.enabled ? watermark.opacityPercent  : null,
       file_hash:               fileHash,
-    });
+      processing_status:       "ready",
+    }, { onConflict: "id" });
 
-  if (insertErr) throw new Error(`photos insert failed: ${insertErr.message}`);
+  if (insertErr) throw new Error(`photos upsert failed: ${insertErr.message}`);
 
   return { id: photoId, cdnUrl, blurhash, dominantColor };
 }

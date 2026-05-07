@@ -96,12 +96,14 @@ export default async function TourPage({ params, searchParams }: PageProps) {
       ]),
     ]} />
     <main className="min-h-screen bg-ink-black text-warm-cream px-5 py-12 max-w-3xl mx-auto space-y-6">
-      {tour.image_url && (
+      {(tour.photo || tour.image_url) && (
         <SmartImage
+          row={tour.photo}
           fallbackUrl={tour.image_url}
           alt={tour.name}
           ratio="16:9"
           className="rounded-2xl aspect-video w-full"
+          sizes="(min-width: 768px) 768px, 100vw"
           priority
         />
       )}

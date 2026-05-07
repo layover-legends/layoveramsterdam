@@ -128,11 +128,13 @@ export async function uploadPhoto(formData: FormData): Promise<UploadPhotoResult
       // image without requiring a separate "Save" click on the edit drawer.
       // Maps (entity_type, field_name) → (table, column).
       const ENTITY_IMAGE_COLUMNS: Record<string, { table: string; column: string }> = {
-        "tour:hero_image":     { table: "tours",    column: "image_url" },
-        "staff:photo":         { table: "staff",    column: "photo_url" },
-        "staff:hero_image":    { table: "staff",    column: "photo_url" },
-        "article:cover":       { table: "articles", column: "cover_url" },
-        "article:hero_image":  { table: "articles", column: "cover_url" },
+        "tour:hero_image":          { table: "tours",        column: "image_url"       },
+        "addon:hero_image":         { table: "addons",       column: "image_url"       },
+        "staff:photo":              { table: "staff",        column: "photo_url"       },
+        "staff:hero_image":         { table: "staff",        column: "photo_url"       },
+        "article:cover_image":      { table: "articles",     column: "cover_url"       },
+        "article:hero_image":       { table: "articles",     column: "cover_url"       },
+        "testimonial:source_logo":  { table: "testimonials", column: "source_logo_url" },
       };
       const slot = `${entityType}:${fieldName}`;
       const target = ENTITY_IMAGE_COLUMNS[slot];

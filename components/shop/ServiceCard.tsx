@@ -42,13 +42,15 @@ export default function ServiceCard({ service, labels }: Props) {
         </span>
       )}
 
-      {/* Thumbnail */}
-      {service.image_url && (
+      {/* Thumbnail — pass full photo row for responsive srcset; falls back to legacy URL */}
+      {(service.photo || service.image_url) && (
         <SmartImage
+          row={service.photo}
           fallbackUrl={service.image_url}
           alt={service.name}
           ratio="16:9"
-          className="rounded-xl -mx-1"
+          className="rounded-xl -mx-1 aspect-video"
+          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
         />
       )}
 

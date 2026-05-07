@@ -7,6 +7,7 @@ import { syncServiceToStripe } from "@/app/actions/sync-stripe";
 import { formatPrice } from "@/lib/i18n/format-price";
 import { slugify } from "@/lib/slug";
 import { PhotoUploader } from "@/components/photos/PhotoUploader";
+import SaveImageOnlyButton from "@/components/admin/services/SaveImageOnlyButton";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Row types (id === '__new__' means create mode)
@@ -301,6 +302,16 @@ export default function ServiceEditDrawer(props: Props) {
             }
             onUploadComplete={(r) => setImageUrl(r.cdn_url)}
           />
+
+          {/* Save image only — persists image_url WITHOUT Stripe sync,
+              for when admin just wants to lock in the new photo */}
+          {row.id !== "__new__" && imageUrl !== row.image_url && (
+            <SaveImageOnlyButton
+              serviceId={row.id}
+              source={source === "tour" ? "tour" : "addon"}
+              imageUrl={imageUrl}
+            />
+          )}
 
           {/* ── Identity ──────────────────────────────────────────────────── */}
           <Section label="Identity" />

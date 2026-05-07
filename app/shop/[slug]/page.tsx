@@ -52,12 +52,14 @@ export default async function ShopSlugPage({ params }: PageProps) {
           ← <span>{t(labels, "public.shop.back_to_shop", "Back to shop")}</span>
         </Link>
 
-        {service.image_url && (
+        {(service.photo || service.image_url) && (
           <SmartImage
+            row={service.photo}
             fallbackUrl={service.image_url}
             alt={service.name}
             ratio="16:9"
-            className="rounded-2xl w-full"
+            className="rounded-2xl w-full aspect-video"
+            sizes="(min-width: 1024px) 768px, 100vw"
             priority
           />
         )}

@@ -1,5 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
 
+export type TourHeroPhoto = {
+  id: string;
+  storage_path: string;
+  cdn_url: string | null;
+  alt_text: string;
+  blurhash: string | null;
+  dominant_color: string | null;
+  aspect_ratios_generated: string[];
+};
+
 export type TourDetail = {
   id: string;
   name: string;
@@ -17,9 +27,11 @@ export type TourDetail = {
   meta_title: string | null;
   meta_description: string | null;
   image_url: string | null;
+  /** Full photo row when available — enables responsive srcset rendering. */
+  photo: TourHeroPhoto | null;
 };
 
-type Row = TourDetail;
+type Row = Omit<TourDetail, "photo">;
 
 export async function getTourBySlug(slug: string): Promise<TourDetail | null> {
   const supabase = createClient();
@@ -34,6 +46,26 @@ export async function getTourBySlug(slug: string): Promise<TourDetail | null> {
 
   if (!data) return null;
   const r = data as unknown as Row;
+
+  // Resolve hero photo via photo_usage → photos so we get full srcset support
+  let photo: TourHeroPhoto | null = null;
+  const { data: usage } = await supabase
+    .from("photo_usage")
+    .select("photo_id")
+    .eq("entity_type", "tour")
+    .eq("entity_id", r.id)
+    .eq("field_name", "hero_image")
+    .maybeSingle();
+  const photoId = (usage as { photo_id: string } | null)?.photo_id;
+  if (photoId) {
+    const { data: pData } = await supabase
+      .from("photos")
+      .select("id, storage_path, cdn_url, alt_text, blurhash, dominant_color, aspect_ratios_generated")
+      .eq("id", photoId)
+      .maybeSingle();
+    if (pData) photo = pData as unknown as TourHeroPhoto;
+  }
+
   return {
     id: r.id,
     name: r.name,
@@ -51,5 +83,6 @@ export async function getTourBySlug(slug: string): Promise<TourDetail | null> {
     meta_title: r.meta_title,
     meta_description: r.meta_description,
     image_url: r.image_url,
+    photo,
   };
 }

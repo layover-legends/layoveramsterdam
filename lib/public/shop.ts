@@ -3,6 +3,16 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { FALLBACK_CHAIN, DEFAULT_LOCALE, isLocale } from "@/lib/i18n/locales";
 
+export type PublicServicePhoto = {
+  id: string;
+  storage_path: string;
+  cdn_url: string | null;
+  alt_text: string;
+  blurhash: string | null;
+  dominant_color: string | null;
+  aspect_ratios_generated: string[];
+};
+
 export type PublicService = {
   id: string;
   slug: string;
@@ -18,6 +28,9 @@ export type PublicService = {
   availability_status: "active" | "coming_soon";
   is_recommended: boolean;
   image_url: string | null;
+  /** Full photo row when available — enables responsive srcset rendering.
+   *  Falls back to image_url string when null. */
+  photo: PublicServicePhoto | null;
 };
 
 type ServiceRow = {
@@ -40,6 +53,39 @@ type TransRow = {
   language: string;
   value: string;
 };
+
+async function fetchHeroPhotos(
+  supabase: ReturnType<typeof createClient>,
+  entityType: "tour" | "addon",
+  entityIds: string[],
+): Promise<Map<string, PublicServicePhoto>> {
+  if (entityIds.length === 0) return new Map();
+  const { data: usage } = await supabase
+    .from("photo_usage")
+    .select("entity_id, photo_id")
+    .eq("entity_type", entityType)
+    .eq("field_name", "hero_image")
+    .in("entity_id", entityIds);
+  const usageRows = (usage ?? []) as { entity_id: string; photo_id: string }[];
+  if (usageRows.length === 0) return new Map();
+
+  const photoIds = [...new Set(usageRows.map((u) => u.photo_id))];
+  const { data: photos } = await supabase
+    .from("photos")
+    .select("id, storage_path, cdn_url, alt_text, blurhash, dominant_color, aspect_ratios_generated")
+    .in("id", photoIds);
+  const photoMap = new Map<string, PublicServicePhoto>();
+  for (const p of (photos ?? []) as PublicServicePhoto[]) {
+    photoMap.set(p.id, p);
+  }
+
+  const out = new Map<string, PublicServicePhoto>();
+  for (const u of usageRows) {
+    const p = photoMap.get(u.photo_id);
+    if (p) out.set(u.entity_id, p);
+  }
+  return out;
+}
 
 function buildTransMap(rows: TransRow[]): Map<string, Record<string, Record<string, string>>> {
   const tMap = new Map<string, Record<string, Record<string, string>>>();
@@ -95,6 +141,8 @@ export async function getShopServices(locale: string): Promise<PublicService[]> 
   const tMap = buildTransMap((transRows ?? []) as TransRow[]);
   const pick = makePicker(tMap, unique);
 
+  const heroPhotos = await fetchHeroPhotos(supabase, "addon", ids);
+
   return services.map((s) => ({
     id: s.id,
     slug: s.slug,
@@ -110,6 +158,7 @@ export async function getShopServices(locale: string): Promise<PublicService[]> 
     availability_status: s.availability_status as "active" | "coming_soon",
     is_recommended: false,
     image_url: s.image_url,
+    photo: heroPhotos.get(s.id) ?? null,
   }));
 }
 
@@ -145,6 +194,8 @@ export async function getShopServiceBySlug(
   const tMap = buildTransMap((transRows ?? []) as TransRow[]);
   const pick = makePicker(tMap, unique);
 
+  const heroPhotos = await fetchHeroPhotos(supabase, "addon", [s.id]);
+
   return {
     id: s.id,
     slug: s.slug,
@@ -160,5 +211,6 @@ export async function getShopServiceBySlug(
     availability_status: s.availability_status as "active" | "coming_soon",
     is_recommended: false,
     image_url: s.image_url,
+    photo: heroPhotos.get(s.id) ?? null,
   };
 }

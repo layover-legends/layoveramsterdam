@@ -67,16 +67,20 @@ export function PhotoUploader({
     }
 
     startTransition(async () => {
-      const result = await uploadPhoto({
-        file,
-        alt_text:          altText.trim(),
-        source,
-        entity_type:       entityType,
-        entity_id:         entityId,
-        field_name:        fieldName,
-        replace_existing:  true,
-        watermark_enabled: wmOverride !== null ? wmOverride : undefined,
-      });
+      // Next.js 14 server actions only accept File via FormData (never inside
+      // a plain object — that throws "Only plain objects, and a few built-ins,
+      // can be passed to Server Actions").
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("alt_text", altText.trim());
+      fd.append("source", source);
+      if (entityType) fd.append("entity_type", entityType);
+      if (entityId)   fd.append("entity_id",   entityId);
+      if (fieldName)  fd.append("field_name",  fieldName);
+      fd.append("replace_existing", "true");
+      if (wmOverride !== null) fd.append("watermark_enabled", String(wmOverride));
+
+      const result = await uploadPhoto(fd);
 
       if (!result.ok) {
         const friendly: Record<string, string> = {

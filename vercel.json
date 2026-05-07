@@ -5,7 +5,9 @@
     { "path": "/api/cron/photo-orphan-gc", "schedule": "0 8 * * 1" }
   ],
   "functions": {
-    "app/admin/photos/upload-action.ts": { "maxDuration": 60 },
-    "app/admin/photos/upload/route.ts":  { "maxDuration": 60 }
+    "app/api/admin/upload-photo/route.ts": { "maxDuration": 60 },
+    "app/admin/photos/upload-action.ts":   { "maxDuration": 60 },
+    "app/admin/services/**":               { "maxDuration": 60 },
+    "app/admin/assets/**":                 { "maxDuration": 60 }
   }
 }

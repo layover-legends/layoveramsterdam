@@ -6,30 +6,31 @@ import { processUpload } from "@/lib/photos/upload";
 import { linkPhoto, relinkPhoto } from "@/lib/photos/usage";
 import type { PhotoSource, PhotoUsageEntityType } from "@/lib/photos/types";
 
-export type UploadPhotoInput = {
-  file: File;
-  alt_text: string;
-  source: PhotoSource;
-  entity_type?: PhotoUsageEntityType;
-  entity_id?: string;
-  field_name?: string;
-  replace_existing?: boolean;
-  tags?: string[];
-  // Watermark overrides — undefined = use site_settings defaults
-  watermark_enabled?:  boolean;
-  watermark_position?: string;
-  watermark_opacity?:  number;
-};
-
 export type UploadPhotoResult =
   | { ok: true;  photo_id: string; cdn_url: string }
   | { ok: false; error: string };
 
 const MAX_BYTES = 20 * 1024 * 1024;
 
-export async function uploadPhoto(
-  input: UploadPhotoInput
-): Promise<UploadPhotoResult> {
+/**
+ * Server Action — accepts FormData (Next.js 14 only supports File via FormData,
+ * never inside a plain object — passing { file: File, ... } fails client-side
+ * with "Only plain objects, and a few built-ins, can be passed to Server Actions").
+ *
+ * FormData fields:
+ *   file               — File (required)
+ *   alt_text           — string (required, ≥ 3 chars)
+ *   source             — PhotoSource (required)
+ *   entity_type        — PhotoUsageEntityType (optional)
+ *   entity_id          — string (optional)
+ *   field_name         — string (optional)
+ *   replace_existing   — "true" | "false" (optional)
+ *   tags               — comma-separated string (optional)
+ *   watermark_enabled  — "true" | "false" (optional; absent = use site default)
+ *   watermark_position — string (optional)
+ *   watermark_opacity  — numeric string (optional)
+ */
+export async function uploadPhoto(formData: FormData): Promise<UploadPhotoResult> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "unauthorized" };
@@ -41,25 +42,56 @@ export async function uploadPhoto(
     .maybeSingle();
   if (!profile?.is_admin) return { ok: false, error: "forbidden" };
 
-  if (!input.alt_text || input.alt_text.trim().length < 3) {
-    return { ok: false, error: "alt_text_required" };
-  }
-  if (input.file.size > MAX_BYTES) {
-    return { ok: false, error: "file_too_large_20mb" };
-  }
+  const file = formData.get("file");
+  if (!(file instanceof File)) return { ok: false, error: "no_file" };
 
-  const buffer = Buffer.from(await input.file.arrayBuffer());
+  const altText = String(formData.get("alt_text") ?? "").trim();
+  if (altText.length < 3) return { ok: false, error: "alt_text_required" };
+  if (file.size > MAX_BYTES) return { ok: false, error: "file_too_large_20mb" };
+
+  const source = String(formData.get("source") ?? "marketing") as PhotoSource;
+
+  const entityTypeRaw = formData.get("entity_type");
+  const entityType    = entityTypeRaw ? String(entityTypeRaw) as PhotoUsageEntityType : undefined;
+  const entityIdRaw   = formData.get("entity_id");
+  const entityId      = entityIdRaw   ? String(entityIdRaw)   : undefined;
+  const fieldNameRaw  = formData.get("field_name");
+  const fieldName     = fieldNameRaw  ? String(fieldNameRaw)  : undefined;
+
+  const replaceExisting = String(formData.get("replace_existing") ?? "") === "true";
+
+  const tagsRaw = formData.get("tags");
+  const tags = tagsRaw
+    ? String(tagsRaw).split(",").map(t => t.trim()).filter(Boolean)
+    : undefined;
+
+  const wmEnabledRaw = formData.get("watermark_enabled");
+  const watermarkEnabled =
+    wmEnabledRaw === null || wmEnabledRaw === ""
+      ? undefined
+      : String(wmEnabledRaw) === "true";
+
+  const wmPositionRaw = formData.get("watermark_position");
+  const watermarkPosition = wmPositionRaw ? String(wmPositionRaw) : undefined;
+
+  const wmOpacityRaw = formData.get("watermark_opacity");
+  const watermarkOpacity =
+    wmOpacityRaw === null || wmOpacityRaw === ""
+      ? undefined
+      : Number(wmOpacityRaw);
+
+  const buffer = Buffer.from(await file.arrayBuffer());
 
   let result: Awaited<ReturnType<typeof processUpload>>;
   try {
-    result = await processUpload(buffer, input.file.name, {
-      source:             input.source,
-      altText:            input.alt_text.trim(),
-      uploadedBy:         user.id,
-      tags:               input.tags,
-      watermarkEnabled:   input.watermark_enabled,
-      watermarkPosition:  input.watermark_position,
-      watermarkOpacity:   input.watermark_opacity,
+    result = await processUpload(buffer, file.name, {
+      source,
+      altText,
+      uploadedBy:        user.id,
+      tags,
+      watermarkEnabled,
+      watermarkPosition,
+      watermarkOpacity,
     });
   } catch (err) {
     console.error("[upload-action] processUpload failed:", err);
@@ -68,26 +100,31 @@ export async function uploadPhoto(
   }
 
   // Link to entity slot if provided
-  if (input.entity_type && input.entity_id && input.field_name) {
-    if (input.replace_existing) {
-      const admin = createAdminClient();
-      const { data: existing } = await admin
-        .from("photo_usage")
-        .select("photo_id")
-        .eq("entity_type", input.entity_type)
-        .eq("entity_id",   input.entity_id)
-        .eq("field_name",  input.field_name)
-        .maybeSingle() as { data: { photo_id: string } | null };
+  if (entityType && entityId && fieldName) {
+    try {
+      if (replaceExisting) {
+        const admin = createAdminClient();
+        const { data: existing } = await admin
+          .from("photo_usage")
+          .select("photo_id")
+          .eq("entity_type", entityType)
+          .eq("entity_id",   entityId)
+          .eq("field_name",  fieldName)
+          .maybeSingle() as { data: { photo_id: string } | null };
 
-      await relinkPhoto(
-        existing?.photo_id ?? null,
-        result.id,
-        input.entity_type,
-        input.entity_id,
-        input.field_name,
-      );
-    } else {
-      await linkPhoto(result.id, input.entity_type, input.entity_id, input.field_name);
+        await relinkPhoto(
+          existing?.photo_id ?? null,
+          result.id,
+          entityType,
+          entityId,
+          fieldName,
+        );
+      } else {
+        await linkPhoto(result.id, entityType, entityId, fieldName);
+      }
+    } catch (err) {
+      console.error("[upload-action] linkPhoto failed:", err);
+      // Don't fail the whole upload — the photo is in the library, just unlinked
     }
   }
 
@@ -96,12 +133,12 @@ export async function uploadPhoto(
     event_type: "photo_uploaded",
     payload: {
       photo_id:    result.id,
-      source:      input.source,
-      entity_type: input.entity_type  ?? null,
-      entity_id:   input.entity_id   ?? null,
-      field_name:  input.field_name  ?? null,
-      filename:    input.file.name,
-      bytes:       input.file.size,
+      source,
+      entity_type: entityType ?? null,
+      entity_id:   entityId   ?? null,
+      field_name:  fieldName  ?? null,
+      filename:    file.name,
+      bytes:       file.size,
     },
   });
 

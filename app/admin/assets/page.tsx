@@ -65,7 +65,16 @@ export default async function AdminAssetsPage({ searchParams }: PageProps) {
   if (usage === "used")     qry = qry.gt("usage_count", 0);
   if (usage === "orphaned") qry = qry.eq("usage_count", 0);
   if (usage === "featured") qry = qry.eq("is_featured", true);
-  if (q) qry = qry.or(`alt_text.ilike.%${q}%,original_filename.ilike.%${q}%`);
+  // Full-text search across alt_text + caption + filename + tags via the
+  // search_tsv tsvector column (GIN-indexed, scales to 100k+ photos). Falls
+  // back to ilike for very short queries where tsquery is overkill.
+  if (q) {
+    if (q.length >= 3) {
+      qry = qry.textSearch("search_tsv", q, { type: "websearch", config: "simple" });
+    } else {
+      qry = qry.or(`alt_text.ilike.%${q}%,original_filename.ilike.%${q}%`);
+    }
+  }
 
   const sortMap: Record<string, string> = {
     "created_at": "created_at",
@@ -152,7 +161,7 @@ export default async function AdminAssetsPage({ searchParams }: PageProps) {
         </select>
 
         {/* Search */}
-        <input name="q" defaultValue={q} placeholder="Search alt text…"
+        <input name="q" defaultValue={q} placeholder="Search alt, tags, filename…"
           className="px-3 py-1.5 rounded-lg bg-warm-cream/5 border border-warm-cream/15 text-warm-cream placeholder:text-warm-cream/30 text-xs w-48" />
 
         <button type="submit"

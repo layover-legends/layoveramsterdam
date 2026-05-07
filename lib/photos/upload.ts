@@ -38,9 +38,16 @@ async function uploadVariant(
   buf: Buffer,
   contentType: string
 ) {
+  // 1-year immutable cache — variants are content-addressed (filename includes
+  // ratio + size + format), so updating a photo creates new variants with new
+  // photoId; old variants stay valid until garbage collected.
   const { error } = await admin.storage
     .from(BUCKET)
-    .upload(storagePath, buf, { contentType, upsert: true });
+    .upload(storagePath, buf, {
+      contentType,
+      upsert: true,
+      cacheControl: "31536000, immutable",
+    });
   if (error) throw new Error(`Storage upload failed [${storagePath}]: ${error.message}`);
 }
 
@@ -145,6 +152,29 @@ export async function processUpload(
 ): Promise<ProcessedPhotoResult> {
   if (!options.altText?.trim()) {
     throw new Error("alt_text is required — never upload a photo without describing it.");
+  }
+
+  // ── Deduplication: hash the original buffer and reuse existing photo if
+  //    we've already processed this exact file. Saves ~10s of pipeline work
+  //    plus 24 storage objects per duplicate.
+  const fileHash = (await import("crypto"))
+    .createHash("sha256").update(file).digest("hex");
+  const adminEarly = createAdminClient();
+  const { data: existingPhoto } = await adminEarly
+    .from("photos")
+    .select("id, cdn_url, blurhash, dominant_color")
+    .eq("file_hash", fileHash)
+    .maybeSingle();
+  if (existingPhoto) {
+    const e = existingPhoto as { id: string; cdn_url: string | null; blurhash: string | null; dominant_color: string | null };
+    if (e.cdn_url) {
+      return {
+        id:             e.id,
+        cdnUrl:         e.cdn_url,
+        blurhash:       e.blurhash,
+        dominantColor:  e.dominant_color,
+      };
+    }
   }
 
   const meta = await sharp(file).metadata();
@@ -385,6 +415,7 @@ export async function processUpload(
       watermarked:             watermark.enabled,
       watermark_position:      watermark.enabled ? String(watermark.position) : null,
       watermark_opacity:       watermark.enabled ? watermark.opacityPercent  : null,
+      file_hash:               fileHash,
     });
 
   if (insertErr) throw new Error(`photos insert failed: ${insertErr.message}`);

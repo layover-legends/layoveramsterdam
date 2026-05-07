@@ -1,8 +1,9 @@
 {
   "crons": [
-    { "path": "/api/cron/fx-rates",        "schedule": "0 6 * * *" },
-    { "path": "/api/cron/review-requests", "schedule": "0 10 * * *" },
-    { "path": "/api/cron/photo-orphan-gc", "schedule": "0 8 * * 1" }
+    { "path": "/api/cron/fx-rates",          "schedule": "0 6 * * *" },
+    { "path": "/api/cron/review-requests",   "schedule": "0 10 * * *" },
+    { "path": "/api/cron/photo-orphan-gc",   "schedule": "0 8 * * 1" },
+    { "path": "/api/cron/audit-log-cleanup", "schedule": "0 3 * * 0" }
   ],
   "functions": {
     "app/api/admin/upload-photo/route.ts": { "maxDuration": 60 },

@@ -104,6 +104,7 @@ export default async function TourPage({ params, searchParams }: PageProps) {
           ratio="16:9"
           className="rounded-2xl aspect-video w-full"
           sizes="(min-width: 768px) 768px, 100vw"
+          fit="contain"
           priority
         />
       )}

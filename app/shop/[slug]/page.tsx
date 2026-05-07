@@ -60,6 +60,7 @@ export default async function ShopSlugPage({ params }: PageProps) {
             ratio="16:9"
             className="rounded-2xl w-full aspect-video"
             sizes="(min-width: 1024px) 768px, 100vw"
+            fit="contain"
             priority
           />
         )}

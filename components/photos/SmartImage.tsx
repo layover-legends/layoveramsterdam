@@ -1,5 +1,5 @@
 /**
- * SmartImage — <picture> with AVIF→WebP→JPEG srcset, blurhash placeholder,
+ * SmartImage — <picture> with WebP→JPEG srcset, blurhash placeholder,
  * and dominant_color background.
  *
  * Can be used as either a server component (with photo row data pre-fetched)
@@ -8,13 +8,15 @@
  * Usage:
  *   <SmartImage row={photoRow} ratio="16:9" alt="Amsterdam canal at sunset" />
  *   <SmartImage fallbackUrl={url} alt="..." className="..." />
+ *   <SmartImage row={photoRow} ratio="16:9" fit="contain" />  ← shows full image,
+ *                                                                 no edge crop
  */
 
 import type { AspectRatio, PhotoRow } from "@/lib/photos/types";
 import { PHOTO_SIZES, ratioToFilename } from "@/lib/photos/types";
 
 type SmartImageProps = {
-  /** Full photo row — preferred path (gives blurhash + dominant color + AVIF) */
+  /** Full photo row — preferred path (gives blurhash + dominant color + srcset) */
   row?: Pick<PhotoRow,
     "id" | "storage_path" | "cdn_url" | "alt_text" | "blurhash" |
     "dominant_color" | "aspect_ratios_generated"
@@ -27,6 +29,15 @@ type SmartImageProps = {
   sizes?: string;
   priority?: boolean;
   style?: React.CSSProperties;
+  /**
+   * How the image fills the container:
+   *   - "cover" (default): fill container, may crop edges. Good for tight layouts.
+   *   - "contain":          show full image, may letterbox with dominant_color bars.
+   *                          Use this when preserving the full uploaded image is more
+   *                          important than filling the box (e.g. tour hero photos
+   *                          where the user wants to see the whole picture).
+   */
+  fit?: "cover" | "contain";
 };
 
 // Use Cloudflare CDN proxy when configured, fall back to direct Supabase URL.
@@ -47,11 +58,14 @@ export function SmartImage({
   sizes = "100vw",
   priority = false,
   style = {},
+  fit = "cover",
 }: SmartImageProps) {
   const altText   = alt ?? row?.alt_text ?? "";
   const hasVariants = row?.storage_path && row.aspect_ratios_generated?.includes(ratio);
+  const objectFitClass = fit === "contain" ? "object-contain" : "object-cover";
 
-  // Dominant color background prevents white flash
+  // Dominant color background prevents white flash + provides letterbox bars
+  // when fit="contain"
   const bgColor = row?.dominant_color ?? "transparent";
 
   if (!hasVariants) {
@@ -67,7 +81,7 @@ export function SmartImage({
           alt={altText}
           loading={priority ? "eager" : "lazy"}
           decoding="async"
-          className="w-full h-full object-cover"
+          className={`w-full h-full ${objectFitClass}`}
         />
       </div>
     );
@@ -107,7 +121,7 @@ export function SmartImage({
           alt={altText}
           loading={priority ? "eager" : "lazy"}
           decoding={priority ? "sync" : "async"}
-          className="w-full h-full object-cover"
+          className={`w-full h-full ${objectFitClass}`}
           width={ratio === "9:16" ? 9 * 100 : parseInt(ratio.split(":")[0]) * 100}
           height={ratio === "9:16" ? 16 * 100 : parseInt(ratio.split(":")[1]) * 100}
         />

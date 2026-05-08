@@ -4,7 +4,7 @@
     { "path": "/api/cron/review-requests",     "schedule": "0 10 * * *" },
     { "path": "/api/cron/photo-orphan-gc",     "schedule": "0 8 * * 1" },
     { "path": "/api/cron/audit-log-cleanup",   "schedule": "0 3 * * 0" },
-    { "path": "/api/cron/process-photo-jobs",  "schedule": "* * * * *" }
+    { "path": "/api/cron/process-photo-jobs",  "schedule": "0 4 * * *" }
   ],
   "functions": {
     "app/api/admin/upload-photo/route.ts":     { "maxDuration": 60 },

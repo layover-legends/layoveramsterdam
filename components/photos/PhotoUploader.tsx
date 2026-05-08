@@ -36,6 +36,9 @@ export function PhotoUploader({
   const [previewUrl, setPreviewUrl]   = useState<string | null>(currentLegacyUrl ?? null);
   // null = use site_settings default, true = force on, false = force off
   const [wmOverride, setWmOverride]   = useState<boolean | null>(null);
+  // null = use site default; otherwise override at upload time
+  const [wmPosition, setWmPosition]   = useState<string | null>(null);
+  const [wmOpacity,  setWmOpacity]    = useState<number | null>(null);
   const [longRunning, setLongRunning] = useState(false);
 
   useEffect(() => {
@@ -79,6 +82,9 @@ export function PhotoUploader({
       if (fieldName)  fd.append("field_name",  fieldName);
       fd.append("replace_existing", "true");
       if (wmOverride !== null) fd.append("watermark_enabled", String(wmOverride));
+      // Only send position/opacity overrides when watermark is explicitly ON
+      if (wmOverride === true && wmPosition !== null) fd.append("watermark_position", wmPosition);
+      if (wmOverride === true && wmOpacity  !== null) fd.append("watermark_opacity",  String(wmOpacity));
 
       const result = await uploadPhoto(fd);
 
@@ -186,6 +192,71 @@ export function PhotoUploader({
           >
             {wmOverride === true ? "★ Watermark ON" : wmOverride === false ? "Watermark OFF" : "Watermark: default"}
           </button>
+
+          {/* Watermark options panel — only when ON */}
+          {wmOverride === true && (
+            <div className="basis-full mt-2 p-3 rounded-xl border border-legend-gold/30 bg-legend-gold/5 space-y-2">
+              <p className="text-[10px] uppercase tracking-wider text-legend-gold/80">Watermark options</p>
+
+              {/* Position picker — 5 buttons (4 corners + center) */}
+              <div className="space-y-1">
+                <p className="text-[10px] text-warm-cream/50">Position</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    { v: "northwest", label: "Top-left" },
+                    { v: "northeast", label: "Top-right" },
+                    { v: "center",    label: "Center" },
+                    { v: "southwest", label: "Bottom-left" },
+                    { v: "southeast", label: "Bottom-right" },
+                  ].map((p) => (
+                    <button
+                      key={p.v}
+                      type="button"
+                      onClick={() => setWmPosition(wmPosition === p.v ? null : p.v)}
+                      className={`text-[10px] px-2 py-1 rounded border transition-colors ${
+                        wmPosition === p.v
+                          ? "bg-legend-gold text-ink-black border-legend-gold"
+                          : "bg-warm-cream/5 text-warm-cream/60 border-warm-cream/15 hover:bg-warm-cream/10"
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+                {wmPosition === null && (
+                  <p className="text-[9px] text-warm-cream/40">Using site default position</p>
+                )}
+              </div>
+
+              {/* Opacity slider 0-100 */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] text-warm-cream/50">Opacity</p>
+                  <p className="text-[10px] text-legend-gold tabular-nums">
+                    {wmOpacity === null ? "site default" : `${wmOpacity}%`}
+                  </p>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={5}
+                  value={wmOpacity ?? 30}
+                  onChange={(e) => setWmOpacity(Number(e.target.value))}
+                  className="w-full accent-legend-gold cursor-pointer"
+                />
+                {wmOpacity !== null && (
+                  <button
+                    type="button"
+                    onClick={() => setWmOpacity(null)}
+                    className="text-[9px] text-warm-cream/40 hover:text-warm-cream/70 underline"
+                  >
+                    Reset to site default
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
 
           <a
             href="/admin/assets/upload"
